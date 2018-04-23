@@ -47,11 +47,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     # Local apps
-    'bookworm',
+    # 'alerts.apps.AlertsConfig',
+    'authentication.apps.AuthenticationConfig',
     'books.apps.BooksConfig',
-    'alerts.apps.AlertsConfig',
     'meta_info.apps.MetaInfoConfig',
-    'profile.apps.ProfileConfig',
+    'file_store.apps.FileStoreConfig',
 ]
 
 MIDDLEWARE = [
@@ -200,6 +200,9 @@ CELERY_RESULT_BACKEND = 'django-db'
 SMS_URL = os.getenv('SMS_URL', default="https://textbelt.com/text")
 SMS_TOKEN = os.getenv('SMS_TOKEN', default="textbelt")
 
+
+HASHID_FIELD_SALT = 'kj~*=b1)VJ^yO*~5qKc2U3AXqk|P/4YuD4bs+2@1.N.^HQO&u7'
+HASH_FIELD_ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
 
 # Load local environment specific settings
 try:

@@ -1,13 +1,10 @@
 """Profile signals."""
 
-from django.db.models.signals import (pre_delete)
+from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils.timezone import now
 
 from bookworm.mixins import PreserveModelMixin
-
-
-# weak=False # on connect()
 
 
 @receiver(pre_delete, sender=PreserveModelMixin)

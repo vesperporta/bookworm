@@ -14,11 +14,14 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         read_only_fields = (
             'id',
+            'slug',
             'created_at',
+            'modified_at',
+            'deleted_at',
         )
         fields = read_only_fields + (
-            'slug',
             'copy',
+            'tags',
         )
 
 
@@ -31,10 +34,11 @@ class MetaSerializer(serializers.ModelSerializer):
             'id',
             'created_at',
             'modified_at',
+            'deleted_at',
         )
         fields = read_only_fields + (
             'copy',
             'json',
             'tags',
         )
-        exclude = []
+        exclude = ()
