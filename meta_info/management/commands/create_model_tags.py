@@ -63,6 +63,7 @@ class Command(BaseCommand):
             ('authentication.models', 'TAGS', ),
             ('books.models', 'TAGS', ),
             ('file_store.models', 'TAGS', ),
+            ('meta_info.models_localisation', 'TAGS', ),
             ('meta_info.data.default_tags', 'TAGS', ),
         ]
         for model_rep in model_list:

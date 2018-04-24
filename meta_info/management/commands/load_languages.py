@@ -2,8 +2,10 @@
 
 import logging
 
+from django.conf import settings
 from django.core.management import BaseCommand
 
+from meta_info.models import Tag
 from meta_info.models_localisation import LanguageTag
 from meta_info.data.languages import LANGUAGES
 
@@ -21,7 +23,7 @@ class Command(BaseCommand):
         for language in LANGUAGES:
             if LanguageTag.objects.filter(copy=language[1]).count() > 0:
                 continue
-            LanguageTag.objects.create(
+            instance = LanguageTag.objects.create(
                 copy=language[1],
                 family=language[0],
                 name_native=language[2],
@@ -31,4 +33,9 @@ class Command(BaseCommand):
                 iso_639_3=language[6],
                 notes=language[7],
             )
+            if instance.iso_639_3.lower() is settings.DEFAULT_LANGUAGE.lower():
+                tag = Tag.objects.filter(slug__iexact='default').first()
+                if not tag:
+                    tag = Tag.objects.create(copy='Default')
+                instance.tags.set([tag])
             logger.info('Added Language tag: {}'.format(language[6]))

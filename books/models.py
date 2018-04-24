@@ -10,6 +10,7 @@ from bookworm.mixins import (
     PublishableModelMixin, ProfileReferredMixin, PreserveModelMixin
 )
 from meta_info.models import MetaInfo
+from meta_info.models_localisation import LocaliseTag
 from books.serializers import (
     PublishBookSerializer,
     PublishReadingListSerializer,
@@ -52,15 +53,30 @@ class PublicationMixin(models.Model):
     """Publication mixin."""
 
     title = models.CharField(
+        verbose_name=_('Title'),
         max_length=200,
         db_index=True,
     )
     description = models.TextField(
+        verbose_name=_('Description'),
         blank=True,
     )
     isbn = models.CharField(
-        max_length=200,
+        verbose_name=_('International Standard Book Number'),
+        max_length=16,
         db_index=True,
+        blank=True,
+    )
+    ean = models.CharField(
+        verbose_name=_('International Article Number'),
+        max_length=16,
+        db_index=True,
+        blank=True,
+    )
+    localisations = models.ManyToManyField(
+        LocaliseTag,
+        related_name='publications+',
+        verbose_name=_('Localised Copy'),
         blank=True,
     )
 
@@ -157,6 +173,12 @@ class BookChapter(PreserveModelMixin):
         verbose_name=_('Book'),
         on_delete=models.DO_NOTHING,
     )
+    localisations = models.ManyToManyField(
+        LocaliseTag,
+        related_name='publication_chapters+',
+        verbose_name=_('Localised Copy'),
+        blank=True,
+    )
     meta_info = models.ForeignKey(
         MetaInfo,
         related_name='book_chapters+',
@@ -187,6 +209,12 @@ class ReadingList(
         Book,
         related_name='reading_lists',
         verbose_name=_('Books'),
+    )
+    localisations = models.ManyToManyField(
+        LocaliseTag,
+        related_name='reading_lists+',
+        verbose_name=_('Localised Copy'),
+        blank=True,
     )
     meta_info = models.ForeignKey(
         MetaInfo,
@@ -222,10 +250,27 @@ class BookReview(
         (4, 'paragraph', _('Paragraph highlight')),
     )
 
+    RATINGS = Choices(
+        (0, 'unrated', _('Unrated')),
+        (1, 'terrible', _('Terrible and Trashy')),
+        (2, 'junk', _('Junk Pile')),
+        (3, 'ok', _('Readable')),
+        (4, 'good', _('Good Read')),
+        (5, 'brilliant', _('Couldn\'t Put Down')),
+    )
+
     id = HashidAutoField(primary_key=True)
     type = models.IntegerField(
         choices=TYPES,
         default=TYPES.review,
+        blank=True,
+    )
+    copy = models.TextField(
+        db_index=True,
+    )
+    rating = models.IntegerField(
+        choices=RATINGS,
+        default=RATINGS.unrated,
         blank=True,
     )
     book = models.ForeignKey(
@@ -241,11 +286,10 @@ class BookReview(
         on_delete=models.DO_NOTHING,
         blank=True,
     )
-    reading_list = models.ForeignKey(
-        ReadingList,
-        related_name='reviews',
-        verbose_name=_('Reading List'),
-        on_delete=models.DO_NOTHING,
+    localisations = models.ManyToManyField(
+        LocaliseTag,
+        related_name='publication_reviews+',
+        verbose_name=_('Localised Copy'),
         blank=True,
     )
     meta_info = models.ForeignKey(

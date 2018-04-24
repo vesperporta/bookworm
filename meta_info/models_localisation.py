@@ -1,5 +1,6 @@
 """Meta Information models."""
 
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -7,6 +8,11 @@ from hashid_field import HashidAutoField
 
 from meta_info.models import TagMixin
 from bookworm.mixins import PreserveModelMixin
+
+
+TAGS = (
+    'Default',
+)
 
 
 class LanguageTag(TagMixin, PreserveModelMixin):
@@ -93,6 +99,22 @@ class LocaliseTag(PreserveModelMixin):
     """Localisation Tag for translation assistance."""
 
     id = HashidAutoField(primary_key=True)
+    field_name = models.TextField(
+        verbose_name=_('Models field name'),
+        blank=True,
+    )
+    copy = models.TextField(
+        verbose_name=_('Translated Copy'),
+    )
+    original = models.TextField(
+        verbose_name=_('Source replication on archive'),
+        blank=True,
+    )
+    dirty = models.BooleanField(
+        verbose_name=_('Source Copy Changed'),
+        blank=True,
+        default=False,
+    )
     language = models.ForeignKey(
         LanguageTag,
         related_name='locale_language+',
@@ -113,11 +135,33 @@ class LocaliseTag(PreserveModelMixin):
         verbose_name_plural = 'Localisation Tags'
 
     @property
+    def default_language(self):
+        language = LanguageTag.objects.filter(
+            tags__slug__iexact='default',
+        ).first()
+        if not language:
+            language = LanguageTag.objects.filter(
+                iso_639_3__iexact=settings.DEFAULT_LANGUAGE,
+            ).first()
+        return language
+
+    @property
+    def default_location(self):
+        location = LanguageTag.objects.filter(
+            tags__slug__iexact='default',
+        ).first()
+        if not location:
+            location = LanguageTag.objects.filter(
+                iso_alpha_3__iexact=settings.DEFAULT_LOCATION,
+            ).first()
+        return location
+
+    @property
     def display_code(self):
-        return '{}-{}'.format(
-            self.language.iso_639_3,
-            self.location.iso_alpha_3.lower() if self.location else ''
-        )
+        rtn = '{}'.format(self.language.iso_639_3.lower())
+        if self.location:
+            rtn += '-{}'.format(self.location.iso_alpha_3.lower())
+        return rtn
 
     def __str__(self):
         """ISO codes of language and location."""

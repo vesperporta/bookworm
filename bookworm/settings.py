@@ -204,6 +204,10 @@ SMS_TOKEN = os.getenv('SMS_TOKEN', default="textbelt")
 HASHID_FIELD_SALT = 'kj~*=b1)VJ^yO*~5qKc2U3AXqk|P/4YuD4bs+2@1.N.^HQO&u7'
 HASH_FIELD_ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
 
+
+DEFAULT_LANGUAGE = 'en'
+DEFAULT_LOCATION = 'gb'
+
 # Load local environment specific settings
 try:
     from local_settings import *

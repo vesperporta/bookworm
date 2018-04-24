@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from hashid_field import HashidAutoField
 
+from bookworm.exceptions import DataDuplicationIntegrityError
 from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
 from books.models import ReadingList
 from meta_info.models import MetaInfo
@@ -37,10 +38,11 @@ class Circle(PreserveModelMixin):
         blank=True,
         null=True,
     )
-    reading_list = models.ManyToManyField(
+    reading_list = models.ForeignKey(
         ReadingList,
         related_name='circles',
         verbose_name=_('Reading List'),
+        on_delete=models.DO_NOTHING,
         blank=True,
     )
 
@@ -54,7 +56,7 @@ class Circle(PreserveModelMixin):
     def save(self):
         if not self.meta_info:
             self.meta_info = MetaInfo.objects.create()
-        super().save()
+        return super().save()
 
     class Meta:
         verbose_name = 'Circle'
@@ -65,7 +67,7 @@ class Circle(PreserveModelMixin):
         return '{}{}'.format(self.PREFIX, self.title or self.id)
 
 
-class Invitation(ProfileReferredMixin, PreserveModelMixin):
+class Invitation(PreserveModelMixin, ProfileReferredMixin):
     """Invitiation between a circle and a Profile.
 
     The current user requesting the invitation is defined as `self.profile`.
@@ -109,9 +111,11 @@ class Invitation(ProfileReferredMixin, PreserveModelMixin):
     )
 
     def save(self):
+        if self.profile is self.profile_to:
+            raise DataDuplicationIntegrityError(self, 'profile', 'profile_to')
         if not self.meta_info:
             self.meta_info = MetaInfo.objects.create()
-        super().save()
+        return super().save()
 
     class Meta:
         verbose_name = 'Invitation'
@@ -119,8 +123,8 @@ class Invitation(ProfileReferredMixin, PreserveModelMixin):
 
     def __str__(self):
         """Short description of what this invitation is intended."""
-        rtn = 'Invitation to: {}, for: {}'.format(
+        rtn = 'to: {}, by: {}'.format(
             self.profile_to, self.circle if self.circle else self.profile)
         if self.circle:
-            rtn += ', from: {}'.format(self.circle)
+            rtn += ', for: {}'.format(self.circle)
         return rtn

@@ -2,7 +2,7 @@
 from bookworm.exceptions import OperationReservedInternally
 
 
-class ProfileAssociationSerializerMixin:
+class ProfileRefferedSerializerMixin:
     """Manage the creation of an object with reference to a Profile."""
 
     def validate(self, data):

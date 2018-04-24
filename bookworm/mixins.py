@@ -2,8 +2,10 @@
 
 import json
 import logging
+import importlib
 
 from django.db import models
+from django.db.models.signals import post_delete, pre_delete
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
@@ -12,8 +14,6 @@ from bookworm.exceptions import (
     PublishableObjectNotDefined,
     PublishableValidationError,
 )
-# from authentication.models import Profile
-# from meta_info.models import MetaInfo
 
 
 logger = logging.getLogger(__name__)
@@ -54,6 +54,7 @@ class PreserveModelMixin(ModifiedModelMixin):
         auto_now_add=False,
         blank=True,
         null=True,
+        default=None,
     )
 
     objects = PreserveModelManager()
@@ -61,10 +62,17 @@ class PreserveModelMixin(ModifiedModelMixin):
     class Meta:
         abstract = True
 
+    @property
+    def is_deleted(self):
+        bool(self.deleted_at)
+
     def delete(self, *args, **kwargs):
-        self.deleted_at = now(USE_TZ=True)
-        self.save()
-        return super().delete(*args, **kwargs)
+        pre_delete.send(sender=self.__class__, instance=self)
+        self.deleted_at = now()
+        self.__class__.objects.filter(pk=self.pk).update(
+            deleted_at=self.deleted_at
+        )
+        post_delete.send(sender=self.__class__, instance=self)
 
 
 class ProfileReferredMixin(models.Model):
@@ -158,6 +166,10 @@ class PublishableModelMixin(models.Model):
                     )
                 )
 
+    def _get_MetaInfo(self):
+        module = importlib.import_module('meta_info.models')
+        return getattr(module, 'MetaInfo')
+
     def publish(self):
         """Publish this object"""
         self._validate_for_publication(publish=True)
@@ -170,10 +182,13 @@ class PublishableModelMixin(models.Model):
         }
         output = self.Publishable.serializer(self).data
         output.update(output_source)
-        self.published_content = MetaInfo.objects.create(
+        meta_info_class = self._get_MetaInfo()
+        meta_info = meta_info_class(
             json=output,
             copy=json.dumps(output),
         )
+        meta_info.save()
+        self.published_content = meta_info
         self.published_at = self.published_content.created_at
         self.save()
 
@@ -191,7 +206,8 @@ class PublishableModelMixin(models.Model):
         Retainment of datetime stamps of previous publishes with no content.
         """
         self.unpublish()
-        published_meta_list = MetaInfo.objects.filter(
+        meta_info_class = self._get_MetaInfo()
+        published_meta_list = meta_info_class.objects.filter(
             json__source__id=self.id,
             json__source__class=self.__class__,
         )

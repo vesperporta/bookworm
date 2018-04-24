@@ -2,8 +2,10 @@
 
 import logging
 
+from django.conf import settings
 from django.core.management import BaseCommand
 
+from meta_info.models import Tag
 from meta_info.models_localisation import LocationTag
 from meta_info.data.countries import COUNTRIES
 
@@ -21,10 +23,16 @@ class Command(BaseCommand):
         for country in COUNTRIES:
             if LocationTag.objects.filter(iso_alpha_3=country[2]).count():
                 continue
-            LocationTag.objects.create(
+            instance = LocationTag.objects.create(
                 copy=country[0],
                 iso_alpha_2=country[1],
                 iso_alpha_3=country[2],
                 iso_numeric=country[3],
             )
+            default_location = settings.DEFAULT_LOCATION.lower()
+            if instance.iso_alpha_3.lower() is default_location:
+                tag = Tag.objects.filter(slug__iexact='default').first()
+                if not tag:
+                    tag = Tag.objects.create(copy='Default')
+                instance.tags.set([tag])
             logger.info('Added Location Tag: {}'.format(country[2]))

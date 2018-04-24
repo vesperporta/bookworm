@@ -2,11 +2,11 @@
 
 from rest_framework import serializers
 
-from bookworm.serializers import ProfileAssociationSerializerMixin
+from bookworm.serializers import ProfileRefferedSerializerMixin
 from meta_info.serializers import MetaSerializer
 
 
-class BookSerializer(MetaSerializer, ProfileAssociationSerializerMixin):
+class BookSerializer(MetaSerializer, ProfileRefferedSerializerMixin):
     class Meta:
         model = 'books.models.Book'
         read_only_fields = (
@@ -39,7 +39,7 @@ class PublishBookSerializer(serializers.ModelSerializer):
 
 
 class BookProgressSerializer(
-        serializers.ModelSerializer, ProfileAssociationSerializerMixin):
+        serializers.ModelSerializer, ProfileRefferedSerializerMixin):
     book = BookSerializer()
 
     class Meta:
@@ -76,7 +76,7 @@ class PublishBookProgressSerializer(serializers.ModelSerializer):
         )
 
 
-class ReadingListSerializer(MetaSerializer, ProfileAssociationSerializerMixin):
+class ReadingListSerializer(MetaSerializer, ProfileRefferedSerializerMixin):
     books = BookSerializer(many=True)
 
     class Meta:
@@ -111,7 +111,7 @@ class PublishReadingListSerializer(serializers.ModelSerializer):
         exclude = []
 
 
-class BookReviewSerializer(MetaSerializer, ProfileAssociationSerializerMixin):
+class BookReviewSerializer(MetaSerializer, ProfileRefferedSerializerMixin):
     book = BookSerializer()
     progress = BookProgressSerializer()
 
