@@ -83,11 +83,6 @@ class ContactMethod(PreserveModelMixin):
         null=True,
     )
 
-    def save(self):
-        if not self.meta_info:
-            self.meta_info = MetaInfo.objects.create()
-        super().save()
-
     class Meta:
         verbose_name = 'Contact Method'
         verbose_name_plural = 'Contact Methods'
@@ -158,11 +153,6 @@ class Profile(PreserveModelMixin):
         blank=True,
         null=True,
     )
-
-    def save(self):
-        if not self.meta_info:
-            self.meta_info = MetaInfo.objects.create()
-        super().save()
 
     class Meta:
         verbose_name = 'Profile'

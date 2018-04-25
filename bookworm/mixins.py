@@ -98,6 +98,7 @@ class PublishableModelMixin(models.Model):
         related_name='published_content+',
         verbose_name=_('Published Content'),
         on_delete=models.CASCADE,
+        blank=True,
         null=True,
     )
     published_at = models.DateTimeField(

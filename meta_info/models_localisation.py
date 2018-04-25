@@ -25,7 +25,7 @@ class LanguageTag(TagMixin, PreserveModelMixin):
         blank=True,
     )
     iso_639_1 = models.CharField(
-        max_length=3,
+        max_length=2,
         blank=True,
     )
     iso_639_2_t = models.CharField(
@@ -37,6 +37,10 @@ class LanguageTag(TagMixin, PreserveModelMixin):
         db_index=True,
     )
     iso_639_3 = models.CharField(
+        max_length=3,
+        db_index=True,
+    )
+    iso_639_3_original = models.CharField(
         max_length=9,
         db_index=True,
     )
@@ -124,7 +128,7 @@ class LocaliseTag(PreserveModelMixin):
     location = models.ForeignKey(
         LocationTag,
         related_name='locale_language+',
-        verbose_name=_('Localised Language Tag'),
+        verbose_name=_('Localised Country Tag'),
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,

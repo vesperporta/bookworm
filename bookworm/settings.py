@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'books.apps.BooksConfig',
     'meta_info.apps.MetaInfoConfig',
     'file_store.apps.FileStoreConfig',
+    'posts.apps.PostsConfig',
 ]
 
 MIDDLEWARE = [

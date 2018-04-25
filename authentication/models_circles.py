@@ -6,7 +6,6 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from hashid_field import HashidAutoField
 
-from bookworm.exceptions import DataDuplicationIntegrityError
 from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
 from books.models import ReadingList
 from meta_info.models import MetaInfo
@@ -20,15 +19,15 @@ class Circle(PreserveModelMixin):
 
     id = HashidAutoField(primary_key=True)
     title = models.CharField(
+        verbose_name=_('Reading Circle Title'),
         max_length=254,
         db_index=True,
     )
-    created_by = models.ForeignKey(
+    profile = models.ForeignKey(
         Profile,
         related_name='circles',
-        verbose_name=_('Room requested by'),
+        verbose_name=_('Created by'),
         on_delete=models.DO_NOTHING,
-        null=True,
     )
     meta_info = models.ForeignKey(
         MetaInfo,
@@ -44,19 +43,17 @@ class Circle(PreserveModelMixin):
         verbose_name=_('Reading List'),
         on_delete=models.DO_NOTHING,
         blank=True,
+        null=True,
     )
 
     @property
     def count(self):
         """Number of Profiles accepted into Circle."""
-        return self.invitations.filter(
-            status=Invitation.STATUSES.accepted
-        ).count()
-
-    def save(self):
-        if not self.meta_info:
-            self.meta_info = MetaInfo.objects.create()
-        return super().save()
+        status_list = [
+            Invitation.STATUSES.accepted,
+            Invitation.STATUSES.elevated,
+        ]
+        return self.invitations.filter(status__in=status_list).count()
 
     class Meta:
         verbose_name = 'Circle'
@@ -79,6 +76,7 @@ class Invitation(PreserveModelMixin, ProfileReferredMixin):
         (2, 'rejected', _('Rejected')),
         (3, 'withdrawn', _('Withdrawn')),
         (4, 'banned', _('Banned')),
+        (5, 'elevated', _('Elevated')),
     )
 
     id = HashidAutoField(primary_key=True)
@@ -98,8 +96,6 @@ class Invitation(PreserveModelMixin, ProfileReferredMixin):
         related_name='invitations',
         verbose_name=_('Circle invited to'),
         on_delete=models.DO_NOTHING,
-        blank=True,
-        null=True,
     )
     meta_info = models.ForeignKey(
         MetaInfo,
@@ -110,16 +106,10 @@ class Invitation(PreserveModelMixin, ProfileReferredMixin):
         null=True,
     )
 
-    def save(self):
-        if self.profile is self.profile_to:
-            raise DataDuplicationIntegrityError(self, 'profile', 'profile_to')
-        if not self.meta_info:
-            self.meta_info = MetaInfo.objects.create()
-        return super().save()
-
     class Meta:
         verbose_name = 'Invitation'
         verbose_name_plural = 'Invitations'
+        unique_together = ('profile', 'profile_to', 'circle', )
 
     def __str__(self):
         """Short description of what this invitation is intended."""

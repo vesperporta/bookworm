@@ -112,11 +112,16 @@ class Book(
 
     @property
     def author(self):
-        return self.tags.filter(meta_info__tags__slug__iexact='author').first()
+        return self.meta_info.tags.filter(
+            tags__slug__iexact='author'
+        ).first()
 
     def __str__(self):
         """Title and author of book."""
-        return '{} by {}'.format(self.title, self.author.copy)
+        return '{} by {}'.format(
+            self.title,
+            self.author.copy if self.author else '',
+        )
 
 
 class BookProgress(
@@ -144,8 +149,8 @@ class BookProgress(
     )
 
     class Meta:
-        verbose_name = 'Book progress'
-        verbose_name_plural = 'Books\' progress'
+        verbose_name = 'Progress'
+        verbose_name_plural = 'Progresses'
 
     def __str__(self):
         """Title and percent of book progress."""
@@ -189,7 +194,7 @@ class BookChapter(PreserveModelMixin):
     )
 
     class Meta:
-        verbose_name = 'Book chapter'
+        verbose_name = 'Books\' chapter'
         verbose_name_plural = 'Books\' chapters'
 
 
@@ -233,6 +238,13 @@ class ReadingList(
     class Meta:
         verbose_name = 'Reading List'
         verbose_name_plural = 'Reading Lists'
+
+    @property
+    def count(self):
+        return self.books.all().count()
+
+    def __str__(self):
+        return '{} ({})'.format(self.title, self.count)
 
 
 class BookReview(
@@ -307,5 +319,5 @@ class BookReview(
         serializer = PublishBookReviewSerializer
 
     class Meta:
-        verbose_name = 'Book review'
-        verbose_name_plural = 'Books\' reviews'
+        verbose_name = 'Reader\' book review'
+        verbose_name_plural = 'Readers\' book reviews'

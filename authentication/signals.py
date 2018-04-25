@@ -9,12 +9,38 @@ from django_common.auth_backends import User
 
 from meta_info.models import Tag
 from authentication.models import (Profile, ContactMethod)
-from authentication.models_circles import Invitation
+from authentication.models_circles import (Circle, Invitation)
+from meta_info.models import MetaInfo
 
 from rest_framework.authtoken.models import Token
 
 
 logger = logging.getLogger(__name__)
+
+
+@receiver(pre_save, sender=Circle)
+@receiver(pre_save, sender=Invitation)
+@receiver(pre_save, sender=ContactMethod)
+@receiver(pre_save, sender=Profile)
+def pre_save_instance_auto_meta_info(sender, instance, *args, **kwargs):
+    """Create a MetaInfo object for the instance being created."""
+    if instance.pk:
+        return
+    if not instance.meta_info:
+        instance.meta_info = MetaInfo.objects.create()
+
+
+@receiver(pre_save, sender=Circle)
+def pre_save_circle_create(sender, instance, *args, **kwargs):
+    """Circle creation initialise first administrator of the Circle."""
+    if instance.pk:
+        return
+    Invitation.objects.create(
+        profile=instance.profile,
+        profile_to=instance.profile,
+        circle=instance,
+        status=Invitation.STATUSES.elevated,
+    )
 
 
 @receiver(post_delete, sender=Invitation)
@@ -46,7 +72,7 @@ def post_save_contact_method(sender, instance, *args, **kwargs):
         ).count()
         try:
             tag = Tag.objects.get(slug=primary_copy)
-        except Exception:
+        except Tag.DoesNotExist:
             tag = Tag.objects.create(copy=primary_copy)
         if not contacts:
             instance.meta_info.tags.add(tag)

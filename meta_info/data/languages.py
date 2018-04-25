@@ -74,9 +74,7 @@ LANGUAGES = [
     (
         'Afro-Asiatic',
         'Arabic',
-        '',
         'العربية',
-        '',
         'ar',
         'ara',
         'ara',
@@ -386,9 +384,7 @@ LANGUAGES = [
     (
         'Indo-European',
         'Divehi, Dhivehi, Maldivian',
-        '',
         'ދިވެހި',
-        '',
         'dv',
         'div',
         'div',
@@ -578,9 +574,7 @@ LANGUAGES = [
     (
         'Afro-Asiatic',
         'Hausa',
-        '',
         '(Hausa) هَوُسَ',
-        '',
         'ha',
         'hau',
         'hau',
@@ -590,9 +584,7 @@ LANGUAGES = [
     (
         'Afro-Asiatic',
         'Hebrew (modern)',
-        '',
         'עברית',
-        '',
         'he',
         'heb',
         'heb',
@@ -1272,9 +1264,7 @@ LANGUAGES = [
     (
         'Indo-European',
         'Persian',
-        '',
         'فارسی',
-        '',
         'fa',
         'fas',
         'per',
@@ -1294,9 +1284,7 @@ LANGUAGES = [
     (
         'Indo-European',
         'Pashto, Pushto',
-        '',
         'پښتو',
-        '',
         'ps',
         'pus',
         'pus',
@@ -1726,9 +1714,7 @@ LANGUAGES = [
     (
         'Indo-European',
         'Urdu',
-        '',
         'اردو',
-        '',
         'ur',
         'urd',
         'urd',
@@ -1828,9 +1814,7 @@ LANGUAGES = [
     (
         'Indo-European',
         'Yiddish',
-        '',
         'ייִדיש',
-        '',
         'yi',
         'yid',
         'yid',
