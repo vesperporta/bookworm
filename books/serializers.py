@@ -6,6 +6,66 @@ from bookworm.exceptions import DataMissingValidationError
 from bookworm.serializers import ProfileRefferedSerializerMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 
+from books.models import (
+    Book,
+    BookProgress,
+    BookChapter,
+    ReadingList,
+    BookReview,
+)
+from books.models_read import (
+    Thrill,
+    ConfirmReadQuestion,
+    ConfirmReadAnswer,
+    Read,
+)
+
+
+class BooklessBookProgressSerializer(
+        ProfileRefferedSerializerMixin,
+        serializers.ModelSerializer,
+):
+    """BookProgress model serializer."""
+
+    class Meta:
+        model = BookProgress
+        exclude = []
+        read_only_fields = (
+            'created_at',
+            'modified_at',
+            'deleted_at',
+        )
+        fields = read_only_fields + (
+            'percent',
+            'page',
+            'start',
+            'end',
+        )
+
+
+class BooklessBookReviewSerializer(
+        ProfileRefferedSerializerMixin,
+        MetaInfoAvailabledSerializerMixin,
+        serializers.ModelSerializer,
+):
+    """BookReview serializer."""
+    progress = BooklessBookProgressSerializer(many=False)
+
+    class Meta:
+        model = BookReview
+        read_only_fields = (
+            'created_at',
+            'modified_at',
+            'deleted_at',
+        )
+        fields = read_only_fields + (
+            'type',
+            'copy',
+            'rating',
+            'progress',
+        )
+        exclude = []
+
 
 class BookSerializer(
         ProfileRefferedSerializerMixin,
@@ -13,11 +73,11 @@ class BookSerializer(
         serializers.ModelSerializer,
 ):
     """Book model serializer."""
+    reviews = BooklessBookReviewSerializer(many=True)
 
     class Meta:
-        model = 'books.models.Book'
+        model = Book
         read_only_fields = (
-            'id',
             'created_at',
             'modified_at',
             'deleted_at',
@@ -31,22 +91,6 @@ class BookSerializer(
         exclude = []
 
 
-class PublishBookSerializer(serializers.ModelSerializer):
-    """Book model serializer for publishing."""
-
-    class Meta:
-        model = 'books.models.Book'
-        read_only_fields = (
-            'id',
-            'modified_at',
-        )
-        fields = read_only_fields + (
-            'title',
-            'description',
-        )
-        exclude = []
-
-
 class BookProgressSerializer(
         ProfileRefferedSerializerMixin,
         serializers.ModelSerializer,
@@ -55,10 +99,9 @@ class BookProgressSerializer(
     book = BookSerializer(many=False)
 
     class Meta:
-        model = 'books.models.BookProgress'
+        model = BookProgress
         exclude = []
         read_only_fields = (
-            'id',
             'created_at',
             'modified_at',
             'deleted_at',
@@ -66,25 +109,8 @@ class BookProgressSerializer(
         fields = read_only_fields + (
             'percent',
             'page',
-            'progress',
-            'book',
-        )
-
-
-class PublishBookProgressSerializer(serializers.ModelSerializer):
-    """BookProgress model serializer for publishing."""
-    book = PublishBookSerializer(many=False)
-
-    class Meta:
-        model = 'books.models.BookProgress'
-        exclude = []
-        read_only_fields = (
-            'modified_at',
-        )
-        fields = read_only_fields + (
-            'percent',
-            'page',
-            'progress',
+            'start',
+            'end',
             'book',
         )
 
@@ -96,11 +122,11 @@ class BookChapterSerializer(
 ):
     """BookChapter serializer."""
     book = BookSerializer(many=False)
+    progress = BookProgressSerializer(many=False)
 
     class Meta:
-        model = 'books.models.BookChapter'
+        model = BookChapter
         read_only_fields = (
-            'id',
             'created_at',
             'modified_at',
             'deleted_at',
@@ -122,9 +148,8 @@ class ReadingListSerializer(
     books = BookSerializer(many=True)
 
     class Meta:
-        model = 'books.models.ReadingList'
+        model = ReadingList
         read_only_fields = (
-            'id',
             'profile',
             'created_at',
             'modified_at',
@@ -132,23 +157,6 @@ class ReadingListSerializer(
         )
         fields = read_only_fields + (
             'title',
-            'books',
-        )
-        exclude = []
-
-
-class PublishReadingListSerializer(serializers.ModelSerializer):
-    """ReadingList publish serializer."""
-    books = PublishBookSerializer(many=True)
-
-    class Meta:
-        model = 'books.models.ReadingList'
-        read_only_fields = (
-            'modified_at',
-        )
-        fields = read_only_fields + (
-            'title',
-            'copy',
             'books',
         )
         exclude = []
@@ -164,32 +172,11 @@ class BookReviewSerializer(
     progress = BookProgressSerializer(many=False)
 
     class Meta:
-        model = 'books.models.BookReview'
+        model = BookReview
         read_only_fields = (
-            'id',
             'created_at',
             'modified_at',
             'deleted_at',
-        )
-        fields = read_only_fields + (
-            'type',
-            'copy',
-            'rating',
-            'book',
-            'progress',
-        )
-        exclude = []
-
-
-class PublishBookReviewSerializer(serializers.ModelSerializer):
-    """BookReview publishable serializer."""
-    book = PublishBookSerializer(many=False)
-    progress = PublishBookProgressSerializer(many=False)
-
-    class Meta:
-        model = 'books.models.BookReview'
-        read_only_fields = (
-            'modified_at',
         )
         fields = read_only_fields + (
             'type',
@@ -218,9 +205,8 @@ class ThrillSerializer(
         return super().validate(data)
 
     class Meta:
-        model = 'books.models_read.Thrill'
+        model = Thrill
         read_only_fields = (
-            'id',
             'created_at',
             'modified_at',
             'deleted_at',
@@ -240,9 +226,8 @@ class ConfirmReadQuestionSerializer(
     chapter = BookChapterSerializer(many=False)
 
     class Meta:
-        model = 'books.models_read.Thrill'
+        model = ConfirmReadQuestion
         read_only_fields = (
-            'id',
             'created_at',
             'modified_at',
             'deleted_at',
@@ -262,9 +247,8 @@ class ConfirmReadAnswerSerializer(
     """ConfirmReadAnswer model serializer."""
 
     class Meta:
-        model = 'books.models_read.Thrill'
+        model = ConfirmReadAnswer
         read_only_fields = (
-            'id',
             'created_at',
             'modified_at',
             'deleted_at',
@@ -284,9 +268,8 @@ class ReadSerializer(
     book = BookSerializer(many=False)
 
     class Meta:
-        model = 'books.models_read.Thrill'
+        model = Read
         read_only_fields = (
-            'id',
             'created_at',
             'modified_at',
             'deleted_at',

@@ -6,10 +6,6 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from hashid_field import HashidAutoField
 
-from bookworm.policies import (
-    AnyPermisionsMixin,
-    MembersReadOnlyPermsMixin,
-)
 from bookworm.mixins import (
     PublishableModelMixin,
     ProfileReferredMixin,
@@ -17,7 +13,7 @@ from bookworm.mixins import (
 )
 from meta_info.models import MetaInfo
 from meta_info.models_localisation import LocaliseTag
-from books.serializers import (
+from books.serializers_publish import (
     PublishBookSerializer,
     PublishReadingListSerializer,
     PublishBookReviewSerializer,
@@ -94,7 +90,6 @@ class Book(
         PublishableModelMixin,
         PublicationMixin,
         PreserveModelMixin,
-        AnyPermisionsMixin,
 ):
     """Books model."""
 
@@ -129,21 +124,6 @@ class Book(
             self.title,
             self.author.copy if self.author else '',
         )
-
-    @staticmethod
-    def has_read_permission(request):
-        return True
-
-    def has_object_read_permission(self, request):
-        return True
-
-    @staticmethod
-    def has_write_permission(request):
-        return False
-
-    @staticmethod
-    def has_create_permission(request):
-        return True
 
 
 class BookProgress(
