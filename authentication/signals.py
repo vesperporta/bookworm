@@ -3,6 +3,7 @@
 import logging
 
 from django.conf import settings
+from django.db.utils import IntegrityError
 from django.db.models.signals import (pre_save, post_save, post_delete)
 from django.dispatch import receiver
 from django_common.auth_backends import User
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 @receiver(pre_save, sender=Invitation)
 @receiver(pre_save, sender=ContactMethod)
 @receiver(pre_save, sender=Profile)
-def pre_save_instance_auto_meta_info(sender, instance, *args, **kwargs):
+def pre_save_instance_create_meta_info(sender, instance, *args, **kwargs):
     """Create a MetaInfo object for the instance being created."""
     if instance.pk:
         return
@@ -59,7 +60,7 @@ def pre_save_contact_method(sender, instance, *args, **kwargs):
 
 @receiver(post_save, sender=ContactMethod)
 def post_save_contact_method(sender, instance, *args, **kwargs):
-    """Set b y default the primary tag for ContactMethod."""
+    """Set by default the primary tag for ContactMethod."""
     primary_copy = 'Primary'
     require_primary = [
         ContactMethod.TYPES.email,
@@ -70,9 +71,8 @@ def post_save_contact_method(sender, instance, *args, **kwargs):
             profile=instance.profile,
             meta_info__tags__slug__iexact=primary_copy,
         ).count()
-        try:
-            tag = Tag.objects.get(slug=primary_copy)
-        except Tag.DoesNotExist:
+        tag = Tag.objects.filter(slug__iexact=primary_copy).first()
+        if not tag:
             tag = Tag.objects.create(copy=primary_copy)
         if not contacts:
             instance.meta_info.tags.add(tag)
@@ -87,6 +87,10 @@ def create_user_profile(sender, instance, created, **kwargs):
         user=instance,
         email=instance.email,
     )
+    if instance.is_staff:
+        profile.type = Profile.TYPES.admin
+    if instance.is_superuser:
+        profile.type = Profile.TYPES.destroyer
     profile.save()
     contact = ContactMethod(
         type=ContactMethod.TYPES.email,
@@ -100,6 +104,10 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def post_save_user_profile(sender, instance, **kwargs):
     """Update profile when user is updated."""
+    if not instance.profile.name_first and instance.first_name:
+        instance.profile.name_first = instance.first_name
+    if not instance.profile.name_family and instance.last_name:
+        instance.profile.name_family = instance.last_name
     instance.profile.save()
 
 

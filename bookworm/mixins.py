@@ -9,6 +9,8 @@ from django.db.models.signals import post_delete, pre_delete
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
+from model_utils.managers import QueryManager
+
 from bookworm.managers import PreserveModelManager
 from bookworm.exceptions import (
     PublishableObjectNotDefined,
@@ -57,7 +59,10 @@ class PreserveModelMixin(ModifiedModelMixin):
         default=None,
     )
 
-    objects = PreserveModelManager()
+    # objects = PreserveModelManager()
+    objects = QueryManager(deleted_at__isnull=True)
+    all_objects = models.Manager()
+    deleted_objects = QueryManager(deleted_at__isnull=False)
 
     class Meta:
         abstract = True

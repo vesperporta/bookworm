@@ -1,3 +1,4 @@
+"""Serializers to provide generic functionality."""
 
 from bookworm.exceptions import OperationReservedInternally
 

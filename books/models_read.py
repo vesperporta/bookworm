@@ -92,7 +92,7 @@ class ConfirmReadQuestion(
     )
     question = models.CharField(
         verbose_name=_('Question'),
-        max_length=240,
+        max_length=400,
     )
 
     class Meta:
@@ -123,7 +123,7 @@ class ConfirmReadAnswer(
     )
     copy = models.CharField(
         verbose_name=_('Answer Copy'),
-        max_length=240,
+        max_length=400,
     )
 
     class Meta:

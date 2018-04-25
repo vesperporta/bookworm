@@ -57,6 +57,22 @@ class PublishableValidationError(ValidationError):
         logger.error(self)
 
 
+class DataMissingValidationError(ValidationError):
+
+    def __init__(self, object, key_1, key_2):
+        super().__init__([{
+            'code': 'missing_values_forbidden',
+            'message': '{}:{} and {}:{}'
+                    ', at least one value expected!'.format(
+                        '{}.{}'.format(str(object), key_1),
+                        getattr(object, key_1),
+                        '{}.{}'.format(str(object), key_2),
+                        getattr(object, key_2),
+                    ),
+        }])
+        logger.error(self)
+
+
 class DataDuplicationIntegrityError(IntegrityError):
 
     def __init__(self, object, key_1, key_2):

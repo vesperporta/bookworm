@@ -29,73 +29,9 @@ TAGS = (
 ) + SOCIAL_PLATFORMS
 
 
-class ContactMethod(PreserveModelMixin):
-    """Contact method."""
-
-    TYPES = Choices(
-        (0, 'email', _('email')),
-        (1, 'mobile', _('mobile number')),
-        (2, 'landline', _('landline number')),
-        (3, 'postal', _('postal address')),
-        (4, 'billing', _('billing address')),
-        (5, 'social', _('social network id')),
-    )
-
-    id = HashidAutoField(primary_key=True)
-    type = models.IntegerField(
-        choices=TYPES,
-        default=TYPES.email,
-        blank=True,
-    )
-    detail = models.TextField(
-        db_index=True,
-    )
-    email = models.EmailField(
-        max_length=254,
-        db_index=True,
-        blank=True,
-        null=True,
-    )
-    uri = models.URLField(
-        blank=True,
-        null=True,
-    )
-    meta_info = models.ForeignKey(
-        MetaInfo,
-        related_name='contacts+',
-        verbose_name=_('Meta data'),
-        on_delete=models.DO_NOTHING,
-        blank=True,
-        null=True,
-    )
-    profile = models.ForeignKey(
-        'Profile',
-        related_name='contacts',
-        verbose_name=_('Profile'),
-        on_delete=models.DO_NOTHING,
-    )
-    circle = models.ForeignKey(
-        'Circle',
-        related_name='contacts',
-        verbose_name=_('Circle'),
-        on_delete=models.DO_NOTHING,
-        blank=True,
-        null=True,
-    )
-
-    class Meta:
-        verbose_name = 'Contact Method'
-        verbose_name_plural = 'Contact Methods'
-
-    def __str__(self):
-        """Valid email output of profile."""
-        base = 'Contact {} {}'.format(self.type, self.detail)
-        if self.circle:
-            return '{}, circle({})'.format(self.circle)
-        return base
-
-
-class Profile(PreserveModelMixin):
+class Profile(
+        PreserveModelMixin,
+):
     """Profile model."""
 
     NAME_TITLES = Choices(
@@ -107,12 +43,24 @@ class Profile(PreserveModelMixin):
         (5, 'sir', _('Sir')),
     )
 
+    TYPES = Choices(
+        (0, 'user', _('User')),
+        (1, 'elevated', _('Elevated')),
+        (2, 'admin', _('Administrator')),
+        (3, 'destroyer', _('Destroyer of Worlds')),
+    )
+
     id = HashidAutoField(primary_key=True)
     user = models.OneToOneField(
         User,
         related_name='profile',
         verbose_name=_('Profiles\' User'),
         on_delete=models.CASCADE,
+    )
+    type = models.IntegerField(
+        choices=TYPES,
+        default=TYPES.user,
+        blank=True,
     )
     name_title = models.IntegerField(
         choices=NAME_TITLES,
@@ -168,3 +116,71 @@ class Profile(PreserveModelMixin):
     def __str__(self):
         """Valid email output of profile."""
         return '{} "{}"'.format(self.display_name or self.id, self.email)
+
+
+class ContactMethod(
+        PreserveModelMixin,
+):
+    """Contact method."""
+
+    TYPES = Choices(
+        (0, 'email', _('email')),
+        (1, 'mobile', _('mobile number')),
+        (2, 'landline', _('landline number')),
+        (3, 'postal', _('postal address')),
+        (4, 'billing', _('billing address')),
+        (5, 'social', _('social network id')),
+    )
+
+    id = HashidAutoField(primary_key=True)
+    type = models.IntegerField(
+        choices=TYPES,
+        default=TYPES.email,
+        blank=True,
+    )
+    detail = models.TextField(
+        db_index=True,
+    )
+    email = models.EmailField(
+        max_length=254,
+        db_index=True,
+        blank=True,
+        null=True,
+    )
+    uri = models.URLField(
+        blank=True,
+        null=True,
+    )
+    meta_info = models.ForeignKey(
+        MetaInfo,
+        related_name='contacts+',
+        verbose_name=_('Meta data'),
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
+    profile = models.ForeignKey(
+        Profile,
+        related_name='contacts',
+        verbose_name=_('Profile'),
+        on_delete=models.DO_NOTHING,
+    )
+    circle = models.ForeignKey(
+        'Circle',
+        related_name='contacts',
+        verbose_name=_('Circle'),
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = 'Contact Method'
+        verbose_name_plural = 'Contact Methods'
+
+    def __str__(self):
+        """Valid email output of profile."""
+        base = 'Contact {} {}'.format(self.type, self.detail)
+        if self.circle:
+            return '{}, circle({})'.format(self.circle)
+        return base

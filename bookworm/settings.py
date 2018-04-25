@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
     'django_filters',
+    'dry_rest_permissions',
     # Local apps
     # 'alerts.apps.AlertsConfig',
     'authentication.apps.AuthenticationConfig',

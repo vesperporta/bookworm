@@ -21,7 +21,7 @@ class PreventDeletionQuerySet(models.query.QuerySet):
 
     def all(self):
         """Fetch all active items."""
-        return self.filter(deleted_at=None)
+        return self.filter(deleted_at__isnull=True)
 
 
 class PreserveModelManager(models.Manager):
