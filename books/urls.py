@@ -7,8 +7,6 @@ from books.views import (
     BookChapterViewSet,
     ReadingListViewSet,
     ThrillViewSet,
-    BookThrillViewSet,
-    ReadingListThrillViewSet,
     ConfirmReadQuestionViewSet,
     ConfirmReadAnswerViewSet,
     ReadViewSet,
@@ -22,8 +20,6 @@ router.register(r'review', BookReviewViewSet)
 router.register(r'chapter', BookChapterViewSet)
 router.register(r'reading_list', ReadingListViewSet)
 router.register(r'thrill', ThrillViewSet)
-router.register(r'book_thrill', BookThrillViewSet)
-router.register(r'reading_list_thrill', ReadingListThrillViewSet)
 router.register(r'read_question', ConfirmReadQuestionViewSet)
 router.register(r'read_answer', ConfirmReadAnswerViewSet)
 router.register(r'read', ReadViewSet)

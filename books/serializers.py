@@ -61,6 +61,7 @@ class BookSerializer(
     reviews = BookReviewShortSerializer(
         many=True,
     )
+    thrills = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Book
@@ -71,12 +72,16 @@ class BookSerializer(
             'deleted_at',
             'reviews',
             'meta_info',
+            'thrills',
         )
         fields = read_only_fields + (
             'title',
             'description',
         )
         exclude = []
+
+    def get_thrills(self, book):
+        return book.thrills.all().count()
 
 
 class BookProgressSerializer(
@@ -242,89 +247,6 @@ class ThrillSerializer(
         many=False,
         read_only=True,
         view_name='book-detail',
-    )
-    reading_list = serializers.HyperlinkedRelatedField(
-        many=False,
-        read_only=True,
-        view_name='readinglist-detail',
-    )
-
-    class Meta:
-        model = Thrill
-        read_only_fields = (
-            'id',
-            'created_at',
-            'modified_at',
-            'deleted_at',
-            'profile',
-        )
-        fields = read_only_fields + (
-            'book',
-            'reading_list',
-        )
-        exclude = []
-
-
-class BookThrillSerializer(
-        ProfileRefferedSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
-):
-    """Thrill model serializer."""
-    id = serializers.HyperlinkedRelatedField(
-        many=False,
-        read_only=True,
-        view_name='thrill-detail',
-    )
-    book = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='book-detail',
-        queryset=Book.objects.all(),
-    )
-    reading_list = serializers.HyperlinkedRelatedField(
-        many=False,
-        read_only=True,
-        view_name='readinglist-detail',
-    )
-
-    class Meta:
-        model = Thrill
-        read_only_fields = (
-            'id',
-            'created_at',
-            'modified_at',
-            'deleted_at',
-            'profile',
-        )
-        fields = read_only_fields + (
-            'book',
-            'reading_list',
-        )
-        exclude = []
-
-    def create(self, validated_data):
-        validated_data['reading_list'] = None
-        return super().create(validated_data)
-
-
-class ReadingListThrillSerializer(
-        ProfileRefferedSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
-):
-    """Thrill model serializer."""
-    id = serializers.HyperlinkedRelatedField(
-        many=False,
-        read_only=True,
-        view_name='thrill-detail',
-    )
-    book = serializers.HyperlinkedRelatedField(
-        many=False,
-        read_only=True,
-        view_name='book-detail',
-    )
-    reading_list = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='readinglist-detail',
-        queryset=ReadingList.objects.all(),
     )
 
     class Meta:

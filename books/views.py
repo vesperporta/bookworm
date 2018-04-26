@@ -22,8 +22,6 @@ from books.serializers import (
     BookChapterSerializer,
     ReadingListSerializer,
     ThrillSerializer,
-    BookThrillSerializer,
-    ReadingListThrillSerializer,
     ConfirmReadQuestionSerializer,
     ConfirmReadAnswerSerializer,
     ReadSerializer,
@@ -68,16 +66,6 @@ class ReadingListViewSet(viewsets.ModelViewSet):
 class ThrillViewSet(viewsets.ModelViewSet):
     queryset = Thrill.objects.all()
     serializer_class = ThrillSerializer
-
-
-class BookThrillViewSet(viewsets.ModelViewSet):
-    queryset = Thrill.objects.all()
-    serializer_class = BookThrillSerializer
-
-
-class ReadingListThrillViewSet(viewsets.ModelViewSet):
-    queryset = Thrill.objects.all()
-    serializer_class = ReadingListThrillSerializer
 
 
 class ConfirmReadQuestionViewSet(viewsets.ModelViewSet):

@@ -6,9 +6,8 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from hashid_field import HashidAutoField
 
-from bookworm.exceptions import DataMissingIntegrityError
 from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
-from books.models import (Book, ReadingList, BookChapter)
+from books.models import (Book, BookChapter)
 
 
 class Thrill(
@@ -19,19 +18,14 @@ class Thrill(
 
     PREFIX = '👓'  # 👓 = Thrill
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='FpbU^<z(tC9ax(e"lkca9a(z0rv-+Y[P',
+    )
     book = models.ForeignKey(
         Book,
         related_name='thrills',
         verbose_name=_('Book'),
-        on_delete=models.DO_NOTHING,
-        blank=True,
-        null=True,
-    )
-    reading_list = models.ForeignKey(
-        ReadingList,
-        related_name='thrills',
-        verbose_name=_('Reading List'),
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
@@ -42,9 +36,6 @@ class Thrill(
         verbose_name_plural = 'Thrills'
 
     def save(self):
-        if (not self.book and not self.reading_list) or \
-                (self.book and self.reading_list):
-            raise DataMissingIntegrityError(self, 'book', 'reading_list')
         return super().save()
 
     def __str__(self):
@@ -70,7 +61,10 @@ class ConfirmReadQuestion(
         (4, 'transcend', _('Transcend: 🖖')),
     )
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='L>fZ(XHL?!do[BlbGFIdA99fzkY;k!=+',
+    )
     difficulty = models.IntegerField(
         choices=DIFFICULTIES,
         default=DIFFICULTIES.simple,
@@ -110,7 +104,10 @@ class ConfirmReadAnswer(
 ):
     """Defines answers for read question."""
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='JBKvt+AzL@mRF*^zw.9U$5;pnTFl[665',
+    )
     question = models.ForeignKey(
         ConfirmReadQuestion,
         related_name='answers',
@@ -147,7 +144,10 @@ class Read(
 
     PREFIX = '📖'  # 📖 = Read
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='M&!_eO>;`ZIO&nnUHH*,*-#3:P&0KD]$',
+    )
     book = models.ForeignKey(
         Book,
         related_name='read',
