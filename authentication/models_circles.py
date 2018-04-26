@@ -17,7 +17,10 @@ class Circle(PreserveModelMixin):
 
     PREFIX = '¶'  # Pilcrow
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='ODB13\'B/A!8]0w?m_7Dt{Li+!:C{-!}E',
+    )
     title = models.CharField(
         verbose_name=_('Reading Circle Title'),
         max_length=254,
@@ -79,7 +82,10 @@ class Invitation(PreserveModelMixin, ProfileReferredMixin):
         (5, 'elevated', _('Elevated')),
     )
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='XF5&39(7cM~,o4JQz6D.{.xbqvE_W4^b',
+    )
     status = models.IntegerField(
         choices=STATUSES,
         default=STATUSES.invited,

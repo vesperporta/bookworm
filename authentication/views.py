@@ -9,6 +9,12 @@ from authentication.models import (
 from authentication.serializers import (
     ContactMethodSerializer,
     ProfileSerializer,
+    CircleSerializer,
+    InvitationSerializer,
+)
+from authentication.models_circles import (
+    Circle,
+    Invitation,
 )
 
 
@@ -33,3 +39,17 @@ class ProfileViewSet(viewsets.ModelViewSet):
         """Return reading list objects filtered by user and book related."""
         queryset = Profile.objects.filter(user=self.request.user)
         return queryset
+
+
+class CircleViewSet(viewsets.ModelViewSet):
+    queryset = Circle.objects.all()
+    serializer_class = CircleSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = (
+        'title',
+    )
+
+
+class InvitationViewSet(viewsets.ModelViewSet):
+    queryset = Invitation.objects.all()
+    serializer_class = InvitationSerializer

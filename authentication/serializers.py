@@ -2,10 +2,9 @@
 
 from rest_framework import serializers
 
-from hashid_field import rest
-
 from bookworm.exceptions import InvalidOperation
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
+from bookworm.serializers import ProfileRefferedSerializerMixin
 from authentication.models import (
     Profile,
     ContactMethod,
@@ -16,34 +15,45 @@ from authentication.models_circles import (
 )
 
 
-class ContactMethodSerializer(
+class CircleShortSerializer(
         MetaInfoAvailabledSerializerMixin,
-        serializers.ModelSerializer,
+        serializers.HyperlinkedModelSerializer,
 ):
-    id = rest.HashidSerializerCharField(read_only=True)
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='circle-detail',
+    )
 
     class Meta:
-        model = ContactMethod
+        model = Circle
         read_only_fields = (
             'id',
-            'created_at',
-            'modified_at',
-            'deleted_at',
-            'profile',
-            'meta_info',
         )
-        fields = (
-            'detail',
-            'email',
+        fields = read_only_fields + (
+            'title',
+            'reading_list',
         )
         exclude = []
 
 
 class ProfileSerializer(
         MetaInfoAvailabledSerializerMixin,
-        serializers.ModelSerializer,
+        serializers.HyperlinkedModelSerializer,
 ):
-    id = rest.HashidSerializerCharField(read_only=True)
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='profile-detail',
+    )
+    circles = CircleShortSerializer(
+        many=True,
+    )
+    invitations = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='invitation-detail',
+        queryset=Invitation.objects.all(),
+    )
 
     class Meta:
         model = Profile
@@ -60,16 +70,54 @@ class ProfileSerializer(
             'name_family',
             'name_middle',
             'birth_date',
+            'circles',
             'invitations',
+        )
+        exclude = []
+
+
+class ContactMethodSerializer(
+        ProfileRefferedSerializerMixin,
+        MetaInfoAvailabledSerializerMixin,
+        serializers.HyperlinkedModelSerializer,
+):
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='contactmethod-detail',
+    )
+
+    class Meta:
+        model = ContactMethod
+        read_only_fields = (
+            'id',
+            'created_at',
+            'modified_at',
+            'deleted_at',
+            'profile',
+            'meta_info',
+        )
+        fields = read_only_fields + (
+            'detail',
+            'email',
         )
         exclude = []
 
 
 class CircleSerializer(
         MetaInfoAvailabledSerializerMixin,
-        serializers.ModelSerializer,
+        serializers.HyperlinkedModelSerializer,
 ):
-    id = rest.HashidSerializerCharField(read_only=True)
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='circle-detail',
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
+    )
 
     class Meta:
         model = Circle
@@ -78,7 +126,7 @@ class CircleSerializer(
             'created_at',
             'modified_at',
             'deleted_at',
-            'created_by',
+            'profile',
             'meta_info',
         )
         fields = read_only_fields + (
@@ -90,10 +138,25 @@ class CircleSerializer(
 
 
 class InvitationSerializer(
+        ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
-        serializers.ModelSerializer,
+        serializers.HyperlinkedModelSerializer,
 ):
-    id = rest.HashidSerializerCharField(read_only=True)
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='invitation-detail',
+    )
+    profile_to = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
+    )
+    circle = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='circle-detail',
+        queryset=Circle.objects.all(),
+    )
 
     class Meta:
         model = Invitation

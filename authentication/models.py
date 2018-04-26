@@ -50,7 +50,10 @@ class Profile(
         (3, 'destroyer', _('Destroyer of Worlds')),
     )
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='l6P=[%*eDzqt7eG5@k>wfAh@R-UH?l5x',
+    )
     user = models.OneToOneField(
         User,
         related_name='profile',
@@ -132,7 +135,10 @@ class ContactMethod(
         (5, 'social', _('social network id')),
     )
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='K0jiY1y/MgN;zI06q|ffJSzjQ\'U9`C+=',
+    )
     type = models.IntegerField(
         choices=TYPES,
         default=TYPES.email,

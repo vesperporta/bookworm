@@ -31,11 +31,9 @@ def pre_save_instance_create_meta_info(sender, instance, *args, **kwargs):
         instance.meta_info = MetaInfo.objects.create()
 
 
-@receiver(pre_save, sender=Circle)
-def pre_save_circle_create(sender, instance, *args, **kwargs):
+@receiver(post_save, sender=Circle)
+def post_save_circle_create(sender, instance, *args, **kwargs):
     """Circle creation initialise first administrator of the Circle."""
-    if instance.pk:
-        return
     Invitation.objects.create(
         profile=instance.profile,
         profile_to=instance.profile,
