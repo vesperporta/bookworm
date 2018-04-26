@@ -2,8 +2,14 @@
 
 from rest_framework import serializers
 
+# from bookworm.encoders import HashidJSONEncoder
+from hashid_field import rest
+
 from bookworm.exceptions import DataMissingValidationError
-from bookworm.serializers import ProfileRefferedSerializerMixin
+from bookworm.serializers import (
+    ProfileRefferedSerializerMixin,
+    PreservedModelSerializeMixin,
+)
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 
 from books.models import (
@@ -21,90 +27,66 @@ from books.models_read import (
 )
 
 
-class BooklessBookProgressSerializer(
-        ProfileRefferedSerializerMixin,
-        serializers.ModelSerializer,
-):
-    """BookProgress model serializer."""
-
-    class Meta:
-        model = BookProgress
-        exclude = []
-        read_only_fields = (
-            'created_at',
-            'modified_at',
-            'deleted_at',
-        )
-        fields = read_only_fields + (
-            'percent',
-            'page',
-            'start',
-            'end',
-        )
-
-
-class BooklessBookReviewSerializer(
-        ProfileRefferedSerializerMixin,
-        MetaInfoAvailabledSerializerMixin,
-        serializers.ModelSerializer,
-):
-    """BookReview serializer."""
-    progress = BooklessBookProgressSerializer(many=False)
-
-    class Meta:
-        model = BookReview
-        read_only_fields = (
-            'created_at',
-            'modified_at',
-            'deleted_at',
-        )
-        fields = read_only_fields + (
-            'type',
-            'copy',
-            'rating',
-            'progress',
-        )
-        exclude = []
-
-
 class BookSerializer(
         ProfileRefferedSerializerMixin,
+        PreservedModelSerializeMixin,
         MetaInfoAvailabledSerializerMixin,
-        serializers.ModelSerializer,
+        serializers.HyperlinkedModelSerializer,
 ):
     """Book model serializer."""
-    reviews = BooklessBookReviewSerializer(many=True)
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='book-detail',
+    )
+    reviews = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='review-list',
+    )
 
     class Meta:
         model = Book
         read_only_fields = (
+            'id',
             'created_at',
             'modified_at',
             'deleted_at',
+            'reviews',
+            'meta_info',
         )
         fields = read_only_fields + (
             'title',
             'description',
-            'reviews',
-            'meta_info',
         )
         exclude = []
 
 
 class BookProgressSerializer(
         ProfileRefferedSerializerMixin,
-        serializers.ModelSerializer,
+        serializers.HyperlinkedModelSerializer,
 ):
     """BookProgress model serializer."""
-    book = BookSerializer(many=False)
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='bookprogress-detail',
+    )
+    book = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='book-detail',
+        queryset=Book.objects.all(),
+    )
 
     class Meta:
         model = BookProgress
         exclude = []
         read_only_fields = (
+            'id',
             'created_at',
             'modified_at',
             'deleted_at',
+            'profile',
         )
         fields = read_only_fields + (
             'percent',
@@ -118,15 +100,29 @@ class BookProgressSerializer(
 class BookChapterSerializer(
         ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
-        serializers.ModelSerializer,
+        serializers.HyperlinkedModelSerializer,
 ):
     """BookChapter serializer."""
-    book = BookSerializer(many=False)
-    progress = BookProgressSerializer(many=False)
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='bookchapter-detail',
+    )
+    book = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='book-detail',
+        queryset=Book.objects.all(),
+    )
+    progress = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='bookprogress-detail',
+        queryset=BookProgress.objects.all(),
+    )
 
     class Meta:
         model = BookChapter
         read_only_fields = (
+            'id',
             'created_at',
             'modified_at',
             'deleted_at',
@@ -142,10 +138,14 @@ class BookChapterSerializer(
 class ReadingListSerializer(
         ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
-        serializers.ModelSerializer,
+        serializers.HyperlinkedModelSerializer,
 ):
     """ReadingList serializer."""
-    books = BookSerializer(many=True)
+    books = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='book-list',
+        queryset=Book.objects.all(),
+    )
 
     class Meta:
         model = ReadingList
@@ -165,11 +165,19 @@ class ReadingListSerializer(
 class BookReviewSerializer(
         ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
-        serializers.ModelSerializer,
+        serializers.HyperlinkedModelSerializer,
 ):
     """BookReview serializer."""
-    book = BookSerializer(many=False)
-    progress = BookProgressSerializer(many=False)
+    book = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='book-detail',
+        queryset=Book.objects.all(),
+    )
+    progress = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='progress-detail',
+        queryset=BookProgress.objects.all(),
+    )
 
     class Meta:
         model = BookReview
@@ -190,10 +198,19 @@ class BookReviewSerializer(
 
 class ThrillSerializer(
         ProfileRefferedSerializerMixin,
+        serializers.HyperlinkedModelSerializer,
 ):
     """Thrill model serializer."""
-    book = BookSerializer(many=False)
-    reading_list = ReadingListSerializer(many=False)
+    book = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='book-detail',
+        queryset=Book.objects.all(),
+    )
+    reading_list = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='readinglist-detail',
+        queryset=ReadingList.objects.all(),
+    )
 
     def validate(self, data):
         """Validate for XOR assignment between book and reading_list."""
@@ -220,10 +237,19 @@ class ThrillSerializer(
 
 class ConfirmReadQuestionSerializer(
         ProfileRefferedSerializerMixin,
+        serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmReadQuestion model serializer."""
-    book = BookSerializer(many=False)
-    chapter = BookChapterSerializer(many=False)
+    book = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='book-detail',
+        queryset=Book.objects.all(),
+    )
+    # chapter = serializers.HyperlinkedRelatedField(
+    #     many=False,
+    #     view_name='chapter-detail',
+    #     queryset=BookChapter.objects.all(),
+    # )
 
     class Meta:
         model = ConfirmReadQuestion
@@ -235,7 +261,7 @@ class ConfirmReadQuestionSerializer(
         fields = read_only_fields + (
             'difficulty',
             'book',
-            'chapter',
+            # 'chapter',
             'question',
         )
         exclude = []
@@ -243,6 +269,7 @@ class ConfirmReadQuestionSerializer(
 
 class ConfirmReadAnswerSerializer(
         ProfileRefferedSerializerMixin,
+        serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmReadAnswer model serializer."""
 
@@ -263,9 +290,14 @@ class ConfirmReadAnswerSerializer(
 
 class ReadSerializer(
         ProfileRefferedSerializerMixin,
+        serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmRead model serializer."""
-    book = BookSerializer(many=False)
+    book = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='book-detail',
+        queryset=Book.objects.all(),
+    )
 
     class Meta:
         model = Read

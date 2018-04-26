@@ -90,10 +90,14 @@ class Book(
         PublishableModelMixin,
         PublicationMixin,
         PreserveModelMixin,
+        ProfileReferredMixin,
 ):
     """Books model."""
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='p^oE*^4(%7;Yb:p_5Nuccz3-H?>wYJ4c',
+    )
     meta_info = models.ForeignKey(
         MetaInfo,
         related_name='books+',
@@ -132,7 +136,10 @@ class BookProgress(
 ):
     """Book progress model."""
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='KTEVvV\'e#Z*mO;d\';e1I.5T]aVwUZN"1',
+    )
     percent = models.FloatField()
     page = models.PositiveSmallIntegerField(
         blank=True,
@@ -162,7 +169,10 @@ class BookProgress(
 class BookChapter(PreserveModelMixin):
     """Book chapter model."""
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='oJI94-Ej+ylQ.lqxRIc`Y5!2_{_Q=zGh',
+    )
     title = models.CharField(
         max_length=200,
         db_index=True,
@@ -207,7 +217,10 @@ class ReadingList(
 ):
     """Reading list model."""
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='cF6/9w*hf.1xWzqmleOlY}>,!iWl;2@i',
+    )
     title = models.CharField(
         max_length=200,
         db_index=True,
@@ -273,7 +286,10 @@ class BookReview(
         (5, 'brilliant', _('Couldn\'t Put Down')),
     )
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='p6|v5qADW64CC<-4gMTnFh/N7.sV,wPG',
+    )
     type = models.IntegerField(
         choices=TYPES,
         default=TYPES.review,

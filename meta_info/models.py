@@ -12,7 +12,10 @@ from bookworm.mixins import PreserveModelMixin
 class TagMixin(models.Model):
     """Tagging base mixin."""
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='mQ6mdMA|D>zV})\'@CaBhxmIj5aWR|;ib',
+    )
     slug = models.SlugField(
         db_index=True,
         unique=True,
@@ -50,7 +53,10 @@ class Tag(TagMixin, PreserveModelMixin):
 class MetaInfoMixin(models.Model):
     """Meta mixin model."""
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='jZ/TE5>gnCerRiy<+U`8p&D9otm2c^C&',
+    )
     copy = models.TextField(
         db_index=True,
         blank=True,

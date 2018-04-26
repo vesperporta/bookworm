@@ -2,8 +2,10 @@
 
 from rest_framework import serializers
 
+from hashid_field import rest
+
 from bookworm.exceptions import InvalidOperation
-from meta_info.serializers import MetaSerializer
+from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 from authentication.models import (
     Profile,
     ContactMethod,
@@ -14,8 +16,11 @@ from authentication.models_circles import (
 )
 
 
-class ContactMethodSerializer(serializers.ModelSerializer):
-    meta_info = MetaSerializer()
+class ContactMethodSerializer(
+        MetaInfoAvailabledSerializerMixin,
+        serializers.ModelSerializer,
+):
+    id = rest.HashidSerializerCharField(read_only=True)
 
     class Meta:
         model = ContactMethod
@@ -34,8 +39,11 @@ class ContactMethodSerializer(serializers.ModelSerializer):
         exclude = []
 
 
-class ProfileSerializer(serializers.ModelSerializer):
-    meta_info = MetaSerializer()
+class ProfileSerializer(
+        MetaInfoAvailabledSerializerMixin,
+        serializers.ModelSerializer,
+):
+    id = rest.HashidSerializerCharField(read_only=True)
 
     class Meta:
         model = Profile
@@ -57,8 +65,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         exclude = []
 
 
-class CircleSerializer(serializers.ModelSerializer):
-    meta_info = MetaSerializer()
+class CircleSerializer(
+        MetaInfoAvailabledSerializerMixin,
+        serializers.ModelSerializer,
+):
+    id = rest.HashidSerializerCharField(read_only=True)
 
     class Meta:
         model = Circle
@@ -78,8 +89,11 @@ class CircleSerializer(serializers.ModelSerializer):
         exclude = []
 
 
-class InvitationSerializer(serializers.ModelSerializer):
-    meta_info = MetaSerializer()
+class InvitationSerializer(
+        MetaInfoAvailabledSerializerMixin,
+        serializers.ModelSerializer,
+):
+    id = rest.HashidSerializerCharField(read_only=True)
 
     class Meta:
         model = Invitation

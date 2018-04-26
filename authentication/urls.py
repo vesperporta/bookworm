@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from profiles.views import (
+from authentication.views import (
     ProfileViewSet,
     ContactMethodViewSet,
 )
@@ -8,6 +8,6 @@ from profiles.views import (
 
 router = routers.SimpleRouter()
 router.register(r'profile', ProfileViewSet)
-router.register(r'contacts', ContactMethodViewSet)
+router.register(r'contact', ContactMethodViewSet)
 
 urlpatterns = router.urls

@@ -24,9 +24,7 @@ class InvalidOperation(ValidationError):
     def __init__(self, obj):
         super().__init__([{
             'code': 'invalid_operation',
-            'message': '{}, nopez!'.format(
-                obj
-            ),
+            'message': '{}, nopez!'.format(obj),
         }])
         logger.error(self)
 

@@ -8,7 +8,7 @@ from meta_info.models import (
 )
 from meta_info.serializers import (
     TagSerializer,
-    MetaSerializer,
+    MetaInfoSerializer,
 )
 
 
@@ -21,4 +21,4 @@ class TagViewSet(viewsets.ModelViewSet):
 
 class MetaViewSet(viewsets.ModelViewSet):
     queryset = MetaInfo.objects.all()
-    serializer_class = MetaSerializer
+    serializer_class = MetaInfoSerializer

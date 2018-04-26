@@ -10,6 +10,12 @@ from meta_info.models import (
 
 class TagSlugSerializer(serializers.ModelSerializer):
     """Short hand Tag serializer."""
+    # id = rest.HashidSerializerCharField(read_only=True)
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='tag-detail',
+        queryset=Tag.objects.all(),
+    )
 
     class Meta:
         model = Tag
@@ -22,7 +28,12 @@ class TagSlugSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     """Generic Tag serializer."""
-
+    # id = rest.HashidSerializerCharField(read_only=True)
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='tag-detail',
+        queryset=Tag.objects.all(),
+    )
     tags = TagSlugSerializer(many=True)
 
     class Meta:
@@ -40,10 +51,14 @@ class TagSerializer(serializers.ModelSerializer):
         )
 
 
-class MetaInfoSerializer(serializers.ModelSerializer):
+class MetaInfoSerializer(serializers.HyperlinkedModelSerializer):
     """MetaInfo model serializer."""
-
-    tags = TagSerializer(many=True)
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='metainfo-detail',
+    )
+    tags = TagSlugSerializer(many=True)
 
     class Meta:
         model = MetaInfo
@@ -68,7 +83,11 @@ class MetaInfoAvailabledSerializerMixin:
     model are supplied as a JSON object.
     """
 
-    meta_info = MetaInfoSerializer(many=False)
+    meta_info = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='metainfo-detail',
+        queryset=MetaInfo.objects.all(),
+    )
 
     def validate(self, data):
         """Validate for meta_info to validated_data"""

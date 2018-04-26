@@ -11,7 +11,7 @@ from django.utils.timezone import now
 
 from model_utils.managers import QueryManager
 
-from bookworm.managers import PreserveModelManager
+# from bookworm.managers import PreserveModelManager
 from bookworm.exceptions import (
     PublishableObjectNotDefined,
     PublishableValidationError,
