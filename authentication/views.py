@@ -5,10 +5,14 @@ from rest_framework import (viewsets, filters)
 from authentication.models import (
     ContactMethod,
     Profile,
+    Author,
+    AuthorContactMethod,
 )
 from authentication.serializers import (
     ContactMethodSerializer,
+    AuthorContactMethodSerializer,
     ProfileSerializer,
+    AuthorSerializer,
     CircleSerializer,
     InvitationSerializer,
 )
@@ -16,13 +20,6 @@ from authentication.models_circles import (
     Circle,
     Invitation,
 )
-
-
-class ContactMethodViewSet(viewsets.ModelViewSet):
-    queryset = ContactMethod.objects.all()
-    serializer_class = ContactMethodSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('detail',)
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
@@ -35,10 +32,30 @@ class ProfileViewSet(viewsets.ModelViewSet):
         'email',
     )
 
-    def get_queryset(self, request=None, *args, **kwargs):
-        """Return reading list objects filtered by user and book related."""
-        queryset = Profile.objects.filter(user=self.request.user)
-        return queryset
+
+class AuthorViewSet(viewsets.ModelViewSet):
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = (
+        'name_first',
+        'name_last',
+        'email',
+    )
+
+
+class ContactMethodViewSet(viewsets.ModelViewSet):
+    queryset = ContactMethod.objects.all()
+    serializer_class = ContactMethodSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('detail',)
+
+
+class AuthorContactMethodViewSet(viewsets.ModelViewSet):
+    queryset = AuthorContactMethod.objects.all()
+    serializer_class = AuthorContactMethodSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('detail',)
 
 
 class CircleViewSet(viewsets.ModelViewSet):

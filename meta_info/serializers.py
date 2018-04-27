@@ -10,11 +10,10 @@ from meta_info.models import (
 
 class TagSlugSerializer(serializers.ModelSerializer):
     """Short hand Tag serializer."""
-    # id = rest.HashidSerializerCharField(read_only=True)
     id = serializers.HyperlinkedRelatedField(
         many=False,
+        read_only=True,
         view_name='tag-detail',
-        queryset=Tag.objects.all(),
     )
 
     class Meta:
@@ -28,13 +27,16 @@ class TagSlugSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     """Generic Tag serializer."""
-    # id = rest.HashidSerializerCharField(read_only=True)
     id = serializers.HyperlinkedRelatedField(
         many=False,
+        read_only=True,
+        view_name='tag-detail',
+    )
+    tags = serializers.HyperlinkedRelatedField(
+        many=True,
         view_name='tag-detail',
         queryset=Tag.objects.all(),
     )
-    tags = TagSlugSerializer(many=True)
 
     class Meta:
         model = Tag
@@ -58,7 +60,11 @@ class MetaInfoSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True,
         view_name='metainfo-detail',
     )
-    tags = TagSlugSerializer(many=True)
+    tags = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='tag-detail',
+        queryset=Tag.objects.all(),
+    )
 
     class Meta:
         model = MetaInfo

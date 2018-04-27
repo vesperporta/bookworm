@@ -14,7 +14,7 @@ class Thrill(
         PreserveModelMixin,
         ProfileReferredMixin,
 ):
-    """Want model."""
+    """Thrill model."""
 
     PREFIX = '👓'  # 👓 = Thrill
 
@@ -28,22 +28,21 @@ class Thrill(
         verbose_name=_('Book'),
         on_delete=models.DO_NOTHING,
         blank=True,
-        null=True,
     )
 
     class Meta:
         verbose_name = 'Thrill'
         verbose_name_plural = 'Thrills'
 
-    def save(self):
-        return super().save()
+    # def save(self):
+    #     return super().save()
 
     def __str__(self):
         """Display only as URI valid slug."""
         return '{}{} "{}"'.format(
             self.PREFIX,
             self.profile,
-            self.book if self.book else self.reading_list,
+            self.book,
         )
 
 

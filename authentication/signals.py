@@ -3,13 +3,13 @@
 import logging
 
 from django.conf import settings
-from django.db.utils import IntegrityError
 from django.db.models.signals import (pre_save, post_save, post_delete)
 from django.dispatch import receiver
 from django_common.auth_backends import User
+from django.utils.text import slugify
 
 from meta_info.models import Tag
-from authentication.models import (Profile, ContactMethod)
+from authentication.models import (Profile, Author, ContactMethod)
 from authentication.models_circles import (Circle, Invitation)
 from meta_info.models import MetaInfo
 
@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 @receiver(pre_save, sender=Invitation)
 @receiver(pre_save, sender=ContactMethod)
 @receiver(pre_save, sender=Profile)
+@receiver(pre_save, sender=Author)
 def pre_save_instance_create_meta_info(sender, instance, *args, **kwargs):
     """Create a MetaInfo object for the instance being created."""
     if instance.pk:
@@ -31,9 +32,24 @@ def pre_save_instance_create_meta_info(sender, instance, *args, **kwargs):
         instance.meta_info = MetaInfo.objects.create()
 
 
+@receiver(post_save, sender=Author)
+def post_save_author_create(sender, instance, created, **kwargs):
+    """Create a MetaInfo object for the instance being created."""
+    display_name = slugify(instance.display_name)
+    tag = Tag.objects.filter(slug__iexact=display_name).first()
+    if not created:
+        return
+    if not tag:
+        author_tag = Tag.objects.filter(slug__iexact='Author').first()
+        tag = Tag.objects.create(copy=instance.display_name, tags=[author_tag])
+    instance.meta_info.tags.set(list(instance.meta_info.tags.all()) + [tag])
+
+
 @receiver(post_save, sender=Circle)
-def post_save_circle_create(sender, instance, *args, **kwargs):
+def post_save_circle_create(sender, instance, created, **kwargs):
     """Circle creation initialise first administrator of the Circle."""
+    if not created:
+        return
     Invitation.objects.create(
         profile=instance.profile,
         profile_to=instance.profile,

@@ -60,6 +60,7 @@ class BookSerializer(
     )
     reviews = BookReviewShortSerializer(
         many=True,
+        read_only=True,
     )
     thrills = serializers.SerializerMethodField(read_only=True)
 
@@ -245,8 +246,8 @@ class ThrillSerializer(
     )
     book = serializers.HyperlinkedRelatedField(
         many=False,
-        read_only=True,
         view_name='book-detail',
+        queryset=Book.objects.all(),
     )
 
     class Meta:
@@ -260,7 +261,6 @@ class ThrillSerializer(
         )
         fields = read_only_fields + (
             'book',
-            'reading_list',
         )
         exclude = []
 
@@ -335,6 +335,9 @@ class ReadSerializer(
         view_name='book-detail',
         queryset=Book.objects.all(),
     )
+    answered_correctly = serializers.BooleanField(
+        read_only=True,
+    )
 
     class Meta:
         model = Read
@@ -342,6 +345,7 @@ class ReadSerializer(
             'created_at',
             'modified_at',
             'deleted_at',
+            'answered_correctly',
         )
         fields = read_only_fields + (
             'book',
