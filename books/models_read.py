@@ -82,6 +82,7 @@ class ConfirmReadQuestion(
         verbose_name=_('Chapter'),
         on_delete=models.DO_NOTHING,
         blank=True,
+        null=True,
     )
     question = models.CharField(
         verbose_name=_('Question'),
