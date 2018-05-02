@@ -32,7 +32,7 @@ Inside the project base directory where docker-compose.yml file can be found, ru
 Once the process has finished and the postgres sql database and application are running, run the migrations and load data command inside docker as following:
 *docker-compose run --rm web scripts/migrate_loaddata.sh*
 
-This also creates a default user: *root* with password: *root*
+This also creates a default user: *root* with password: *iamsosecret*
 
 Login to the django administration page at: http://localhost:8000/admin/ with the credentials above to verify this.
 
