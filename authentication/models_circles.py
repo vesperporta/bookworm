@@ -8,8 +8,8 @@ from hashid_field import HashidAutoField
 
 from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
 from books.models import ReadingList
-from meta_info.models import MetaInfo
-from authentication.models import Profile
+from meta_info.models import MetaInfo, MetaInfoMixin
+from authentication.models import ContactMethod, Profile
 
 
 class Circle(PreserveModelMixin):
@@ -31,6 +31,11 @@ class Circle(PreserveModelMixin):
         related_name='circles',
         verbose_name=_('Created by'),
         on_delete=models.DO_NOTHING,
+    )
+    contacts = models.ManyToManyField(
+        ContactMethod,
+        related_name='circles+',
+        verbose_name=_('Contact Methods'),
     )
     meta_info = models.ForeignKey(
         MetaInfo,
@@ -65,6 +70,28 @@ class Circle(PreserveModelMixin):
     def __str__(self):
         """Valid email output of profile."""
         return '{}{}'.format(self.PREFIX, self.title or self.id)
+
+
+class CircleSetting(
+        PreserveModelMixin,
+        MetaInfoMixin,
+):
+    """Circle Settings model."""
+
+    id = HashidAutoField(
+        primary_key=True,
+        salt='R;aU-Y.v_,nw8O+/2e%sMLy5m$=A6cbC',
+    )
+    circle = models.ForeignKey(
+        Circle,
+        related_name='settings',
+        verbose_name=_('Settings for Circle'),
+        on_delete=models.DO_NOTHING,
+    )
+
+    class Meta:
+        verbose_name = 'Circle Setting'
+        verbose_name_plural = 'Circle Settings'
 
 
 class Invitation(PreserveModelMixin, ProfileReferredMixin):

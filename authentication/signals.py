@@ -6,7 +6,6 @@ from django.conf import settings
 from django.db.models.signals import (pre_save, post_save, post_delete)
 from django.dispatch import receiver
 from django_common.auth_backends import User
-from django.utils.text import slugify
 
 from meta_info.models import Tag
 from authentication.models import (Profile, Author, ContactMethod)
@@ -35,13 +34,9 @@ def pre_save_instance_create_meta_info(sender, instance, *args, **kwargs):
 @receiver(post_save, sender=Author)
 def post_save_author_create(sender, instance, created, **kwargs):
     """Create a MetaInfo object for the instance being created."""
-    display_name = slugify(instance.display_name)
-    tag = Tag.objects.filter(slug__iexact=display_name).first()
+    tag = Tag.objects.get_or_create_tag(instance.display_name, ['Author'])
     if not created:
         return
-    if not tag:
-        author_tag = Tag.objects.filter(slug__iexact='Author').first()
-        tag = Tag.objects.create(copy=instance.display_name, tags=[author_tag])
     instance.meta_info.tags.set(list(instance.meta_info.tags.all()) + [tag])
 
 
@@ -80,16 +75,22 @@ def post_save_contact_method(sender, instance, *args, **kwargs):
         ContactMethod.TYPES.email,
         ContactMethod.TYPES.mobile
     ]
+    tag = Tag.objects.get_or_create_tag(primary_copy)
+    profile = Profile.objects.filter(contacts__id=instance.id).first()
+    if profile:
+        primary_allocated = profile.contacts.filter(
+            type__in=require_primary,
+            meta_info__tags__slug__iexact=tag.slug,
+        )
+        for primary in primary_allocated:
+            tags = list(primary.meta_info.tags.all())
+            contact_tags = [t for t in tags if t.slug != tag.slug]
+            if len(tags) != len(contact_tags):
+                primary.meta_info.tags.set(contact_tags)
+                primary.meta_info.save()
     if instance.type in require_primary:
-        contacts = ContactMethod.objects.filter(
-            profile=instance.profile,
-            meta_info__tags__slug__iexact=primary_copy,
-        ).count()
-        tag = Tag.objects.filter(slug__iexact=primary_copy).first()
-        if not tag:
-            tag = Tag.objects.create(copy=primary_copy)
-        if not contacts:
-            instance.meta_info.tags.add(tag)
+        instance.meta_info.tags.add(tag)
+        instance.meta_info.save()
 
 
 @receiver(post_save, sender=User)
@@ -106,13 +107,13 @@ def create_user_profile(sender, instance, created, **kwargs):
     if instance.is_superuser:
         profile.type = Profile.TYPES.destroyer
     profile.save()
-    contact = ContactMethod(
+    contact = ContactMethod.objects.create(
         type=ContactMethod.TYPES.email,
         detail=instance.email,
         email=instance.email,
-        profile=profile,
     )
-    contact.save()
+    profile.contacts.set([contact])
+    profile.save()
 
 
 @receiver(post_save, sender=User)

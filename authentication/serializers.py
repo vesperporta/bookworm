@@ -9,34 +9,11 @@ from authentication.models import (
     Profile,
     Author,
     ContactMethod,
-    AuthorContactMethod,
 )
 from authentication.models_circles import (
     Circle,
     Invitation,
 )
-
-
-class CircleShortSerializer(
-        MetaInfoAvailabledSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
-):
-    id = serializers.HyperlinkedRelatedField(
-        many=False,
-        read_only=True,
-        view_name='circle-detail',
-    )
-
-    class Meta:
-        model = Circle
-        read_only_fields = (
-            'id',
-        )
-        fields = read_only_fields + (
-            'title',
-            'reading_list',
-        )
-        exclude = []
 
 
 class ProfileSerializer(
@@ -47,6 +24,11 @@ class ProfileSerializer(
         many=False,
         read_only=True,
         view_name='profile-detail',
+    )
+    pen_names = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='author-detail',
+        queryset=Author.objects.all(),
     )
     contacts = serializers.HyperlinkedRelatedField(
         many=True,
@@ -79,6 +61,7 @@ class ProfileSerializer(
             'name_family',
             'name_middle',
             'birth_date',
+            'pen_names',
             'contacts',
             'circles',
             'invitations',
@@ -97,8 +80,8 @@ class AuthorSerializer(
     )
     contacts = serializers.HyperlinkedRelatedField(
         many=True,
-        view_name='authorcontactmethod-detail',
-        queryset=AuthorContactMethod.objects.all(),
+        view_name='contactmethod-detail',
+        queryset=ContactMethod.objects.all(),
     )
 
     class Meta:
@@ -150,34 +133,6 @@ class ContactMethodSerializer(
         exclude = []
 
 
-class AuthorContactMethodSerializer(
-        ProfileRefferedSerializerMixin,
-        MetaInfoAvailabledSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
-):
-    id = serializers.HyperlinkedRelatedField(
-        many=False,
-        read_only=True,
-        view_name='authorcontactmethod-detail',
-    )
-
-    class Meta:
-        model = AuthorContactMethod
-        read_only_fields = (
-            'id',
-            'created_at',
-            'modified_at',
-            'deleted_at',
-            'profile',
-            'meta_info',
-        )
-        fields = read_only_fields + (
-            'detail',
-            'email',
-        )
-        exclude = []
-
-
 class CircleSerializer(
         ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
@@ -187,6 +142,11 @@ class CircleSerializer(
         many=False,
         read_only=True,
         view_name='circle-detail',
+    )
+    contacts = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='contactmethod-detail',
+        queryset=ContactMethod.objects.all(),
     )
 
     class Meta:
@@ -201,6 +161,7 @@ class CircleSerializer(
         )
         fields = read_only_fields + (
             'title',
+            'contacts',
             'reading_list',
             'invitations',
         )

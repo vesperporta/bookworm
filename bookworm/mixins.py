@@ -59,7 +59,6 @@ class PreserveModelMixin(ModifiedModelMixin):
         default=None,
     )
 
-    # objects = PreserveModelManager()
     objects = QueryManager(deleted_at__isnull=True)
     all_objects = models.Manager()
     deleted_objects = QueryManager(deleted_at__isnull=False)
@@ -109,6 +108,14 @@ class PublishableModelMixin(models.Model):
     published_at = models.DateTimeField(
         auto_now=False,
         auto_now_add=False,
+        blank=True,
+        null=True,
+    )
+    published_restrictions = models.ForeignKey(
+        'meta_info.MetaInfo',
+        related_name='published_restrictions+',
+        verbose_name=_('Published Restrictions'),
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
     )

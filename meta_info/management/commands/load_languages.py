@@ -41,8 +41,6 @@ class Command(BaseCommand):
                 logger.error('Failed Language import: {}'.format(language))
                 return
             if instance.iso_639_3.lower() is settings.DEFAULT_LANGUAGE.lower():
-                tag = Tag.objects.filter(slug__iexact='default').first()
-                if not tag:
-                    tag = Tag.objects.create(copy='Default')
+                tag = Tag.objects.get_or_create_tag('Default')
                 instance.tags.set([tag])
             logger.info('Added Language tag: {}'.format(language[6]))

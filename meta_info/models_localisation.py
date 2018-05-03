@@ -18,6 +18,10 @@ TAGS = (
 class LanguageTag(TagMixin, PreserveModelMixin):
     """Language object."""
 
+    id = HashidAutoField(
+        primary_key=True,
+        salt='ZH_N/YK26txcVPFvSo^J7+$j8?aMmksq',
+    )
     family = models.TextField(
         blank=True,
     )
@@ -61,6 +65,10 @@ class LanguageTag(TagMixin, PreserveModelMixin):
 class LocationTag(TagMixin, PreserveModelMixin):
     """Language object."""
 
+    id = HashidAutoField(
+        primary_key=True,
+        salt='X;Iq2*HJp+Bn,o7`P[!"<uK]ybdf#Q%8',
+    )
     iso_alpha_2 = models.CharField(
         max_length=3,
         db_index=True,
@@ -102,7 +110,10 @@ class LocationTag(TagMixin, PreserveModelMixin):
 class LocaliseTag(PreserveModelMixin):
     """Localisation Tag for translation assistance."""
 
-    id = HashidAutoField(primary_key=True)
+    id = HashidAutoField(
+        primary_key=True,
+        salt='l!?"pzK*2|`n81EW&-+#mPJeNyu>0o6[',
+    )
     field_name = models.TextField(
         verbose_name=_('Models field name'),
         blank=True,

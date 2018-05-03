@@ -3,6 +3,7 @@
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.text import slugify
 
 from hashid_field import HashidAutoField
 
@@ -12,10 +13,6 @@ from bookworm.mixins import PreserveModelMixin
 class TagMixin(models.Model):
     """Tagging base mixin."""
 
-    id = HashidAutoField(
-        primary_key=True,
-        salt='mQ6mdMA|D>zV})\'@CaBhxmIj5aWR|;ib',
-    )
     slug = models.SlugField(
         db_index=True,
         unique=True,
@@ -36,10 +33,48 @@ class TagMixin(models.Model):
         abstract = True
 
 
+class TagManager(models.Manager):
+    """Handle tags."""
+
+    def get_or_create_tag(self, copy, tags=[]):
+        """Manage the creation of Tag objects with respect to child tags.
+
+        @param copy: Expected display name for a tag.
+        @param tags: List or Tuple of strings for expected child tags.
+
+        @return Tag object.
+        """
+        tag_rtn = self.filter(slug__iexact=slugify(copy)).first()
+        if not tag_rtn:
+            tag_rtn = self.create(copy=copy)
+        if type(tags) is not list or type(tags) is not tuple:
+            return tag_rtn
+        tag_tags = list(tag_rtn.tags.all())
+        for tag in tags:
+            if type(tag) is str:
+                sub_tag = self.create_tag(tag)
+            elif type(tag) is TagMixin:
+                sub_tag = tag
+            if sub_tag:
+                tag_tags.append(sub_tag)
+            sub_tag = None
+        if tag_tags:
+            tag_rtn.tags.set(tag_tags)
+            tag_rtn.save()
+        return tag_rtn
+
+
 class Tag(TagMixin, PreserveModelMixin):
     """Tag model."""
 
     PREFIX = '#'  # hash
+
+    id = HashidAutoField(
+        primary_key=True,
+        salt='F3<_/,p7x*|0`1N;!ug]UmQ(G"Y5SH8[',
+    )
+
+    objects = TagManager()
 
     class Meta:
         verbose_name = 'Tag'
@@ -53,10 +88,6 @@ class Tag(TagMixin, PreserveModelMixin):
 class MetaInfoMixin(models.Model):
     """Meta mixin model."""
 
-    id = HashidAutoField(
-        primary_key=True,
-        salt='jZ/TE5>gnCerRiy<+U`8p&D9otm2c^C&',
-    )
     copy = models.TextField(
         db_index=True,
         blank=True,
@@ -80,6 +111,10 @@ class MetaInfoMixin(models.Model):
 class MetaInfo(MetaInfoMixin, PreserveModelMixin):
     """Meta model."""
 
+    id = HashidAutoField(
+        primary_key=True,
+        salt='jZ/TE5>gnCerRiy<+U`8p&D9otm2c^C&',
+    )
     uri = models.URLField(
         max_length=2000,
         blank=True,

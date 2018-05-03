@@ -3,10 +3,12 @@
 from django.contrib import admin
 from authentication.models import (
     Profile,
+    ProfileSetting,
     ContactMethod,
 )
 from authentication.models_circles import (
     Circle,
+    CircleSetting,
     Invitation,
 )
 
@@ -51,6 +53,28 @@ class ProfileAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(ProfileSetting)
+class ProfileSettingAdmin(admin.ModelAdmin):
+    """ProfileSetting admin."""
+
+    list_display = (
+        'id',
+        'copy',
+        'json',
+    )
+    readonly_fields = (
+        'profile',
+    )
+    search_fields = (
+        'copy',
+    )
+    exclude = (
+        'created_at',
+        'modified_at',
+        'deleted_at',
+    )
+
+
 @admin.register(Circle)
 class CircleAdmin(admin.ModelAdmin):
     """Circle admin."""
@@ -66,6 +90,28 @@ class CircleAdmin(admin.ModelAdmin):
         'deleted_at',
     )
     readonly_fields = (
+    )
+
+
+@admin.register(CircleSetting)
+class CircleSettingAdmin(admin.ModelAdmin):
+    """CircleSetting admin."""
+
+    list_display = (
+        'id',
+        'copy',
+        'json',
+    )
+    readonly_fields = (
+        'circle',
+    )
+    search_fields = (
+        'copy',
+    )
+    exclude = (
+        'created_at',
+        'modified_at',
+        'deleted_at',
     )
 
 

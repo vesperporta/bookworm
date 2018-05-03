@@ -6,11 +6,9 @@ from authentication.models import (
     ContactMethod,
     Profile,
     Author,
-    AuthorContactMethod,
 )
 from authentication.serializers import (
     ContactMethodSerializer,
-    AuthorContactMethodSerializer,
     ProfileSerializer,
     AuthorSerializer,
     CircleSerializer,
@@ -47,13 +45,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
 class ContactMethodViewSet(viewsets.ModelViewSet):
     queryset = ContactMethod.objects.all()
     serializer_class = ContactMethodSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('detail',)
-
-
-class AuthorContactMethodViewSet(viewsets.ModelViewSet):
-    queryset = AuthorContactMethod.objects.all()
-    serializer_class = AuthorContactMethodSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('detail',)
 

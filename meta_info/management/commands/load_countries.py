@@ -31,8 +31,6 @@ class Command(BaseCommand):
             )
             default_location = settings.DEFAULT_LOCATION.lower()
             if instance.iso_alpha_3.lower() is default_location:
-                tag = Tag.objects.filter(slug__iexact='default').first()
-                if not tag:
-                    tag = Tag.objects.create(copy='Default')
+                tag = Tag.objects.get_or_create_tag('Default')
                 instance.tags.set([tag])
             logger.info('Added Location Tag: {}'.format(country[2]))
