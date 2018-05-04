@@ -80,10 +80,11 @@ class ContactMethod(
 
     def __str__(self):
         """Valid email output of profile."""
-        return 'Contact {} {}'.format(self.TYPES[self.type], self.detail)
+        contact_type = self.TYPES[self.type]
+        return f'Contact {contact_type} {self.detail}'
 
 
-class PersonMixin:
+class PersonMixin(models.Model):
     """Person mixin."""
 
     NAME_TITLES = Choices(
@@ -144,7 +145,8 @@ class PersonMixin:
             [getattr(self, n) for n in name_list if getattr(self, n)]
         )
         if self.name_title:
-            name = '{} {}'.format(self.NAME_TITLES[self.name_title], name)
+            title = self.NAME_TITLES[self.name_title]
+            name = f'{title} {name}'
         return name
 
 
@@ -201,7 +203,7 @@ class Profile(
 
     def __str__(self):
         """Valid email output of profile."""
-        return '{} "{}"'.format(self.display_name or self.id, self.email)
+        return f'{self.display_name or self.id} "{self.email}"'
 
 
 class Author(
@@ -240,7 +242,7 @@ class Author(
 
     def __str__(self):
         """Valid email output of profile."""
-        return 'Author "{}"'.format(self.display_name or self.id)
+        return f'Author "{self.display_name or self.id}"'
 
 
 class ProfileSetting(

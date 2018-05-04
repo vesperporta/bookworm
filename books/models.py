@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from hashid_field import HashidAutoField
 
+from authentication.models import Author
 from bookworm.mixins import (
     PublishableModelMixin,
     ProfileReferredMixin,
@@ -98,6 +99,14 @@ class Book(
         primary_key=True,
         salt='p^oE*^4(%7;Yb:p_5Nuccz3-H?>wYJ4c',
     )
+    author = models.ForeignKey(
+        Author,
+        related_name='books',
+        verbose_name=_('Author'),
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
     meta_info = models.ForeignKey(
         MetaInfo,
         related_name='books+',
@@ -109,25 +118,19 @@ class Book(
 
     class Publishable:
         publishable_verification = None
-        publishable_children = ('reviews', )
+        publishable_children = (
+            'reviews',
+        )
         serializer = PublishBookSerializer
 
     class Meta:
         verbose_name = 'Book'
         verbose_name_plural = 'Books'
 
-    @property
-    def author(self):
-        return self.meta_info.tags.filter(
-            tags__slug__iexact='author'
-        ).first()
-
     def __str__(self):
         """Title and author of book."""
-        return '{} by {}'.format(
-            self.title,
-            self.author.copy if self.author else '',
-        )
+        author = self.author.display_name if self.author else 'Unknown'
+        return f'{self.title} by {author}'
 
 
 class BookProgress(
@@ -156,6 +159,7 @@ class BookProgress(
         verbose_name=_('Book'),
         on_delete=models.DO_NOTHING,
     )
+    # TODO: For screen reading ensure the file being read is recorded.
 
     class Meta:
         verbose_name = 'Progress'
@@ -163,7 +167,7 @@ class BookProgress(
 
     def __str__(self):
         """Title and percent of book progress."""
-        return '{} at {}%'.format(self.book.title, self.percent)
+        return f'{self.book.title} at {self.percent}%'
 
 
 class BookChapter(PreserveModelMixin):
@@ -190,6 +194,7 @@ class BookChapter(PreserveModelMixin):
         verbose_name=_('Book'),
         on_delete=models.DO_NOTHING,
     )
+    # TODO: For screen reading ensure the file being read is recorded.
     localisations = models.ManyToManyField(
         LocaliseTag,
         related_name='publication_chapters+',
@@ -206,8 +211,11 @@ class BookChapter(PreserveModelMixin):
     )
 
     class Meta:
-        verbose_name = 'Books\' chapter'
-        verbose_name_plural = 'Books\' chapters'
+        verbose_name = 'Book Chapter'
+        verbose_name_plural = 'Book Chapters'
+
+    def __str__(self):
+        return f'{self.book.title} Chapter: {self.title}'
 
 
 class ReadingList(
@@ -259,7 +267,8 @@ class ReadingList(
         return self.books.all().count()
 
     def __str__(self):
-        return '{} ({})'.format(self.title, self.count)
+        plural = 's' if len(self.books) > 1 else ''
+        return f'{self.title} ({self.count} book{plural})'
 
 
 class BookReview(
@@ -337,5 +346,8 @@ class BookReview(
         serializer = PublishBookReviewSerializer
 
     class Meta:
-        verbose_name = 'Reader\' book review'
-        verbose_name_plural = 'Readers\' book reviews'
+        verbose_name = 'Book Review'
+        verbose_name_plural = 'Book Reviews'
+
+    def __str__(self):
+        return f'{self.book.title} reviewed by {self.profile.display_name}'

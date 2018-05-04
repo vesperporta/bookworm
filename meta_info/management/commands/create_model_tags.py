@@ -29,7 +29,6 @@ class Command(BaseCommand):
             dependant_list = ()
             if type(tag) is tuple or type(tag) is list:
                 dependant_list = tag[1]
-                self._create_tags(dependant_list)
                 tag = tag[0]
             Tag.objects.get_or_create_tag(tag, dependant_list)
 

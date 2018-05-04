@@ -69,7 +69,7 @@ class Circle(PreserveModelMixin):
 
     def __str__(self):
         """Valid email output of profile."""
-        return '{}{}'.format(self.PREFIX, self.title or self.id)
+        return f'{self.PREFIX}{self.title or self.id}'
 
 
 class CircleSetting(
@@ -146,8 +146,7 @@ class Invitation(PreserveModelMixin, ProfileReferredMixin):
 
     def __str__(self):
         """Short description of what this invitation is intended."""
-        rtn = 'to: {}, by: {}'.format(
-            self.profile_to, self.circle if self.circle else self.profile)
+        addressed = f'to: {self.profile_to}, from: {self.profile}'
         if self.circle:
-            rtn += ', for: {}'.format(self.circle)
-        return rtn
+            return f'{addressed}, for: {self.circle};'
+        return f'{addressed};'
