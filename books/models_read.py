@@ -7,7 +7,6 @@ from model_utils import Choices
 from hashid_field import HashidAutoField
 
 from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
-from books.models import (Book, BookChapter)
 
 
 class Thrill(
@@ -16,33 +15,38 @@ class Thrill(
 ):
     """Thrill model."""
 
+    TYPES = Choices(
+        (0, 'book', _('Book')),
+        (1, 'read', _('Read')),
+        (2, 'reading_list', _('Reading List')),
+        (3, 'book_review', _('Book Review')),
+        (4, 'confirm_read_question', _('Confirm Read Question')),
+    )
+
     PREFIX = '👓'  # 👓 = Thrill
 
     id = HashidAutoField(
         primary_key=True,
         salt='FpbU^<z(tC9ax(e"lkca9a(z0rv-+Y[P',
     )
-    book = models.ForeignKey(
-        Book,
-        related_name='thrills',
-        verbose_name=_('Book'),
-        on_delete=models.DO_NOTHING,
-        blank=True,
+    type = models.IntegerField(
+        choices=TYPES,
+        default=TYPES.book,
+    )
+    associated_id = models.CharField(
+        verbose_name=_('Associated Object ID'),
+        max_length=32,
     )
 
     class Meta:
         verbose_name = 'Thrill'
         verbose_name_plural = 'Thrills'
 
-    # def save(self):
-    #     return super().save()
-
     def __str__(self):
         """Display only as URI valid slug."""
-        return '{}{} "{}"'.format(
+        return '{}{}'.format(
             self.PREFIX,
-            self.profile,
-            self.book,
+            self.profile.display_name,
         )
 
 
@@ -70,14 +74,14 @@ class ConfirmReadQuestion(
         blank=True,
     )
     book = models.ForeignKey(
-        Book,
+        'books.Book',
         related_name='confirm_read+',
         verbose_name=_('Book'),
         on_delete=models.DO_NOTHING,
         blank=True,
     )
     chapter = models.ForeignKey(
-        BookChapter,
+        'books.BookChapter',
         related_name='confirm_read+',
         verbose_name=_('Chapter'),
         on_delete=models.DO_NOTHING,
@@ -87,6 +91,12 @@ class ConfirmReadQuestion(
     question = models.CharField(
         verbose_name=_('Question'),
         max_length=400,
+    )
+    thrills = models.ManyToManyField(
+        Thrill,
+        related_name='read_questions',
+        verbose_name=_('Thrills'),
+        blank=True,
     )
 
     class Meta:
@@ -149,7 +159,7 @@ class Read(
         salt='M&!_eO>;`ZIO&nnUHH*,*-#3:P&0KD]$',
     )
     book = models.ForeignKey(
-        Book,
+        'books.Book',
         related_name='read',
         verbose_name=_('Book'),
         on_delete=models.DO_NOTHING,
@@ -165,6 +175,12 @@ class Read(
         related_name='read_selected',
         verbose_name=_('Challenge Answer'),
         on_delete=models.DO_NOTHING,
+        blank=True,
+    )
+    thrills = models.ManyToManyField(
+        Thrill,
+        related_name='reads',
+        verbose_name=_('Thrills'),
         blank=True,
     )
 

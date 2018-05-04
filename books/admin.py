@@ -136,15 +136,12 @@ class ThrillAdmin(admin.ModelAdmin):
 
     list_display = (
         'id',
-        'book',
+        'profile',
     )
     search_fields = (
         'title__icontains',
-        'book__title__icontains',
-        'profile__user__username',
-    )
-    list_filter = (
-        'book__title',
+        'profile__user__username__icontains',
+        'profile__email__icontains',
     )
     exclude = (
         'created_at',

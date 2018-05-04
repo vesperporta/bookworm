@@ -14,6 +14,7 @@ from bookworm.mixins import (
 )
 from meta_info.models import MetaInfo
 from meta_info.models_localisation import LocaliseTag
+from books.models_read import Thrill
 from books.serializers_publish import (
     PublishBookSerializer,
     PublishReadingListSerializer,
@@ -106,6 +107,12 @@ class Book(
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
+    )
+    thrills = models.ManyToManyField(
+        Thrill,
+        related_name='books',
+        verbose_name=_('Thrills'),
+        blank=True,
     )
     meta_info = models.ForeignKey(
         MetaInfo,
@@ -244,6 +251,12 @@ class ReadingList(
         verbose_name=_('Localised Copy'),
         blank=True,
     )
+    thrills = models.ManyToManyField(
+        Thrill,
+        related_name='reading_lists',
+        verbose_name=_('Thrills'),
+        blank=True,
+    )
     meta_info = models.ForeignKey(
         MetaInfo,
         related_name='reading_lists+',
@@ -323,6 +336,12 @@ class BookReview(
         related_name='reviewed_at',
         verbose_name=_('Progress'),
         on_delete=models.DO_NOTHING,
+        blank=True,
+    )
+    thrills = models.ManyToManyField(
+        Thrill,
+        related_name='reviews',
+        verbose_name=_('Thrills'),
         blank=True,
     )
     localisations = models.ManyToManyField(
