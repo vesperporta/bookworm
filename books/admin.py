@@ -137,9 +137,10 @@ class ThrillAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'profile',
+        'type',
+        'associated_id',
     )
     search_fields = (
-        'title__icontains',
         'profile__user__username__icontains',
         'profile__email__icontains',
     )
@@ -185,12 +186,12 @@ class ConfirmReadAnswerAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'question',
-        'answer',
+        'is_answer',
         'copy',
     )
     search_fields = (
         'question__icontains',
-        'answer',
+        'is_answer',
         'copy__icontains',
         'profile__user__username',
     )

@@ -244,11 +244,6 @@ class ThrillSerializer(
         read_only=True,
         view_name='thrill-detail',
     )
-    book = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='book-detail',
-        queryset=Book.objects.all(),
-    )
 
     class Meta:
         model = Thrill
@@ -260,7 +255,8 @@ class ThrillSerializer(
             'profile',
         )
         fields = read_only_fields + (
-            'book',
+            'type',
+            'associated_id',
         )
         exclude = []
 
@@ -319,7 +315,7 @@ class ConfirmReadAnswerSerializer(
         )
         fields = read_only_fields + (
             'question',
-            'answer',
+            'is_answer',
             'copy',
         )
         exclude = []

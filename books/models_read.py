@@ -44,10 +44,7 @@ class Thrill(
 
     def __str__(self):
         """Display only as URI valid slug."""
-        return '{}{}'.format(
-            self.PREFIX,
-            self.profile.display_name,
-        )
+        return f'{self.PREFIX}{self.profile.display_name}'
 
 
 class ConfirmReadQuestion(
@@ -105,7 +102,8 @@ class ConfirmReadQuestion(
 
     def __str__(self):
         """Display only as URI valid slug."""
-        return '{} "{}"'.format(self.book, self.question)
+        thrilled = self.thrills.all().count()
+        return f'{self.book} "{self.question[:30]}" {Thrill.PREFIX}{thrilled}'
 
 
 class ConfirmReadAnswer(
@@ -124,7 +122,7 @@ class ConfirmReadAnswer(
         verbose_name=_('Question'),
         on_delete=models.DO_NOTHING,
     )
-    answer = models.BooleanField(
+    is_answer = models.BooleanField(
         verbose_name=_('Is Answer'),
         default=False,
     )
@@ -139,11 +137,8 @@ class ConfirmReadAnswer(
 
     def __str__(self):
         """Display only as URI valid slug."""
-        return '{} "{}"{}'.format(
-            self.question.id,
-            self.copy[:30],
-            '👍' if self.answer else '👎',
-        )
+        answers = '👍' if self.is_answer else '👎'
+        return f'{self.copy[:30]} {answers} {self.question.id}'
 
 
 class Read(
@@ -194,4 +189,4 @@ class Read(
 
     def __str__(self):
         """Display only as URI valid slug."""
-        return '{}{} "{}"'.format(self.PREFIX, self.profile, self.book)
+        return f'{self.PREFIX}{self.profile.display_name} "{self.book.title}"'

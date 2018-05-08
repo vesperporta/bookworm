@@ -4,7 +4,6 @@ import logging
 
 from rest_framework import (viewsets, filters)
 
-from books.exceptions import UnknownThrillAssociation
 from books.models import (
     Book,
     BookProgress,
@@ -71,22 +70,6 @@ class ReadingListViewSet(viewsets.ModelViewSet):
 class ThrillViewSet(viewsets.ModelViewSet):
     queryset = Thrill.objects.all()
     serializer_class = ThrillSerializer
-
-    def create(self, request, *args, **kwargs):
-        """Create a thrill and handle object associations."""
-        instance = super().create(request, *args, **kwargs)
-        associations = [
-            Book, Read, ReadingList, BookReview, ConfirmReadQuestion, ]
-        associated_id = request.data['associated_id']
-        try:
-            association = associations[request.data['type']].objects.get(
-                id=associated_id, )
-        except (IndexError, AttributeError):
-            instance.delete()
-            raise UnknownThrillAssociation(instance)
-        association.thrills.add(instance)
-        association.save()
-        return instance
 
 
 class ConfirmReadQuestionViewSet(viewsets.ModelViewSet):
