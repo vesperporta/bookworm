@@ -18,13 +18,12 @@ Install docker and docker-compose specific to your operating system. See https:/
 
 git clone the project and in the project base directory create a .env file with the following inside:
 
-`DATABASE_HOST=postgres`
-
-`DATABASE_NAME=postgres`
-
-`DATABASE_USER=postgres`
-
-`DATABASE_PASSWORD=postgres`
+```
+DATABASE_HOST=postgres
+DATABASE_NAME=postgres
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+```
 
 Inside the project base directory where docker-compose.yml file can be found, run the following commands:
 *docker-compose up --build*
