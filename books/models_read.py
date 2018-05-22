@@ -7,47 +7,11 @@ from model_utils import Choices
 from hashid_field import HashidAutoField
 
 from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
-
-
-class Thrill(
-        PreserveModelMixin,
-        ProfileReferredMixin,
-):
-    """Thrill model."""
-
-    TYPES = Choices(
-        (0, 'book', _('Book')),
-        (1, 'read', _('Read')),
-        (2, 'reading_list', _('Reading List')),
-        (3, 'book_review', _('Book Review')),
-        (4, 'confirm_read_question', _('Confirm Read Question')),
-    )
-
-    PREFIX = '👓'  # 👓 = Thrill
-
-    id = HashidAutoField(
-        primary_key=True,
-        salt='FpbU^<z(tC9ax(e"lkca9a(z0rv-+Y[P',
-    )
-    type = models.IntegerField(
-        choices=TYPES,
-        default=TYPES.book,
-    )
-    associated_id = models.CharField(
-        verbose_name=_('Associated Object ID'),
-        max_length=32,
-    )
-
-    class Meta:
-        verbose_name = 'Thrill'
-        verbose_name_plural = 'Thrills'
-
-    def __str__(self):
-        """Display only as URI valid slug."""
-        return f'{self.PREFIX}{self.profile.display_name}'
+from posts.models import Emotable
 
 
 class ConfirmReadQuestion(
+        Emotable,
         PreserveModelMixin,
         ProfileReferredMixin,
 ):
@@ -75,7 +39,6 @@ class ConfirmReadQuestion(
         related_name='confirm_read+',
         verbose_name=_('Book'),
         on_delete=models.DO_NOTHING,
-        blank=True,
     )
     chapter = models.ForeignKey(
         'books.BookChapter',
@@ -85,15 +48,9 @@ class ConfirmReadQuestion(
         blank=True,
         null=True,
     )
-    question = models.CharField(
+    copy = models.CharField(
         verbose_name=_('Question'),
         max_length=400,
-    )
-    thrills = models.ManyToManyField(
-        Thrill,
-        related_name='read_questions',
-        verbose_name=_('Thrills'),
-        blank=True,
     )
 
     class Meta:
@@ -102,8 +59,7 @@ class ConfirmReadQuestion(
 
     def __str__(self):
         """Display only as URI valid slug."""
-        thrilled = self.thrills.all().count()
-        return f'{self.book} "{self.question[:30]}" {Thrill.PREFIX}{thrilled}'
+        return f'{self.book} "{self.question[:30]}" [{self.ggregation}]'
 
 
 class ConfirmReadAnswer(
@@ -111,6 +67,13 @@ class ConfirmReadAnswer(
         ProfileReferredMixin,
 ):
     """Defines answers for read question."""
+
+    TYPES = Choices(
+        (0, 'choice', _('Multiple choice answer to select from.')),
+        (1, 'written', _('Written answer.')),
+        (2, 'boolean', _('True or False.')),
+    )
+    TYPES_CHOICE = [TYPES.choice, TYPES.boolean, ]
 
     id = HashidAutoField(
         primary_key=True,
@@ -122,26 +85,53 @@ class ConfirmReadAnswer(
         verbose_name=_('Question'),
         on_delete=models.DO_NOTHING,
     )
+    copy = models.CharField(
+        verbose_name=_('Answer copy'),
+        max_length=400,
+    )
+    is_true = models.BooleanField(
+        verbose_name=_('Boolean Answer'),
+        blank=True,
+        default=None,
+    )
     is_answer = models.BooleanField(
-        verbose_name=_('Is Answer'),
+        verbose_name=_('Is Answer for Multiple Choice'),
         default=False,
     )
-    copy = models.CharField(
-        verbose_name=_('Answer Copy'),
-        max_length=400,
+    accepted_at = models.DateTimeField(
+        verbose_name=_('Accepted When'),
+        auto_now=False,
+        auto_now_add=False,
+        blank=True,
+        null=True,
+        default=None,
+    )
+    accepted_by = models.ForeignKey(
+        'authentication.Profile',
+        verbose_name=_('Accepted By'),
+        related_name='read_answers_accepted+',
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
     )
 
     class Meta:
         verbose_name = 'Confirm Read Answer'
         verbose_name_plural = 'Confirm Read Answers'
 
+    @property
+    def correct(self):
+        """Answer is correct."""
+        return bool(self.is_answer or self.accepted_by)
+
     def __str__(self):
         """Display only as URI valid slug."""
-        answers = '👍' if self.is_answer else '👎'
-        return f'{self.copy[:30]} {answers} {self.question.id}'
+        answers = '👍' if self.correct else '👎'
+        return f'{self.id} {answers} for question: {self.question.id}'
 
 
 class Read(
+        Emotable,
         PreserveModelMixin,
         ProfileReferredMixin,
 ):
@@ -159,23 +149,11 @@ class Read(
         verbose_name=_('Book'),
         on_delete=models.DO_NOTHING,
     )
-    question = models.ForeignKey(
-        ConfirmReadQuestion,
-        related_name='read',
-        verbose_name=_('Question Challenge'),
-        on_delete=models.DO_NOTHING,
-    )
     answer = models.ForeignKey(
         ConfirmReadAnswer,
         related_name='read_selected',
         verbose_name=_('Challenge Answer'),
         on_delete=models.DO_NOTHING,
-        blank=True,
-    )
-    thrills = models.ManyToManyField(
-        Thrill,
-        related_name='reads',
-        verbose_name=_('Thrills'),
         blank=True,
     )
 
@@ -185,7 +163,8 @@ class Read(
 
     @property
     def answered_correctly(self):
-        return self.question.answers.filter(answer=True).first() is self.answer
+        """Read declaration is correct, answer given defines correctness."""
+        return self.answer.correct
 
     def __str__(self):
         """Display only as URI valid slug."""

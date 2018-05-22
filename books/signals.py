@@ -52,14 +52,15 @@ def pre_save_book_meta_info(sender, instance, *args, **kwargs):
 
 @receiver(pre_save, sender=ConfirmReadAnswer)
 def pre_save_confirm_read_one_answer(sender, instance, *args, **kwargs):
-    """Ensure only one true answer for a question."""
-    if not instance.answer:
+    """Ensure only one true answer for a question for multi-choice."""
+    type_choice = instance.type in ConfirmReadAnswer.TYPES_CHOICE
+    if not instance.is_answer or type_choice:
         return
-    answer_list = list(instance.question.ansers.filter(answer=True))
+    answer_list = list(instance.question.answers.filter(is_answer=True))
     for answer in answer_list:
-        if answer.id is instance.id:
+        if answer.id == instance.id:
             continue
-        answer.answer = False
+        answer.is_answer = False
         answer.save()
 
 

@@ -51,7 +51,7 @@ class BookProgressAdmin(admin.ModelAdmin):
     )
     search_fields = (
         'book__title',
-        'profile__user__username',
+        'profile__user__username__icontains',
     )
     list_filter = ('book__title',)
     exclude = (
@@ -73,7 +73,7 @@ class BookChapterAdmin(admin.ModelAdmin):
     )
     search_fields = (
         'book__title',
-        'profile__user__username',
+        'profile__user__username__icontains',
         'title',
     )
     list_filter = ('title', 'book__title',)
@@ -94,7 +94,7 @@ class BookReviewAdmin(admin.ModelAdmin):
     )
     search_fields = (
         'book__title',
-        'profile__user__username',
+        'profile__user__username__icontains',
     )
     list_filter = (
         'book__title',
@@ -118,7 +118,7 @@ class ReadingListAdmin(admin.ModelAdmin):
     search_fields = (
         'title',
         'book__title',
-        'profile__user__username',
+        'profile__user__username__icontains',
     )
     list_filter = (
         'title',
@@ -167,7 +167,7 @@ class ConfirmReadQuestionAdmin(admin.ModelAdmin):
         'question__icontains',
         'book__title__icontains',
         'chapter__title__icontains',
-        'profile__user__username',
+        'profile__user__username__icontains',
     )
     list_filter = (
         'question',
@@ -193,7 +193,7 @@ class ConfirmReadAnswerAdmin(admin.ModelAdmin):
         'question__icontains',
         'is_answer',
         'copy__icontains',
-        'profile__user__username',
+        'profile__user__username__icontains',
     )
     list_filter = (
         'copy',
@@ -217,7 +217,7 @@ class ReadAdmin(admin.ModelAdmin):
     search_fields = (
         'book__title__icontains',
         'question__copy__icontains',
-        'profile__user__username',
+        'profile__user__username__icontains',
     )
     list_filter = (
         'book',

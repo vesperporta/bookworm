@@ -183,10 +183,14 @@ class PublishableModelMixin(models.Model):
         module = importlib.import_module('meta_info.models')
         return getattr(module, 'MetaInfo')
 
-    def publish(self):
-        """Publish this object"""
+    def publish(self, skip_children=False):
+        """Publish this object.
+
+        @param skip_children=False flag to handle child object publication.
+        """
         self._validate_for_publication(publish=True)
-        self._handle_child_publication(publish=True)
+        if not skip_children:
+            self._handle_child_publication(publish=True)
         output_source = {
             self.PUBLISHED_SOURCE_KEY: {
                 'id': self.id,
@@ -201,15 +205,22 @@ class PublishableModelMixin(models.Model):
             copy=json.dumps(output),
         )
         meta_info.save()
+        if self.published_content:
+            self.published_content.delete()
         self.published_content = meta_info
         self.published_at = self.published_content.created_at
         self.save()
 
-    def unpublish(self):
-        """Unpublish this object"""
+    def unpublish(self, skip_children=False):
+        """Unpublish this object.
+
+        @param skip_children=False flag to handle child object publication.
+        """
         self._validate_for_publication(publish=False)
-        self._handle_child_publication(publish=False)
+        if not skip_children:
+            self._handle_child_publication(publish=False)
         self.published_at = None
+        self.published_content.delete()
         self.published_content = None
         self.save()
 

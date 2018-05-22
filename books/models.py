@@ -14,7 +14,7 @@ from bookworm.mixins import (
 )
 from meta_info.models import MetaInfo
 from meta_info.models_localisation import LocaliseTag
-from books.models_read import Thrill
+from posts.models import Emotable
 from books.serializers_publish import (
     PublishBookSerializer,
     PublishReadingListSerializer,
@@ -90,6 +90,7 @@ class PublicationMixin(models.Model):
 
 class Book(
         PublishableModelMixin,
+        Emotable,
         PublicationMixin,
         PreserveModelMixin,
         ProfileReferredMixin,
@@ -107,12 +108,6 @@ class Book(
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
-    )
-    thrills = models.ManyToManyField(
-        Thrill,
-        related_name='books',
-        verbose_name=_('Thrills'),
-        blank=True,
     )
     meta_info = models.ForeignKey(
         MetaInfo,
@@ -227,6 +222,7 @@ class BookChapter(PreserveModelMixin):
 
 class ReadingList(
         PublishableModelMixin,
+        Emotable,
         ProfileReferredMixin,
         PreserveModelMixin,
 ):
@@ -249,12 +245,6 @@ class ReadingList(
         LocaliseTag,
         related_name='reading_lists+',
         verbose_name=_('Localised Copy'),
-        blank=True,
-    )
-    thrills = models.ManyToManyField(
-        Thrill,
-        related_name='reading_lists',
-        verbose_name=_('Thrills'),
         blank=True,
     )
     meta_info = models.ForeignKey(
@@ -286,6 +276,7 @@ class ReadingList(
 
 class BookReview(
         PublishableModelMixin,
+        Emotable,
         ProfileReferredMixin,
         PreserveModelMixin,
 ):
@@ -336,12 +327,6 @@ class BookReview(
         related_name='reviewed_at',
         verbose_name=_('Progress'),
         on_delete=models.DO_NOTHING,
-        blank=True,
-    )
-    thrills = models.ManyToManyField(
-        Thrill,
-        related_name='reviews',
-        verbose_name=_('Thrills'),
         blank=True,
     )
     localisations = models.ManyToManyField(
