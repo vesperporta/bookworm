@@ -1,18 +1,12 @@
 """Tag signals."""
 import json
 
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from meta_info.models import MetaInfo
 from books.models import Book, BookChapter, ReadingList, BookReview
-from books.models_read import (
-    Thrill,
-    ConfirmReadQuestion,
-    ConfirmReadAnswer,
-    Read
-)
-from books.exceptions import UnknownThrillAssociation
+from books.models_read import ConfirmReadAnswer
 
 
 @receiver(pre_save, sender=BookChapter)
@@ -62,19 +56,3 @@ def pre_save_confirm_read_one_answer(sender, instance, *args, **kwargs):
             continue
         answer.is_answer = False
         answer.save()
-
-
-@receiver(post_save, sender=Thrill)
-def post_save_thrill(sender, instance, *args, **kwargs):
-    """Test to be sure the Thrill created is assosiated with a known object."""
-    associations = [
-        Book, Read, ReadingList, BookReview, ConfirmReadQuestion, ]
-    associated_id = instance.associated_id
-    try:
-        association = associations[instance.type].objects.get(
-            id=associated_id, )
-    except (IndexError, AttributeError):
-        instance.delete()
-        raise UnknownThrillAssociation(instance)
-    association.thrills.add(instance)
-    association.save()

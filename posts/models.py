@@ -52,7 +52,7 @@ class Emotable(models.Model):
 
     emotes = models.ManyToManyField(
         Emote,
-        related_name='emoted',
+        related_name='emoted+',
         verbose_name=_('Emotes'),
         blank=True,
     )
@@ -149,7 +149,7 @@ class Post(
 
     def __str__(self):
         """Title and author of book."""
-        return '{} posted {}'.format(self.profile, self.copy)
+        return f'{self.profile.display_name} posted {self.id}:{self.copy[:30]}'
 
 
 class Comment(
@@ -176,7 +176,7 @@ class Comment(
     )
     meta_info = models.ForeignKey(
         MetaInfo,
-        related_name='posts+',
+        related_name='comments+',
         verbose_name=_('Meta data'),
         on_delete=models.DO_NOTHING,
         blank=True,
@@ -194,4 +194,4 @@ class Comment(
 
     def __str__(self):
         """Title and author of book."""
-        return '{} says {}'.format(self.profile, self.copy)
+        return f'{self.profile.display_name} says {self.id}:{self.copy[:30]}~'

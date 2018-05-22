@@ -7,6 +7,7 @@ from bookworm.serializers import (
     PreservedModelSerializeMixin,
 )
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
+from posts.serializers import EmotableSerializerMixin
 
 from books.models import (
     Book,
@@ -16,7 +17,6 @@ from books.models import (
     BookReview,
 )
 from books.models_read import (
-    Thrill,
     ConfirmReadQuestion,
     ConfirmReadAnswer,
     Read,
@@ -32,11 +32,18 @@ class BookReviewShortSerializer(
         read_only=True,
         view_name='bookreview-detail',
     )
+    emotes = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='emotes-detail',
+    )
 
     class Meta:
         model = BookReview
         read_only_fields = (
             'id',
+            'emotes',
+            'emote_aggregate',
         )
         fields = read_only_fields + (
             'type',
@@ -47,6 +54,7 @@ class BookReviewShortSerializer(
 
 
 class BookSerializer(
+        EmotableSerializerMixin,
         ProfileRefferedSerializerMixin,
         PreservedModelSerializeMixin,
         MetaInfoAvailabledSerializerMixin,
@@ -62,7 +70,6 @@ class BookSerializer(
         many=True,
         read_only=True,
     )
-    thrills = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Book
@@ -73,16 +80,14 @@ class BookSerializer(
             'deleted_at',
             'reviews',
             'meta_info',
-            'thrills',
+            'emotes',
+            'emote_aggregate',
         )
         fields = read_only_fields + (
             'title',
             'description',
         )
         exclude = []
-
-    def get_thrills(self, book):
-        return book.thrills.all().count()
 
 
 class BookProgressSerializer(
@@ -159,6 +164,7 @@ class BookChapterSerializer(
 
 
 class ReadingListSerializer(
+        EmotableSerializerMixin,
         ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
@@ -183,6 +189,8 @@ class ReadingListSerializer(
             'created_at',
             'modified_at',
             'deleted_at',
+            'emotes',
+            'emote_aggregate',
             'meta_info',
         )
         fields = read_only_fields + (
@@ -193,6 +201,7 @@ class ReadingListSerializer(
 
 
 class BookReviewSerializer(
+        EmotableSerializerMixin,
         ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
@@ -223,6 +232,8 @@ class BookReviewSerializer(
             'deleted_at',
             'meta_info',
             'profile',
+            'emotes',
+            'emote_aggregate',
         )
         fields = read_only_fields + (
             'type',
@@ -234,34 +245,8 @@ class BookReviewSerializer(
         exclude = []
 
 
-class ThrillSerializer(
-        ProfileRefferedSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
-):
-    """Thrill model serializer."""
-    id = serializers.HyperlinkedRelatedField(
-        many=False,
-        read_only=True,
-        view_name='thrill-detail',
-    )
-
-    class Meta:
-        model = Thrill
-        read_only_fields = (
-            'id',
-            'created_at',
-            'modified_at',
-            'deleted_at',
-            'profile',
-        )
-        fields = read_only_fields + (
-            'type',
-            'associated_id',
-        )
-        exclude = []
-
-
 class ConfirmReadQuestionSerializer(
+        EmotableSerializerMixin,
         ProfileRefferedSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
@@ -290,6 +275,8 @@ class ConfirmReadQuestionSerializer(
             'modified_at',
             'deleted_at',
             'profile',
+            'emotes',
+            'emote_aggregate',
         )
         fields = read_only_fields + (
             'difficulty',
@@ -322,6 +309,7 @@ class ConfirmReadAnswerSerializer(
 
 
 class ReadSerializer(
+        EmotableSerializerMixin,
         ProfileRefferedSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
@@ -342,10 +330,11 @@ class ReadSerializer(
             'modified_at',
             'deleted_at',
             'answered_correctly',
+            'emotes',
+            'emote_aggregate',
         )
         fields = read_only_fields + (
             'book',
-            'question',
             'answer',
         )
         exclude = []

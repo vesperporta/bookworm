@@ -10,7 +10,6 @@ from books.models import (
     ReadingList,
 )
 from books.models_read import (
-    Thrill,
     ConfirmReadQuestion,
     ConfirmReadAnswer,
     Read,
@@ -130,27 +129,6 @@ class ReadingListAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Thrill)
-class ThrillAdmin(admin.ModelAdmin):
-    """Thrill admin."""
-
-    list_display = (
-        'id',
-        'profile',
-        'type',
-        'associated_id',
-    )
-    search_fields = (
-        'profile__user__username__icontains',
-        'profile__email__icontains',
-    )
-    exclude = (
-        'created_at',
-        'modified_at',
-        'deleted_at',
-    )
-
-
 @admin.register(ConfirmReadQuestion)
 class ConfirmReadQuestionAdmin(admin.ModelAdmin):
     """ConfirmReadQuestion admin."""
@@ -160,18 +138,15 @@ class ConfirmReadQuestionAdmin(admin.ModelAdmin):
         'difficulty',
         'book',
         'chapter',
-        'question',
     )
     search_fields = (
         'difficulty',
-        'question__icontains',
+        'copy__icontains',
         'book__title__icontains',
         'chapter__title__icontains',
         'profile__user__username__icontains',
     )
-    list_filter = (
-        'question',
-    )
+    list_filter = ()
     exclude = (
         'created_at',
         'modified_at',
@@ -190,7 +165,6 @@ class ConfirmReadAnswerAdmin(admin.ModelAdmin):
         'copy',
     )
     search_fields = (
-        'question__icontains',
         'is_answer',
         'copy__icontains',
         'profile__user__username__icontains',
