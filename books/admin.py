@@ -1,43 +1,19 @@
 """Books admin."""
 
 from django.contrib import admin
-from .models import (
-    Author,
-    Profile,
-    Publisher,
+
+from books.models import (
     Book,
-    Favourite,
+    BookProgress,
+    BookReview,
+    BookChapter,
     ReadingList,
 )
-
-
-@admin.register(Author)
-class AuthorAdmin(admin.ModelAdmin):
-    """Author admin."""
-
-    list_display = ('name',)
-
-    search_fields = ('name',)
-
-
-@admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
-    """Profile admin."""
-
-    list_display = (
-        'user',
-        'mobile_number',
-        'birth_date',
-    )
-
-
-@admin.register(Publisher)
-class PublisherAdmin(admin.ModelAdmin):
-    """Publisher admin."""
-
-    list_display = ('name',)
-
-    search_fields = ('name',)
+from books.models_read import (
+    ConfirmReadQuestion,
+    ConfirmReadAnswer,
+    Read,
+)
 
 
 @admin.register(Book)
@@ -45,65 +21,183 @@ class BookAdmin(admin.ModelAdmin):
     """Book admin."""
 
     list_display = (
+        'id',
         'title',
-        'genre',
-        'pages',
-        'publisher',
-        'published_date',
+        'description',
     )
-
     search_fields = (
-        'title',
-        'genre',
-        'authors__name',
-        'publisher__name',
-        'published_date',
+        'title__icontains',
+        'description__icontains',
+        'chapters__title__icontains',
+        'meta_info__tags__copy__icontains',
+    )
+    list_filter = ('title',)
+    exclude = (
+        'created_at',
+        'modified_at',
+        'deleted_at',
     )
 
-    list_filter = ('genre',)
 
+@admin.register(BookProgress)
+class BookProgressAdmin(admin.ModelAdmin):
+    """BookProgress admin."""
 
-@admin.register(Favourite)
-class Favourite(admin.ModelAdmin):
-    """Favourite admin."""
-
-    list_display = ('book', 'user',)
-
+    list_display = (
+        'id',
+        'book',
+        'profile',
+    )
     search_fields = (
         'book__title',
-        'book__genre',
-        'book__authors__name',
-        'book__publisher__name',
-        'book__published_date',
-        'user__username',
+        'profile__user__username__icontains',
+    )
+    list_filter = ('book__title',)
+    exclude = (
+        'created_at',
+        'modified_at',
+        'deleted_at',
     )
 
-    list_filter = ('book__genre',)
+
+@admin.register(BookChapter)
+class BookChapterAdmin(admin.ModelAdmin):
+    """BookProgress admin."""
+
+    list_display = (
+        'id',
+        'book',
+        'title',
+        'progress',
+    )
+    search_fields = (
+        'book__title',
+        'profile__user__username__icontains',
+        'title',
+    )
+    list_filter = ('title', 'book__title',)
+    exclude = (
+        'created_at',
+        'modified_at',
+        'deleted_at',
+    )
+
+
+@admin.register(BookReview)
+class BookReviewAdmin(admin.ModelAdmin):
+    """BookReview admin."""
+
+    list_display = (
+        'id',
+        'book',
+    )
+    search_fields = (
+        'book__title',
+        'profile__user__username__icontains',
+    )
+    list_filter = (
+        'book__title',
+    )
+    exclude = (
+        'created_at',
+        'modified_at',
+        'deleted_at',
+    )
 
 
 @admin.register(ReadingList)
 class ReadingListAdmin(admin.ModelAdmin):
-    """ReadingList admin."""
+    """BookReview admin."""
 
     list_display = (
-        'book',
-        'started_reading',
-        'started_date',
-        'finished_reading',
-        'finished_date',
+        'id',
+        'title',
+        'count',
     )
-
     search_fields = (
+        'title',
         'book__title',
-        'book__genre',
-        'book__authors__name',
-        'book__publisher__name',
-        'book__published_date',
-        'user__username',
+        'profile__user__username__icontains',
+    )
+    list_filter = (
+        'title',
+    )
+    exclude = (
+        'created_at',
+        'modified_at',
+        'deleted_at',
     )
 
+
+@admin.register(ConfirmReadQuestion)
+class ConfirmReadQuestionAdmin(admin.ModelAdmin):
+    """ConfirmReadQuestion admin."""
+
+    list_display = (
+        'id',
+        'difficulty',
+        'book',
+        'chapter',
+    )
+    search_fields = (
+        'difficulty',
+        'copy__icontains',
+        'book__title__icontains',
+        'chapter__title__icontains',
+        'profile__user__username__icontains',
+    )
+    list_filter = ()
+    exclude = (
+        'created_at',
+        'modified_at',
+        'deleted_at',
+    )
+
+
+@admin.register(ConfirmReadAnswer)
+class ConfirmReadAnswerAdmin(admin.ModelAdmin):
+    """ConfirmReadAnswer admin."""
+
+    list_display = (
+        'id',
+        'question',
+        'is_answer',
+        'copy',
+    )
+    search_fields = (
+        'is_answer',
+        'copy__icontains',
+        'profile__user__username__icontains',
+    )
     list_filter = (
-        'started_reading',
-        'finished_reading',
-        'book__genre',
+        'copy',
+    )
+    exclude = (
+        'created_at',
+        'modified_at',
+        'deleted_at',
+    )
+
+
+@admin.register(Read)
+class ReadAdmin(admin.ModelAdmin):
+    """Read admin."""
+
+    list_display = (
+        'id',
+        'book',
+        'answered_correctly',
+    )
+    search_fields = (
+        'book__title__icontains',
+        'question__copy__icontains',
+        'profile__user__username__icontains',
+    )
+    list_filter = (
+        'book',
+    )
+    exclude = (
+        'created_at',
+        'modified_at',
+        'deleted_at',
     )

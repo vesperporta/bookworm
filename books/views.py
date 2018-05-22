@@ -1,17 +1,33 @@
 """Books app views."""
 
+import logging
+
 from rest_framework import (viewsets, filters)
 
 from books.models import (
     Book,
+    BookProgress,
+    BookReview,
+    BookChapter,
     ReadingList,
-    Favourite,
+)
+from books.models_read import (
+    ConfirmReadQuestion,
+    ConfirmReadAnswer,
+    Read,
 )
 from books.serializers import (
     BookSerializer,
+    BookProgressSerializer,
+    BookReviewSerializer,
+    BookChapterSerializer,
     ReadingListSerializer,
-    FavouriteSerializer,
+    ConfirmReadQuestionSerializer,
+    ConfirmReadAnswerSerializer,
+    ReadSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -21,21 +37,44 @@ class BookViewSet(viewsets.ModelViewSet):
     search_fields = ('title',)
 
 
+class BookProgressViewSet(viewsets.ModelViewSet):
+    queryset = BookProgress.objects.all()
+    serializer_class = BookProgressSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Test for REVIEW data available
+        return super().create(request, *args, **kwargs)
+
+
+class BookReviewViewSet(viewsets.ModelViewSet):
+    queryset = BookReview.objects.all()
+    serializer_class = BookReviewSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Test for progress data available
+        return super().create(request, *args, **kwargs)
+
+
+class BookChapterViewSet(viewsets.ModelViewSet):
+    queryset = BookChapter.objects.all()
+    serializer_class = BookChapterSerializer
+
+
 class ReadingListViewSet(viewsets.ModelViewSet):
     queryset = ReadingList.objects.all()
     serializer_class = ReadingListSerializer
 
-    def get_queryset(self, request=None, *args, **kwargs):
-        """Return reading list objects filtered by user and book related."""
-        queryset = ReadingList.objects.filter(
-                user=self.request.user).prefetch_related('book')
-        return queryset
+
+class ConfirmReadQuestionViewSet(viewsets.ModelViewSet):
+    queryset = ConfirmReadQuestion.objects.all()
+    serializer_class = ConfirmReadQuestionSerializer
 
 
-class FavoriteViewSet(viewsets.ModelViewSet):
-    queryset = Favourite.objects.all()
-    serializer_class = FavouriteSerializer
+class ConfirmReadAnswerViewSet(viewsets.ModelViewSet):
+    queryset = ConfirmReadAnswer.objects.all()
+    serializer_class = ConfirmReadAnswerSerializer
 
-    def get_queryset(self):
-        """Return the queryset of favourites for this user."""
-        return Favourite.objects.filter(user=self.request.user)
+
+class ReadViewSet(viewsets.ModelViewSet):
+    queryset = Read.objects.all()
+    serializer_class = ReadSerializer

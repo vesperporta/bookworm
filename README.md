@@ -18,13 +18,12 @@ Install docker and docker-compose specific to your operating system. See https:/
 
 git clone the project and in the project base directory create a .env file with the following inside:
 
-`DATABASE_HOST=postgres`
-
-`DATABASE_NAME=postgres`
-
-`DATABASE_USER=postgres`
-
-`DATABASE_PASSWORD=postgres`
+```
+DATABASE_HOST=postgres
+DATABASE_NAME=postgres
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+```
 
 Inside the project base directory where docker-compose.yml file can be found, run the following commands:
 *docker-compose up --build*
@@ -32,7 +31,7 @@ Inside the project base directory where docker-compose.yml file can be found, ru
 Once the process has finished and the postgres sql database and application are running, run the migrations and load data command inside docker as following:
 *docker-compose run --rm web scripts/migrate_loaddata.sh*
 
-This also creates a default user: *root* with password: *root*
+This also creates a default user: *root* with password: *iamsosecret*
 
 Login to the django administration page at: http://localhost:8000/admin/ with the credentials above to verify this.
 
