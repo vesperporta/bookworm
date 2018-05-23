@@ -6,7 +6,8 @@ from django.dispatch import receiver
 
 from meta_info.models import MetaInfo
 from books.models import Book, BookChapter, ReadingList, BookReview
-from books.models_read import ConfirmReadAnswer
+from books.models_read import ConfirmReadAnswer, Read
+from posts.models import Post
 
 
 @receiver(pre_save, sender=BookChapter)
@@ -56,3 +57,13 @@ def pre_save_confirm_read_one_answer(sender, instance, *args, **kwargs):
             continue
         answer.is_answer = False
         answer.save()
+
+
+@receiver(pre_save, sender=Read)
+def pre_save_read_comments(sender, instance, *args, **kwargs):
+    """Update the Read object with a post thread for comments."""
+    if instance.post:
+        return
+    instance.post = Post.objects.create(
+        copy=f'{Read.PREFIX}{instance.book.title}',
+    )

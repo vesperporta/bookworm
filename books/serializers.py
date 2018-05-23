@@ -24,6 +24,7 @@ from books.models_read import (
 
 
 class BookReviewShortSerializer(
+        EmotableSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
     """BookReview serializer."""
@@ -31,11 +32,6 @@ class BookReviewShortSerializer(
         many=False,
         read_only=True,
         view_name='bookreview-detail',
-    )
-    emotes = serializers.HyperlinkedRelatedField(
-        many=True,
-        read_only=True,
-        view_name='emotes-detail',
     )
 
     class Meta:
@@ -282,7 +278,7 @@ class ConfirmReadQuestionSerializer(
             'difficulty',
             'book',
             'chapter',
-            'question',
+            'copy',
         )
         exclude = []
 

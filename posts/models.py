@@ -11,7 +11,11 @@ from bookworm.mixins import (
     PublishableModelMixin, ProfileReferredMixin, PreserveModelMixin
 )
 from meta_info.models import MetaInfo
-from posts.exceptions import InvalidEmoteModification
+from posts.exceptions import (
+    InvalidEmoteModification,
+    DuplicateEmoteValidationError,
+    UnemoteValidationError,
+)
 
 
 class Emote(
@@ -63,6 +67,7 @@ class Emotable(models.Model):
         ),
         size=8,
         blank=True,
+        null=True,
     )
 
     class Meta:
@@ -71,20 +76,35 @@ class Emotable(models.Model):
     @property
     def emote_aggregation(self):
         """Aggregation of emotes for printability."""
+        if not self.emote_aggregate:
+            self._emote_aggregation_from_db()
         return [
             [Emote.EMOTES[k], v] for k, v in enumerate(self.emote_aggregate)
         ]
 
-    def _modify_emote_aggregation(self, index, adding=True):
-        """Change the aggregate score without needing to save model twice."""
-        aggregate_score = self.emote_aggregate[index]
-        if adding:
-            aggregate_score += 1
-        else:
-            aggregate_score -= 1
-            if aggregate_score < 0:
-                raise InvalidEmoteModification(Emote.EMOTES[index], self)
-        self.emote_aggregate[index] = aggregate_score
+    def _emote_aggregation_from_db(
+            self,
+            index=None,
+            adding=True,
+            save_obj=False,
+    ):
+        """Aggregate values for an object to keep data synced."""
+        aggregate = []
+        all_emotes = self.emotes.all()
+        for item in enumerate(Emote.EMOTES):
+            emote_int = item[1][0]
+            aggregate_score = all_emotes.filter(type=emote_int).count()
+            if index is not None and item[0] == index:
+                if adding:
+                    aggregate_score += 1
+                else:
+                    aggregate_score -= 1
+                    if aggregate_score < 0:
+                        raise InvalidEmoteModification(item[1], self)
+            aggregate.append(aggregate_score)
+        self.emote_aggregate = aggregate
+        if save_obj:
+            self.save()
 
     def has_emoted(self, profile):
         """Check if the profile has emoted with this model."""
@@ -93,24 +113,24 @@ class Emotable(models.Model):
     def emoted(self, emote_type, profile):
         """Add an Emote to this model."""
         if self.has_emoted(profile):
-            return
+            raise DuplicateEmoteValidationError(profile, self)
         emote = Emote.objects.create(
             type=emote_type,
             profile=profile,
         )
         self.emotes.add(emote)
-        self._modify_emote_aggregation(emote_type, adding=True)
+        self._emote_aggregation_from_db(emote_type, adding=True)
         self.save()
 
     def demote(self, profile):
         """Remove an Emote from this model."""
         emote = self.has_emoted(profile)
         if not emote:
-            return
+            raise UnemoteValidationError(profile, self)
         emote_type = emote.type
         self.emotes.remove(emote)
         emote.delete()
-        self._modify_emote_aggregation(emote_type, adding=False)
+        self._emote_aggregation_from_db(emote_type, adding=False)
         self.save()
 
 

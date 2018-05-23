@@ -7,7 +7,7 @@ from model_utils import Choices
 from hashid_field import HashidAutoField
 
 from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
-from posts.models import Emotable
+from posts.models import Emotable, Post
 
 
 class ConfirmReadQuestion(
@@ -59,7 +59,7 @@ class ConfirmReadQuestion(
 
     def __str__(self):
         """Display only as URI valid slug."""
-        return f'{self.book} "{self.question[:30]}" [{self.ggregation}]'
+        return f'{self.book} "{self.copy[:30]}" [{self.aggregation}]'
 
 
 class ConfirmReadAnswer(
@@ -153,6 +153,13 @@ class Read(
         ConfirmReadAnswer,
         related_name='read_selected',
         verbose_name=_('Challenge Answer'),
+        on_delete=models.DO_NOTHING,
+        blank=True,
+    )
+    post = models.ForeignKey(
+        Post,
+        related_name='read+',
+        verbose_name=_('Comment Thread'),
         on_delete=models.DO_NOTHING,
         blank=True,
     )

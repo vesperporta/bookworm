@@ -74,6 +74,13 @@ class PostSerializer(
         read_only=True,
         view_name='post-detail',
     )
+    comments = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='comment-detail',
+        queryset=Comment.objects.all(),
+    )
+    comments_count = serializers.SerializerMethodField()
+    comments_preview = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -86,11 +93,20 @@ class PostSerializer(
             'meta_info',
             'emotes',
             'emote_aggregate',
+            'comments',
+            'comments_count',
+            'comments_preview',
         )
         fields = read_only_fields + (
             'copy',
         )
         exclude = ()
+
+    def get_comments_count(self, obj):
+        return obj.comments.all().count()
+
+    def get_comments_preview(self, obj):
+        return obj.comments.all().order_by('-created_at')[:3]
 
 
 class CommentSerializer(
