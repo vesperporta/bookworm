@@ -32,9 +32,9 @@ class EmotableViewSet:
 
     @detail_route(methods=['post'])
     def emoted(self, request, pk, **kwargs):
-        emoting_to = self.get_object()
+        emoting_on = self.get_object()
         try:
-            emoting_to.emoted(
+            emoting_on.emoted(
                 request.POST.get('emote_type'),
                 Profile.objects.filter(user=request.user).first(),
             )
@@ -42,7 +42,7 @@ class EmotableViewSet:
             return Response(
                 {
                     'status': 'error',
-                    'aggregate': emoting_to.emote_aggregation,
+                    'aggregate': emoting_on.emote_aggregation,
                     'error': e.detail,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -50,40 +50,40 @@ class EmotableViewSet:
         return Response(
             {
                 'status': 'emoted',
-                'aggregate': emoting_to.emote_aggregation,
+                'aggregate': emoting_on.emote_aggregation,
             }
         )
 
     @detail_route(methods=['post'])
     def demote(self, request, pk, **kwargs):
-        emoting_to = self.get_object()
+        emoting_on = self.get_object()
         try:
-            emoting_to.demote(
+            emoting_on.demote(
                 Profile.objects.filter(user=request.user).first(),
             )
         except UnemoteValidationError as e:
             return Response(
                 {
                     'status': 'error',
-                    'aggregate': emoting_to.emote_aggregation,
+                    'aggregate': emoting_on.emote_aggregation,
                     'error': e.detail,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except InvalidEmoteModification as e:
-            # emoting_to._emote_aggregation_from_db(self, )
+            # emoting_on._emote_aggregation_from_db(self, )
             pass
         return Response(
             {
                 'status': 'demoted',
-                'aggregate': emoting_to.emote_aggregation,
+                'aggregate': emoting_on.emote_aggregation,
             }
         )
 
 
 class PostViewSet(
-        viewsets.ModelViewSet,
         EmotableViewSet,
+        viewsets.ModelViewSet,
 ):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -91,8 +91,8 @@ class PostViewSet(
 
 
 class CommentViewSet(
-        viewsets.ModelViewSet,
         EmotableViewSet,
+        viewsets.ModelViewSet,
 ):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer

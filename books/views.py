@@ -26,11 +26,15 @@ from books.serializers import (
     ConfirmReadAnswerSerializer,
     ReadSerializer,
 )
+from posts.views import EmotableViewSet
 
 logger = logging.getLogger(__name__)
 
 
-class BookViewSet(viewsets.ModelViewSet):
+class BookViewSet(
+        EmotableViewSet,
+        viewsets.ModelViewSet,
+):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     filter_backends = (filters.SearchFilter,)
@@ -46,7 +50,10 @@ class BookProgressViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
 
-class BookReviewViewSet(viewsets.ModelViewSet):
+class BookReviewViewSet(
+        EmotableViewSet,
+        viewsets.ModelViewSet,
+):
     queryset = BookReview.objects.all()
     serializer_class = BookReviewSerializer
 
@@ -60,12 +67,18 @@ class BookChapterViewSet(viewsets.ModelViewSet):
     serializer_class = BookChapterSerializer
 
 
-class ReadingListViewSet(viewsets.ModelViewSet):
+class ReadingListViewSet(
+        EmotableViewSet,
+        viewsets.ModelViewSet,
+):
     queryset = ReadingList.objects.all()
     serializer_class = ReadingListSerializer
 
 
-class ConfirmReadQuestionViewSet(viewsets.ModelViewSet):
+class ConfirmReadQuestionViewSet(
+        EmotableViewSet,
+        viewsets.ModelViewSet,
+):
     queryset = ConfirmReadQuestion.objects.all()
     serializer_class = ConfirmReadQuestionSerializer
 
@@ -75,6 +88,9 @@ class ConfirmReadAnswerViewSet(viewsets.ModelViewSet):
     serializer_class = ConfirmReadAnswerSerializer
 
 
-class ReadViewSet(viewsets.ModelViewSet):
+class ReadViewSet(
+        EmotableViewSet,
+        viewsets.ModelViewSet,
+):
     queryset = Read.objects.all()
     serializer_class = ReadSerializer

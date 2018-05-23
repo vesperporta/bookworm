@@ -76,32 +76,25 @@ class Emotable(models.Model):
     @property
     def emote_aggregation(self):
         """Aggregation of emotes for printability."""
-        if not self.emote_aggregate:
-            self._emote_aggregation_from_db()
         return [
             [Emote.EMOTES[k], v] for k, v in enumerate(self.emote_aggregate)
         ]
 
-    def _emote_aggregation_from_db(
+    def _emote_aggregation_update(
             self,
             index=None,
             adding=True,
             save_obj=False,
     ):
         """Aggregate values for an object to keep data synced."""
-        aggregate = []
         all_emotes = self.emotes.all()
-        for item in enumerate(Emote.EMOTES):
-            emote_int = item[1][0]
-            aggregate_score = all_emotes.filter(type=emote_int).count()
-            if index is not None and item[0] == index:
-                if adding:
-                    aggregate_score += 1
-                else:
-                    aggregate_score -= 1
-                    if aggregate_score < 0:
-                        raise InvalidEmoteModification(item[1], self)
-            aggregate.append(aggregate_score)
+        aggregate = [0] * len(Emote.EMOTES)
+        for item in all_emotes:
+            aggregate[item[0]] += 1
+        if index is not None:
+            aggregate[index] += 1 if adding else -1
+            if aggregate[index] < 0:
+                raise InvalidEmoteModification(item, self)
         self.emote_aggregate = aggregate
         if save_obj:
             self.save()
@@ -119,7 +112,7 @@ class Emotable(models.Model):
             profile=profile,
         )
         self.emotes.add(emote)
-        self._emote_aggregation_from_db(emote_type, adding=True)
+        self._emote_aggregation_update(emote_type, adding=True)
         self.save()
 
     def demote(self, profile):
@@ -130,7 +123,7 @@ class Emotable(models.Model):
         emote_type = emote.type
         self.emotes.remove(emote)
         emote.delete()
-        self._emote_aggregation_from_db(emote_type, adding=False)
+        self._emote_aggregation_update(emote_type, adding=False)
         self.save()
 
 
