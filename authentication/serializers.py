@@ -29,6 +29,8 @@ class ProfileSerializer(
         many=True,
         view_name='author-detail',
         queryset=Author.objects.all(),
+        required=False,
+        allow_null=True,
     )
     contacts = serializers.HyperlinkedRelatedField(
         many=True,
@@ -42,8 +44,8 @@ class ProfileSerializer(
     )
     invitations = serializers.HyperlinkedRelatedField(
         many=True,
+        read_only=True,
         view_name='invitation-detail',
-        queryset=Invitation.objects.all(),
     )
 
     class Meta:
@@ -54,13 +56,17 @@ class ProfileSerializer(
             'modified_at',
             'deleted_at',
             'meta_info',
+            'email',
+            'type',
         )
         fields = read_only_fields + (
             'name_title',
             'name_first',
             'name_family',
             'name_middle',
+            'name_display',
             'birth_date',
+            'death_date',
             'pen_names',
             'contacts',
             'circles',
@@ -82,6 +88,8 @@ class AuthorSerializer(
         many=True,
         view_name='contactmethod-detail',
         queryset=ContactMethod.objects.all(),
+        required=False,
+        allow_null=True,
     )
 
     class Meta:
@@ -123,7 +131,6 @@ class ContactMethodSerializer(
             'created_at',
             'modified_at',
             'deleted_at',
-            'profile',
             'meta_info',
         )
         fields = read_only_fields + (
@@ -147,6 +154,13 @@ class CircleSerializer(
         many=True,
         view_name='contactmethod-detail',
         queryset=ContactMethod.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    invitations = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='invitation-detail',
     )
 
     class Meta:

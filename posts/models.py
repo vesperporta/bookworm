@@ -142,54 +142,17 @@ class Post(
     copy = models.TextField(
         verbose_name=_('Post copy'),
     )
-    meta_info = models.ForeignKey(
-        MetaInfo,
-        related_name='posts+',
-        verbose_name=_('Meta data'),
+    parent = models.ForeignKey(
+        'posts.Post',
+        related_name='children',
+        verbose_name=_('Parent Post'),
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
     )
-
-    class Publishable:
-        publishable_verification = None
-        publishable_children = ('comments', )
-        # serializer = PublishBookSerializer
-
-    class Meta:
-        verbose_name = 'Post'
-        verbose_name_plural = 'Posts'
-
-    def __str__(self):
-        """Title and author of book."""
-        return f'{self.profile.display_name} posted {self.id}:{self.copy[:30]}'
-
-
-class Comment(
-        PublishableModelMixin,
-        Emotable,
-        PreserveModelMixin,
-        ProfileReferredMixin,
-):
-    """Comment model."""
-
-    id = HashidAutoField(
-        primary_key=True,
-        salt='e(2W,>JajbvtM4pzUlc@B=$1+hI;g3/8',
-    )
-    copy = models.CharField(
-        verbose_name=_('Comment copy'),
-        max_length=400,
-    )
-    post = models.ForeignKey(
-        Post,
-        related_name='comments',
-        verbose_name=_('Posting'),
-        on_delete=models.DO_NOTHING,
-    )
     meta_info = models.ForeignKey(
         MetaInfo,
-        related_name='comments+',
+        related_name='posts+',
         verbose_name=_('Meta data'),
         on_delete=models.DO_NOTHING,
         blank=True,
@@ -202,9 +165,9 @@ class Comment(
         # serializer = PublishBookSerializer
 
     class Meta:
-        verbose_name = 'Post Comment'
-        verbose_name_plural = 'Post Comments'
+        verbose_name = 'Post'
+        verbose_name_plural = 'Posts'
 
     def __str__(self):
         """Title and author of book."""
-        return f'{self.profile.display_name} says {self.id}:{self.copy[:30]}~'
+        return f'{self.profile.display_name} posted {self.id}:{self.copy[:30]}'

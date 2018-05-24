@@ -3,9 +3,8 @@
 from django.contrib import admin
 
 from posts.models import (
-    Post,
-    Comment,
     Emote,
+    Post,
 )
 
 
@@ -42,28 +41,6 @@ class PostAdmin(admin.ModelAdmin):
         'profile__user__username',
     )
     list_filter = ('profile',)
-    exclude = (
-        'created_at',
-        'modified_at',
-        'deleted_at',
-    )
-
-
-@admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
-    """Comment admin."""
-
-    list_display = (
-        'id',
-        'profile',
-        'post',
-        'copy',
-    )
-    search_fields = (
-        'copy__icontains',
-        'profile__user__username',
-    )
-    list_filter = ('post',)
     exclude = (
         'created_at',
         'modified_at',

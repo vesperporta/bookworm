@@ -38,7 +38,7 @@ class BookViewSet(
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('title',)
+    search_fields = ('title', 'description', )
 
 
 class BookProgressViewSet(viewsets.ModelViewSet):
@@ -81,6 +81,8 @@ class ConfirmReadQuestionViewSet(
 ):
     queryset = ConfirmReadQuestion.objects.all()
     serializer_class = ConfirmReadQuestionSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('book__title', 'copy', )
 
 
 class ConfirmReadAnswerViewSet(viewsets.ModelViewSet):

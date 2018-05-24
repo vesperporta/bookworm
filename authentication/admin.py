@@ -37,7 +37,6 @@ class ProfileAdmin(admin.ModelAdmin):
 
     list_display = (
         'id',
-        'name_title',
         'name_first',
         'name_family',
         'name_display',

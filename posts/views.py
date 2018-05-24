@@ -8,12 +8,10 @@ from authentication.models import Profile
 from posts.models import (
     Emote,
     Post,
-    Comment,
 )
 from posts.serializers import (
     EmoteSerializer,
     PostSerializer,
-    CommentSerializer,
 )
 from posts.exceptions import (
     InvalidEmoteModification,
@@ -25,7 +23,6 @@ from posts.exceptions import (
 class EmoteViewSet(viewsets.ModelViewSet):
     queryset = Emote.objects.all()
     serializer_class = EmoteSerializer
-    filter_backends = (filters.SearchFilter,)
 
 
 class EmotableViewSet:
@@ -87,13 +84,5 @@ class PostViewSet(
 ):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    search_fields = ('copy',)
-
-
-class CommentViewSet(
-        EmotableViewSet,
-        viewsets.ModelViewSet,
-):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    search_fields = ('copy',)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('copy', 'parent__id', )

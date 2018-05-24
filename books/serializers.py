@@ -140,6 +140,8 @@ class BookChapterSerializer(
         many=False,
         view_name='bookprogress-detail',
         queryset=BookProgress.objects.all(),
+        required=False,
+        allow_null=True,
     )
 
     class Meta:
@@ -217,6 +219,8 @@ class BookReviewSerializer(
         many=False,
         view_name='bookprogress-detail',
         queryset=BookProgress.objects.all(),
+        required=False,
+        allow_null=True,
     )
 
     class Meta:
@@ -261,6 +265,8 @@ class ConfirmReadQuestionSerializer(
         many=False,
         view_name='bookchapter-detail',
         queryset=BookChapter.objects.all(),
+        required=False,
+        allow_null=True,
     )
 
     class Meta:
@@ -295,9 +301,12 @@ class ConfirmReadAnswerSerializer(
             'created_at',
             'modified_at',
             'deleted_at',
+            'accepted_at',
+            'accepted_by',
         )
         fields = read_only_fields + (
             'question',
+            'is_true',
             'is_answer',
             'copy',
         )

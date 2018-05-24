@@ -93,6 +93,8 @@ class MetaInfoAvailabledSerializerMixin:
         many=False,
         view_name='metainfo-detail',
         queryset=MetaInfo.objects.all(),
+        required=False,
+        allow_null=True,
     )
 
     def validate(self, data):
