@@ -67,13 +67,12 @@ class PublicationMixin(models.Model):
     )
     isbn = models.CharField(
         verbose_name=_('International Standard Book Number'),
-        max_length=16,
-        db_index=True,
+        max_length=10,
         blank=True,
     )
     ean = models.CharField(
         verbose_name=_('International Article Number'),
-        max_length=16,
+        max_length=13,
         db_index=True,
         blank=True,
     )
@@ -143,7 +142,7 @@ class BookProgress(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='KTEVvV\'e#Z*mO;d\';e1I.5T]aVwUZN"1',
+        salt='KTEVvVde#Z*mO;db;e1I.5T]aVwUZN"1',
     )
     percent = models.FloatField()
     page = models.PositiveSmallIntegerField(
@@ -196,7 +195,6 @@ class BookChapter(PreserveModelMixin):
         verbose_name=_('Book'),
         on_delete=models.DO_NOTHING,
     )
-    # TODO: For screen reading ensure the file being read is recorded.
     localisations = models.ManyToManyField(
         LocaliseTag,
         related_name='publication_chapters+',
@@ -269,8 +267,16 @@ class ReadingList(
     def count(self):
         return self.books.all().count()
 
+    def add_book(self, book):
+        book = book if type(book) is Book else Book.objects.get(id=book)
+        self.books.add(book)
+
+    def remove_book(self, book):
+        book = book if type(book) is Book else Book.objects.get(id=book)
+        self.books.remove(book)
+
     def __str__(self):
-        plural = 's' if len(self.books) > 1 else ''
+        plural = 's' if len(self.books.all()) > 1 else ''
         return f'{self.title} ({self.count} book{plural})'
 
 
@@ -321,6 +327,13 @@ class BookReview(
         related_name='reviews',
         verbose_name=_('Book'),
         on_delete=models.PROTECT,
+    )
+    infered_progress = models.ForeignKey(
+        BookProgress,
+        related_name='infered_reviewed_at+',
+        verbose_name=_('Infered Progress'),
+        on_delete=models.DO_NOTHING,
+        blank=True,
     )
     progress = models.ForeignKey(
         BookProgress,

@@ -5,9 +5,37 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from meta_info.models import MetaInfo
-from books.models import Book, BookChapter, ReadingList, BookReview
-from books.models_read import ConfirmReadAnswer, Read
+from books.models import (
+    Book,
+    BookProgress,
+    BookChapter,
+    ReadingList,
+    BookReview,
+)
+from books.models_read import (
+    ConfirmReadAnswer,
+    Read,
+)
 from posts.models import (Emote, Post)
+
+
+@receiver(pre_save, sender=BookReview)
+def pre_save_book_review(sender, instance, *args, **kwargs):
+    """Ensure there is an infered progress update."""
+    if instance.infered_progress:
+        return
+    progress = BookProgress.objects.filter(
+        book=instance.book
+    ).order_by('-percent', '-page').first()
+    if not progress:
+        progress = BookProgress.objects.create(
+            percent=0.0,
+            page=0,
+            start=0,
+            end=0,
+            book=instance.book,
+        )
+    instance.infered_progress = progress
 
 
 @receiver(pre_save, sender=BookChapter)

@@ -226,6 +226,8 @@ class Author(
         related_name='pen_names',
         verbose_name=_('Profile'),
         on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
     )
     meta_info = models.ForeignKey(
         MetaInfo,

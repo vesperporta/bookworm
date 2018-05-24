@@ -3,13 +3,24 @@
 import logging
 
 from django.conf import settings
-from django.db.models.signals import (pre_save, post_save, post_delete)
+from django.db.models.signals import (
+    pre_save,
+    post_save,
+    post_delete,
+)
 from django.dispatch import receiver
 from django_common.auth_backends import User
 
 from meta_info.models import Tag
-from authentication.models import (Profile, Author, ContactMethod)
-from authentication.models_circles import (Circle, Invitation)
+from authentication.models import (
+    Profile,
+    Author,
+    ContactMethod,
+)
+from authentication.models_circles import (
+    Circle,
+    Invitation,
+)
 from meta_info.models import MetaInfo
 
 from rest_framework.authtoken.models import Token

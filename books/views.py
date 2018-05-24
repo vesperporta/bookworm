@@ -2,7 +2,9 @@
 
 import logging
 
-from rest_framework import (viewsets, filters)
+from rest_framework import (status, viewsets, filters)
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
 
 from books.models import (
     Book,
@@ -45,10 +47,6 @@ class BookProgressViewSet(viewsets.ModelViewSet):
     queryset = BookProgress.objects.all()
     serializer_class = BookProgressSerializer
 
-    def create(self, request, *args, **kwargs):
-        # Test for REVIEW data available
-        return super().create(request, *args, **kwargs)
-
 
 class BookReviewViewSet(
         EmotableViewSet,
@@ -56,15 +54,15 @@ class BookReviewViewSet(
 ):
     queryset = BookReview.objects.all()
     serializer_class = BookReviewSerializer
-
-    def create(self, request, *args, **kwargs):
-        # Test for progress data available
-        return super().create(request, *args, **kwargs)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('copy', 'book__title', )
 
 
 class BookChapterViewSet(viewsets.ModelViewSet):
     queryset = BookChapter.objects.all()
     serializer_class = BookChapterSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('title', 'book__title', )
 
 
 class ReadingListViewSet(
@@ -73,6 +71,50 @@ class ReadingListViewSet(
 ):
     queryset = ReadingList.objects.all()
     serializer_class = ReadingListSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('title', 'books__title', )
+
+    @detail_route(methods=['post'])
+    def add_book(self, request, pk, **kwargs):
+        reading_list = self.get_object()
+        response = {
+            'status': 'added',
+            'reading_list': reading_list.id,
+            'book': request.POST.get('book'),
+        }
+        try:
+            reading_list.add_book(request.POST.get('book'))
+        except Book.DoesNotExist as e:
+            response.update({
+                'status': 'error',
+                'error': e.detail,
+            })
+            return Response(
+                response,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(response)
+
+    @detail_route(methods=['post'])
+    def remove_book(self, request, pk, **kwargs):
+        reading_list = self.get_object()
+        response = {
+            'status': 'removed',
+            'reading_list': reading_list.id,
+            'book': request.POST.get('book'),
+        }
+        try:
+            reading_list.remove_book(request.POST.get('book'))
+        except Book.DoesNotExist as e:
+            response.update({
+                'status': 'error',
+                'error': e.detail,
+            })
+            return Response(
+                response,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(response)
 
 
 class ConfirmReadQuestionViewSet(

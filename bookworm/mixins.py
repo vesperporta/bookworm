@@ -9,6 +9,8 @@ from django.db.models.signals import post_delete, pre_delete
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
+from dry_rest_permissions.generics import authenticated_users
+
 from model_utils.managers import QueryManager
 
 # from bookworm.managers import PreserveModelManager
@@ -72,7 +74,7 @@ class PreserveModelMixin(ModifiedModelMixin):
 
     def delete(self, *args, **kwargs):
         pre_delete.send(sender=self.__class__, instance=self)
-        self.deleted_at = now()
+        self.deleted_at = now(USE_TZ=True)
         self.__class__.objects.filter(pk=self.pk).update(
             deleted_at=self.deleted_at
         )

@@ -81,7 +81,10 @@ class BookSerializer(
         )
         fields = read_only_fields + (
             'title',
+            'author',
             'description',
+            'isbn',
+            'ean',
         )
         exclude = []
 
