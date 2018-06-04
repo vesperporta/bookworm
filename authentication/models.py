@@ -9,7 +9,6 @@ from hashid_field import HashidAutoField
 
 from bookworm.mixins import PreserveModelMixin
 from meta_info.models import MetaInfo, MetaInfoMixin
-from posts.models import Emotable
 
 
 SOCIAL_PLATFORMS = (
@@ -210,7 +209,6 @@ class Profile(
 
 
 class Author(
-        Emotable,
         PersonMixin,
         PreserveModelMixin,
 ):

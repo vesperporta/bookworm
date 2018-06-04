@@ -18,7 +18,6 @@ from posts.exceptions import (
     DuplicateEmoteValidationError,
     UnemoteValidationError,
 )
-from posts.serializers import PostPublishSerializer
 
 
 class Emote(
@@ -161,11 +160,6 @@ class Post(
         blank=True,
         null=True,
     )
-
-    class Publishable:
-        publishable_verification = None
-        publishable_children = None
-        serializer = PostPublishSerializer
 
     class Meta:
         verbose_name = 'Post'

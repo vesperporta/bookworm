@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 from bookworm.exceptions import InvalidOperation
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
-from authentication.serializers_mixins import ProfileRefferedSerializerMixin
 from authentication.models import (
     Profile,
     Author,
@@ -114,7 +113,6 @@ class AuthorSerializer(
 
 
 class ContactMethodSerializer(
-        ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
@@ -122,6 +120,11 @@ class ContactMethodSerializer(
         many=False,
         read_only=True,
         view_name='contactmethod-detail',
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -141,7 +144,6 @@ class ContactMethodSerializer(
 
 
 class CircleSerializer(
-        ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
@@ -161,6 +163,11 @@ class CircleSerializer(
         many=True,
         read_only=True,
         view_name='invitation-detail',
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -183,7 +190,6 @@ class CircleSerializer(
 
 
 class InvitationSerializer(
-        ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
@@ -201,6 +207,11 @@ class InvitationSerializer(
         many=False,
         view_name='circle-detail',
         queryset=Circle.objects.all(),
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
     )
 
     class Meta:

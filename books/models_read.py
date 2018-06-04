@@ -8,7 +8,7 @@ from hashid_field import HashidAutoField
 
 from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
 from posts.models import Emotable, Post
-from books.models import OwnerElevatedAndLockAccessMixin
+from books.policies import OwnerElevatedAndLockAccessMixin
 
 
 class ConfirmReadQuestion(

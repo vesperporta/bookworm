@@ -3,7 +3,6 @@
 from rest_framework import serializers
 
 from bookworm.serializers import PreservedModelSerializeMixin
-from authentication.serializers_mixins import ProfileRefferedSerializerMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 from posts.serializers import EmotableSerializerMixin
 from authentication.models import Profile
@@ -51,7 +50,6 @@ class BookReviewShortSerializer(
 
 class BookSerializer(
         EmotableSerializerMixin,
-        ProfileRefferedSerializerMixin,
         PreservedModelSerializeMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
@@ -66,6 +64,11 @@ class BookSerializer(
     reviews = BookReviewShortSerializer(
         many=True,
         read_only=True,
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -91,7 +94,6 @@ class BookSerializer(
 
 
 class BookProgressSerializer(
-        ProfileRefferedSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
     """BookProgress model serializer."""
@@ -105,6 +107,11 @@ class BookProgressSerializer(
         many=False,
         view_name='book-detail',
         queryset=Book.objects.all(),
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -169,7 +176,6 @@ class BookChapterSerializer(
 
 class ReadingListSerializer(
         EmotableSerializerMixin,
-        ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
@@ -184,6 +190,11 @@ class ReadingListSerializer(
         many=True,
         view_name='book-detail',
         queryset=Book.objects.all(),
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -207,7 +218,6 @@ class ReadingListSerializer(
 
 class BookReviewSerializer(
         EmotableSerializerMixin,
-        ProfileRefferedSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
@@ -255,7 +265,6 @@ class BookReviewSerializer(
 
 class ConfirmReadQuestionSerializer(
         EmotableSerializerMixin,
-        ProfileRefferedSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmReadQuestion model serializer."""
@@ -276,6 +285,11 @@ class ConfirmReadQuestionSerializer(
         queryset=BookChapter.objects.all(),
         required=False,
         allow_null=True,
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -299,7 +313,6 @@ class ConfirmReadQuestionSerializer(
 
 
 class ConfirmReadAnswerSerializer(
-        ProfileRefferedSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmReadAnswer model serializer."""
@@ -318,6 +331,11 @@ class ConfirmReadAnswerSerializer(
         many=False,
         view_name='confirmreadquestion-detail',
         queryset=ConfirmReadQuestion.objects.all(),
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -341,7 +359,6 @@ class ConfirmReadAnswerSerializer(
 
 class ReadSerializer(
         EmotableSerializerMixin,
-        ProfileRefferedSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmRead model serializer."""
@@ -363,6 +380,11 @@ class ReadSerializer(
         many=False,
         view_name='confirmreadanswer-detail',
         queryset=ConfirmReadAnswer.objects.all(),
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
     )
 
     class Meta:

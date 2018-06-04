@@ -3,9 +3,9 @@
 from rest_framework import serializers
 
 from bookworm.serializers import PreservedModelSerializeMixin
-from authentication.serializers_mixins import ProfileRefferedSerializerMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 
+from authentication.models import Profile
 from posts.models import (
     Emote,
     Post,
@@ -13,7 +13,6 @@ from posts.models import (
 
 
 class EmoteSerializer(
-        ProfileRefferedSerializerMixin,
         PreservedModelSerializeMixin,
         serializers.HyperlinkedModelSerializer,
 ):
@@ -23,6 +22,11 @@ class EmoteSerializer(
         many=False,
         read_only=True,
         view_name='emote-detail',
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -83,7 +87,6 @@ class ThinPostSerializer(serializers.HyperlinkedModelSerializer):
 
 class PostSerializer(
         EmotableSerializerMixin,
-        ProfileRefferedSerializerMixin,
         PreservedModelSerializeMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
@@ -101,6 +104,11 @@ class PostSerializer(
         queryset=Post.objects.all(),
         required=False,
         allow_null=True,
+    )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
     )
     children = serializers.HyperlinkedRelatedField(
         many=True,
@@ -140,43 +148,3 @@ class PostSerializer(
             serializer = ThinPostSerializer(child, context=self.context)
             data.append(serializer.data)
         return data
-
-
-class PostPublishSerializer(
-        EmotableSerializerMixin,
-        ProfileRefferedSerializerMixin,
-        PreservedModelSerializeMixin,
-        MetaInfoAvailabledSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
-):
-    """Post model serializer."""
-
-    id = serializers.HyperlinkedRelatedField(
-        many=False,
-        read_only=True,
-        view_name='post-detail',
-    )
-    parent = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='post-detail',
-        queryset=Post.objects.all(),
-        required=False,
-        allow_null=True,
-    )
-
-    class Meta:
-        model = Post
-        read_only_fields = (
-            'id',
-            'profile',
-            'created_at',
-            'modified_at',
-            'deleted_at',
-            'meta_info',
-            'emotes',
-            'emote_aggregate',
-            'copy',
-            'parent',
-        )
-        fields = read_only_fields + ()
-        exclude = ()
