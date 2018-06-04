@@ -208,6 +208,9 @@ HASH_FIELD_ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ12345
 DEFAULT_LANGUAGE = 'en'
 DEFAULT_LOCATION = 'gb'
 
+PROFILE_TYPE_ELEVATED__MIN = 1
+PROFILE_TYPE_ADMIN__MIN = 2
+
 # Load local environment specific settings
 try:
     from local_settings import *

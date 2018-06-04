@@ -2,10 +2,8 @@
 
 from rest_framework import serializers
 
-from bookworm.serializers import (
-    ProfileRefferedSerializerMixin,
-    PreservedModelSerializeMixin,
-)
+from bookworm.serializers import PreservedModelSerializeMixin
+from authentication.serializers_mixins import ProfileRefferedSerializerMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 
 from posts.models import (
@@ -142,3 +140,43 @@ class PostSerializer(
             serializer = ThinPostSerializer(child, context=self.context)
             data.append(serializer.data)
         return data
+
+
+class PostPublishSerializer(
+        EmotableSerializerMixin,
+        ProfileRefferedSerializerMixin,
+        PreservedModelSerializeMixin,
+        MetaInfoAvailabledSerializerMixin,
+        serializers.HyperlinkedModelSerializer,
+):
+    """Post model serializer."""
+
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='post-detail',
+    )
+    parent = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='post-detail',
+        queryset=Post.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
+    class Meta:
+        model = Post
+        read_only_fields = (
+            'id',
+            'profile',
+            'created_at',
+            'modified_at',
+            'deleted_at',
+            'meta_info',
+            'emotes',
+            'emote_aggregate',
+            'copy',
+            'parent',
+        )
+        fields = read_only_fields + ()
+        exclude = ()

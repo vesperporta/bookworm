@@ -8,18 +8,12 @@ from hashid_field import HashidAutoField
 
 from authentication.models import Author
 from bookworm.mixins import (
-    PublishableModelMixin,
     ProfileReferredMixin,
     PreserveModelMixin,
 )
 from meta_info.models import MetaInfo
 from meta_info.models_localisation import LocaliseTag
 from posts.models import Emotable
-from books.serializers_publish import (
-    PublishBookSerializer,
-    PublishReadingListSerializer,
-    PublishBookReviewSerializer,
-)
 
 
 GENRES = (
@@ -88,7 +82,6 @@ class PublicationMixin(models.Model):
 
 
 class Book(
-        PublishableModelMixin,
         Emotable,
         PublicationMixin,
         PreserveModelMixin,
@@ -116,13 +109,6 @@ class Book(
         blank=True,
         null=True,
     )
-
-    class Publishable:
-        publishable_verification = None
-        publishable_children = (
-            'reviews',
-        )
-        serializer = PublishBookSerializer
 
     class Meta:
         verbose_name = 'Book'
@@ -219,7 +205,6 @@ class BookChapter(PreserveModelMixin):
 
 
 class ReadingList(
-        PublishableModelMixin,
         Emotable,
         ProfileReferredMixin,
         PreserveModelMixin,
@@ -254,11 +239,6 @@ class ReadingList(
         null=True,
     )
 
-    class Publishable:
-        publishable_verification = None
-        publishable_children = None
-        serializer = PublishReadingListSerializer
-
     class Meta:
         verbose_name = 'Reading List'
         verbose_name_plural = 'Reading Lists'
@@ -281,7 +261,6 @@ class ReadingList(
 
 
 class BookReview(
-        PublishableModelMixin,
         Emotable,
         ProfileReferredMixin,
         PreserveModelMixin,
@@ -356,11 +335,6 @@ class BookReview(
         blank=True,
         null=True,
     )
-
-    class Publishable:
-        publishable_verification = None
-        publishable_children = None
-        serializer = PublishBookReviewSerializer
 
     class Meta:
         verbose_name = 'Book Review'

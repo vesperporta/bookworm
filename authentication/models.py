@@ -9,6 +9,7 @@ from hashid_field import HashidAutoField
 
 from bookworm.mixins import PreserveModelMixin
 from meta_info.models import MetaInfo, MetaInfoMixin
+from posts.models import Emotable
 
 
 SOCIAL_PLATFORMS = (
@@ -104,10 +105,12 @@ class PersonMixin(models.Model):
     name_first = models.CharField(
         max_length=64,
         db_index=True,
+        blank=True,
     )
     name_family = models.CharField(
         max_length=64,
         db_index=True,
+        blank=True,
     )
     name_middle = models.CharField(
         max_length=128,
@@ -116,7 +119,7 @@ class PersonMixin(models.Model):
     )
     name_display = models.CharField(
         max_length=254,
-        blank=True,
+        db_index=True,
     )
     birth_date = models.DateField(
         null=True,
@@ -207,6 +210,7 @@ class Profile(
 
 
 class Author(
+        Emotable,
         PersonMixin,
         PreserveModelMixin,
 ):

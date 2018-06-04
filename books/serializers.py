@@ -2,12 +2,11 @@
 
 from rest_framework import serializers
 
-from bookworm.serializers import (
-    ProfileRefferedSerializerMixin,
-    PreservedModelSerializeMixin,
-)
+from bookworm.serializers import PreservedModelSerializeMixin
+from authentication.serializers_mixins import ProfileRefferedSerializerMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 from posts.serializers import EmotableSerializerMixin
+from authentication.models import Profile
 
 from books.models import (
     Book,
@@ -28,6 +27,7 @@ class BookReviewShortSerializer(
         serializers.HyperlinkedModelSerializer,
 ):
     """BookReview serializer."""
+
     id = serializers.HyperlinkedRelatedField(
         many=False,
         read_only=True,
@@ -57,6 +57,7 @@ class BookSerializer(
         serializers.HyperlinkedModelSerializer,
 ):
     """Book model serializer."""
+
     id = serializers.HyperlinkedRelatedField(
         many=False,
         read_only=True,
@@ -94,6 +95,7 @@ class BookProgressSerializer(
         serializers.HyperlinkedModelSerializer,
 ):
     """BookProgress model serializer."""
+
     id = serializers.HyperlinkedRelatedField(
         many=False,
         read_only=True,
@@ -129,6 +131,7 @@ class BookChapterSerializer(
         serializers.HyperlinkedModelSerializer,
 ):
     """BookChapter serializer."""
+
     id = serializers.HyperlinkedRelatedField(
         many=False,
         read_only=True,
@@ -171,6 +174,7 @@ class ReadingListSerializer(
         serializers.HyperlinkedModelSerializer,
 ):
     """ReadingList serializer."""
+
     id = serializers.HyperlinkedRelatedField(
         many=False,
         read_only=True,
@@ -208,6 +212,7 @@ class BookReviewSerializer(
         serializers.HyperlinkedModelSerializer,
 ):
     """BookReview serializer."""
+
     id = serializers.HyperlinkedRelatedField(
         many=False,
         read_only=True,
@@ -254,6 +259,7 @@ class ConfirmReadQuestionSerializer(
         serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmReadQuestion model serializer."""
+
     id = serializers.HyperlinkedRelatedField(
         many=False,
         read_only=True,
@@ -298,9 +304,26 @@ class ConfirmReadAnswerSerializer(
 ):
     """ConfirmReadAnswer model serializer."""
 
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='confirmreadanswer-detail',
+    )
+    accepted_by = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
+    )
+    question = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='confirmreadquestion-detail',
+        queryset=ConfirmReadQuestion.objects.all(),
+    )
+
     class Meta:
         model = ConfirmReadAnswer
         read_only_fields = (
+            'id',
             'created_at',
             'modified_at',
             'deleted_at',
@@ -322,6 +345,12 @@ class ReadSerializer(
         serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmRead model serializer."""
+
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='read-detail',
+    )
     book = serializers.HyperlinkedRelatedField(
         many=False,
         view_name='book-detail',
@@ -330,10 +359,16 @@ class ReadSerializer(
     answered_correctly = serializers.BooleanField(
         read_only=True,
     )
+    answer = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='confirmreadanswer-detail',
+        queryset=ConfirmReadAnswer.objects.all(),
+    )
 
     class Meta:
         model = Read
         read_only_fields = (
+            'id',
             'created_at',
             'modified_at',
             'deleted_at',
@@ -346,3 +381,11 @@ class ReadSerializer(
             'answer',
         )
         exclude = []
+
+    def create(self, validated_data):
+        answer_data = validated_data.pop('answer')
+        if type(answer_data) is not str:
+            validated_data.update(
+                {'answer': ConfirmReadAnswerSerializer(data=answer_data).id, }
+            )
+        return super().create(validated_data)

@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from bookworm.exceptions import InvalidOperation
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
-from bookworm.serializers import ProfileRefferedSerializerMixin
+from authentication.serializers_mixins import ProfileRefferedSerializerMixin
 from authentication.models import (
     Profile,
     Author,

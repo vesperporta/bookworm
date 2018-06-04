@@ -63,10 +63,7 @@ class DisplayImage(
         ProfileReferredMixin,
         PreserveModelMixin,
 ):
-    """Image model.
-
-    TODO: Make this model publishable with `PublishableModelMixin`.  # noqa
-    """
+    """Image model."""
 
     image = models.ImageField()
     original = models.ForeignKey(
@@ -107,7 +104,6 @@ class StoredFile(
     """Publication file model.
 
     TODO: If self.url is defined scrape file.  # noqa
-    TODO: Make this model publishable with `PublishableModelMixin`.  # noqa
     """
 
     file = models.FileField(

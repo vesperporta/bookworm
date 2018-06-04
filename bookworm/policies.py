@@ -1,181 +1,88 @@
 """Policies for models and serializers."""
 
-# from django_common.auth_backends import User
+import logging
+
+from django.conf import settings
 
 from dry_rest_permissions.generics import authenticated_users
 
-from authentication.models import Profile
+
+logger = logging.getLogger(__name__)
 
 
-class AnyPermisionsMixin:
-    """Allow all permisions to model."""
+class OwnerAdminAccessMixin:
+    """Policy defining owner of model and admins write access.
 
-    @staticmethod
-    def has_read_permission(request):
-        return True
-
-    def has_object_read_permission(self, request):
-        return True
-
-    @staticmethod
-    def has_write_permission(request):
-        return False
-
-    @staticmethod
-    def has_create_permission(request):
-        return True
-
-    @staticmethod
-    def has_write_permission(request):
-        """
-        We can remove the has_create_permission because this implicitly grants that permission.
-        """
-        return True
-
-    def has_object_write_permission(self, request):
-        return request.user == self.owner
-
-
-class MembersReadOnlyPermsMixin:
-    """Make the endpoint only editable by editors."""
-
-    @staticmethod
-    @authenticated_users
-    def has_read_permission(request):
-        """Check permissions for GET requests.
-
-        Make object readable for all authenticated users.
-        """
-        return True
-
-    @authenticated_users
-    def has_object_read_permission(self, request):
-        """Check permissions for GET requests over specific instance.
-
-        All authenticated users can do that.
-        """
-        return True
-
-    @staticmethod
-    @authenticated_users
-    def has_write_permission(request):
-        """Check permissions for POST/PUT/PATCH/DELETE requests.
-
-        Only editors can modify the inventory.
-        """
-        types = (
-            Profile.TYPES.elevated,
-            Profile.TYPES.admin,
-            Profile.TYPES.destroyer,
-        )
-        return request.user.profile.type in types
-
-    @authenticated_users
-    def has_object_write_permission(self, request):
-        """Check permissions for POST/PUT/PATCH/DELETE requests.
-
-        Only editors can modify the inventory.
-        """
-        types = (
-            Profile.TYPES.elevated,
-            Profile.TYPES.admin,
-            Profile.TYPES.destroyer,
-        )
-        return request.user.profile.type in types
-
-
-class MemberCreateReadPermissions:
-    """Permissions for member activities.
-
-    Allow members to read and create their activities.
+    Default access of all others is read.
     """
 
-    @staticmethod
-    @authenticated_users
-    def has_read_permission(request):
-        """Check permissions for GET requests.
-
-        It doesn't check anything because it's checked in has_list_permission
-        and has_object_read_permission.
-        """
-        return True
+    def _get_admin_grade_user_bool(self, request):
+        admin_type_min = settings.get('PROFILE_TYPE_ADMIN__MIN')
+        return (
+            request.user.is_superuser or
+            request.user == self.profile.user or
+            request.user.profile.type >= admin_type_min
+        )
 
     @staticmethod
     @authenticated_users
     def has_list_permission(request):
-        """Check permissions for GET request on /v1/<endpoint>/."""
-        if request.user.is_superuser:
-            return True
+        """Check permissions for GET request on list."""
+        return True
 
-        try:
-            query_id = int(request.query_params['member_profile'])
-        except (KeyError, ValueError):
-            # member_profile not set or is not an integer
-            return False
-
-        if request.user.type == 'delegate_member':
-            member_profile_id = request.user.delegate_member.member_profile.id
-        else:
-            member_profile_id = request.user.member_profile.id
-        return query_id == member_profile_id
+    @staticmethod
+    @authenticated_users
+    def has_read_permission(request):
+        """Check permissions for GET request on detail."""
+        return True
 
     @authenticated_users
     def has_object_read_permission(self, request):
-        """Check permissions for GET request on /v1/<endpoint>/<ID>/.
+        """Check permissions for GET request on detail."""
+        return self._get_admin_grade_user_bool(request)
 
-        Only has permissions if the user is a superuser or if it is a member or
-        a delegate member of the user that is trying to access.
-        """
-        if request.user.is_superuser:
-            return True
-        if (request.user.type == 'delegate_member' and
-                request.user.delegate_member.member_profile ==
-                self.member_profile):
-            return True
-        return request.user == self.member_profile.user
+    @staticmethod
+    @authenticated_users
+    def has_create_permission(request):
+        """Check permissions for POST request on list."""
+        return False
 
     @staticmethod
     @authenticated_users
     def has_write_permission(request):
-        """Check permissions for POST/PUT/PATCH/DELETE requests.
+        """Check permissions for PUT/PATCH/DELETE requests."""
+        return True
 
-        Only allow POST (the serializer manage to only allow create activities
-        for the current member).
-        """
-        if request.method == 'POST':
-            return True
+    @authenticated_users
+    def has_object_update_permission(self, request):
+        """Detail update permissions."""
+        return self._get_admin_grade_user_bool(request)
+
+    @authenticated_users
+    def has_object_destroy_permission(self, request):
+        """Check permissions for DELETE request on detail."""
         return False
 
 
-class MemberCreateReadUpdatePermissions(MemberCreateReadPermissions):
-    """Permissions for member activities.
-
-    Allow members to read, create and update their activities.
-    """
+class ProfileOnlyAccessMixin:
+    """stuff"""
 
     @staticmethod
     @authenticated_users
-    def has_write_permission(request):
-        """Check permissions for POST/PATCH requests.
+    def has_change_password_permission(request):
+        """Change password permissions."""
+        return True
 
-        Allow POST and PATCH (the serializer manage to only allow create
-        and update activities for the current member).
-        """
-        if request.method == 'POST' or request.method == 'PATCH':
-            return True
-        return False
+    def has_object_change_password_permission(self, request):
+        """Change object password permissions."""
+        return request.user == self.profile.user
 
+    @staticmethod
     @authenticated_users
-    def has_object_write_permission(self, request):
-        """Check permissions for PUT/PATCH/DELETE request on /v1/<endpoint>/<ID>/.
+    def has_change_email_permission(request):
+        """Change email permissions."""
+        return True
 
-        Only has permissions if the user is a superuser or if it is a member or
-        a delegate member of the user that is trying to access.
-        """
-        if request.user.is_superuser:
-            return True
-        if (request.user.type == 'delegate_member' and
-                request.user.delegate_member.member_profile ==
-                self.member_profile):
-            return True
-        return request.user == self.member_profile.user
+    def has_object_change_email_permission(self, request):
+        """Change object email permissions."""
+        return request.user == self.profile.user

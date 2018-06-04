@@ -8,12 +8,14 @@ from hashid_field import HashidAutoField
 
 from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
 from posts.models import Emotable, Post
+from books.models import OwnerElevatedAndLockAccessMixin
 
 
 class ConfirmReadQuestion(
         Emotable,
         PreserveModelMixin,
         ProfileReferredMixin,
+        OwnerElevatedAndLockAccessMixin,
 ):
     """ConfirmRead model."""
 
@@ -52,6 +54,11 @@ class ConfirmReadQuestion(
         verbose_name=_('Question'),
         max_length=400,
     )
+    lock = models.BooleanField(
+        verbose_name=_('Lock Changes'),
+        blank=True,
+        default=False,
+    )
 
     class Meta:
         verbose_name = 'Confirm Read Question'
@@ -65,6 +72,7 @@ class ConfirmReadQuestion(
 class ConfirmReadAnswer(
         PreserveModelMixin,
         ProfileReferredMixin,
+        OwnerElevatedAndLockAccessMixin,
 ):
     """Defines answers for read question."""
 
@@ -88,6 +96,11 @@ class ConfirmReadAnswer(
     copy = models.CharField(
         verbose_name=_('Answer copy'),
         max_length=400,
+    )
+    lock = models.BooleanField(
+        verbose_name=_('Lock Changes'),
+        blank=True,
+        default=False,
     )
     is_true = models.BooleanField(
         verbose_name=_('Boolean Answer'),

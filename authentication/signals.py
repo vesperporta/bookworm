@@ -22,6 +22,7 @@ from authentication.models_circles import (
     Invitation,
 )
 from meta_info.models import MetaInfo
+from posts.models import Emote
 
 from rest_framework.authtoken.models import Token
 
@@ -49,6 +50,13 @@ def post_save_author_create(sender, instance, created, **kwargs):
     if not created:
         return
     instance.meta_info.tags.set(list(instance.meta_info.tags.all()) + [tag])
+
+
+@receiver(pre_save, sender=Author)
+def pre_save_emotable_aggregate(sender, instance, *args, **kwargs):
+    """Pre save objects for emotable aggregation."""
+    if not instance.emote_aggregate:
+        instance.emote_aggregate = [0 for k in enumerate(Emote.EMOTES)]
 
 
 @receiver(post_save, sender=Circle)

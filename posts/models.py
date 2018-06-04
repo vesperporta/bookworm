@@ -8,14 +8,17 @@ from model_utils import Choices
 from hashid_field import HashidAutoField
 
 from bookworm.mixins import (
-    PublishableModelMixin, ProfileReferredMixin, PreserveModelMixin
+    ProfileReferredMixin,
+    PreserveModelMixin,
 )
+from bookworm.mixins_publishable import PublishableModelMixin
 from meta_info.models import MetaInfo
 from posts.exceptions import (
     InvalidEmoteModification,
     DuplicateEmoteValidationError,
     UnemoteValidationError,
 )
+from posts.serializers import PostPublishSerializer
 
 
 class Emote(
@@ -162,7 +165,7 @@ class Post(
     class Publishable:
         publishable_verification = None
         publishable_children = None
-        # serializer = PublishBookSerializer
+        serializer = PostPublishSerializer
 
     class Meta:
         verbose_name = 'Post'
