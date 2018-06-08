@@ -203,11 +203,6 @@ class InvitationSerializer(
         view_name='profile-detail',
         queryset=Profile.objects.all(),
     )
-    circle = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='circle-detail',
-        queryset=Circle.objects.all(),
-    )
     profile = serializers.HyperlinkedRelatedField(
         many=False,
         view_name='profile-detail',
@@ -226,7 +221,6 @@ class InvitationSerializer(
         fields = read_only_fields + (
             'status',
             'profile_to',
-            'circle',
         )
         exclude = []
 

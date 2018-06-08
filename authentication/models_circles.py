@@ -12,6 +12,101 @@ from meta_info.models import MetaInfo, MetaInfoMixin
 from authentication.models import ContactMethod, Profile
 
 
+class Invitation(PreserveModelMixin, ProfileReferredMixin):
+    """Invitiation between a circle and a Profile.
+
+    The current user requesting the invitation is defined as `self.profile`.
+    """
+
+    STATUSES = Choices(
+        (0, 'invited', _('Invited')),
+        (1, 'accepted', _('Accepted')),
+        (2, 'rejected', _('Rejected')),
+        (3, 'withdrawn', _('Withdrawn')),
+        (4, 'banned', _('Banned')),
+        (5, 'elevated', _('Elevated')),
+    )
+
+    id = HashidAutoField(
+        primary_key=True,
+        salt='XF5&39(7cM~,o4JQz6D.{.xbqvE_W4^b',
+    )
+    status = models.IntegerField(
+        choices=STATUSES,
+        default=STATUSES.invited,
+        blank=True,
+    )
+    profile_to = models.ForeignKey(
+        Profile,
+        related_name='invitations',
+        verbose_name=_('Profile Invited'),
+        on_delete=models.DO_NOTHING,
+    )
+    meta_info = models.ForeignKey(
+        MetaInfo,
+        related_name='invitation_meta+',
+        verbose_name=_('Invitation meta data'),
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = 'Invitation'
+        verbose_name_plural = 'Invitations'
+        unique_together = ('profile', 'profile_to', 'circle', )
+
+    def __str__(self):
+        """Short description of what this invitation is intended."""
+        addressed = f'to: {self.profile_to}, from: {self.profile}'
+        if self.circle:
+            return f'{addressed}, for: {self.circle};'
+        return f'{addressed};'
+
+
+class Invitable(models.Model):
+    """Invitations based mixins to add support in managing invites."""
+
+    invites = models.ManyToManyField(
+        Invitation,
+        related_name='invited_to+',
+        verbose_name=_('Invitations'),
+        on_delete=models.DO_NOTHING,
+    )
+
+    class Meta:
+        abstract = True
+
+    def has_invited(self, profile, profile_to):
+        """Check the unique togetherness of the two profiles."""
+        # TODO: status check for if there are any
+        return self.invites.filter(
+            profile__id=profile.id,
+            profile_to__id=profile_to.id,
+        ).first()
+
+    def invite(self, profile, profile_to):
+        """Create an Invitation between teh two profiles and assign."""
+        if self.has_invited(profile, profile_to):
+            # raise DuplicateEmoteValidationError(profile, self)
+            pass
+        self.invites.add(Invitation.objects.create(
+            profile=profile,
+            profile_to=profile_to,
+        ))
+        self.save()
+
+    def uninvite(self, profile):
+        """Find the Invitaiton of the two profiles and remove."""
+        invite = self.has_invited(profile)
+        if not invite:
+            # raise UnemoteValidationError(profile, self)
+            pass
+        self.emotes.remove(invite)
+        invite.delete()
+        self.save()
+
+
 class Circle(PreserveModelMixin):
     """Profile and group relationship model."""
 
@@ -92,61 +187,3 @@ class CircleSetting(
     class Meta:
         verbose_name = 'Circle Setting'
         verbose_name_plural = 'Circle Settings'
-
-
-class Invitation(PreserveModelMixin, ProfileReferredMixin):
-    """Invitiation between a circle and a Profile.
-
-    The current user requesting the invitation is defined as `self.profile`.
-    """
-
-    STATUSES = Choices(
-        (0, 'invited', _('Invited')),
-        (1, 'accepted', _('Accepted')),
-        (2, 'rejected', _('Rejected')),
-        (3, 'withdrawn', _('Withdrawn')),
-        (4, 'banned', _('Banned')),
-        (5, 'elevated', _('Elevated')),
-    )
-
-    id = HashidAutoField(
-        primary_key=True,
-        salt='XF5&39(7cM~,o4JQz6D.{.xbqvE_W4^b',
-    )
-    status = models.IntegerField(
-        choices=STATUSES,
-        default=STATUSES.invited,
-        blank=True,
-    )
-    profile_to = models.ForeignKey(
-        Profile,
-        related_name='invitations',
-        verbose_name=_('Profile Invited'),
-        on_delete=models.DO_NOTHING,
-    )
-    circle = models.ForeignKey(
-        Circle,
-        related_name='invitations',
-        verbose_name=_('Circle invited to'),
-        on_delete=models.DO_NOTHING,
-    )
-    meta_info = models.ForeignKey(
-        MetaInfo,
-        related_name='invitation_meta+',
-        verbose_name=_('Invitation meta data'),
-        on_delete=models.DO_NOTHING,
-        blank=True,
-        null=True,
-    )
-
-    class Meta:
-        verbose_name = 'Invitation'
-        verbose_name_plural = 'Invitations'
-        unique_together = ('profile', 'profile_to', 'circle', )
-
-    def __str__(self):
-        """Short description of what this invitation is intended."""
-        addressed = f'to: {self.profile_to}, from: {self.profile}'
-        if self.circle:
-            return f'{addressed}, for: {self.circle};'
-        return f'{addressed};'
