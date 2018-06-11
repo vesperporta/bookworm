@@ -89,6 +89,7 @@ class CircleAdmin(admin.ModelAdmin):
         'deleted_at',
     )
     readonly_fields = (
+        'invites',
     )
 
 
@@ -121,8 +122,8 @@ class InvitationAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'status',
+        'profile',
         'profile_to',
-        'circle',
     )
     exclude = (
         'created_at',
