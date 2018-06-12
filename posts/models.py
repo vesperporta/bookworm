@@ -107,8 +107,12 @@ class Emotable(models.Model):
 
     def emoted(self, emote_type, profile):
         """Add an Emote to this model."""
-        if self.has_emoted(profile):
-            raise DuplicateEmoteValidationError(profile, self)
+        emote = self.has_emoted(profile)
+        if emote:
+            if emote.type == emote_type:
+                raise DuplicateEmoteValidationError(profile, self)
+            self.emotes.remove(emote)
+            emote.delete()
         emote = Emote.objects.create(
             type=emote_type,
             profile=profile,
@@ -116,6 +120,7 @@ class Emotable(models.Model):
         self.emotes.add(emote)
         self._emote_aggregation_update(emote_type, adding=True)
         self.save()
+        return emote
 
     def demote(self, profile):
         """Remove an Emote from this model."""
@@ -127,6 +132,7 @@ class Emotable(models.Model):
         emote.delete()
         self._emote_aggregation_update(emote_type, adding=False)
         self.save()
+        return emote
 
 
 class Post(

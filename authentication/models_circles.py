@@ -81,7 +81,6 @@ class Invitable(models.Model):
 
     def has_invited(self, profile_to):
         """Check the unique togetherness of the two profiles."""
-        # TODO: status check for if there are any
         return self.invites.filter(profile_to__id=profile_to.id).first()
 
     def _validate_invite_status_change(
@@ -131,12 +130,14 @@ class Invitable(models.Model):
         if self.has_invited(profile_to):
             raise DuplicateInvitationValidationError(self, profile, profile_to)
         self._validate_invite_status_change(status, profile, profile_to)
-        self.invites.add(Invitation.objects.create(
+        invite = Invitation.objects.create(
             profile=profile,
             profile_to=profile_to,
             status=status,
-        ))
+        )
+        self.invites.add(invite)
         self.save()
+        return invite
 
     def invite_change(self, profile, profile_to, status):
         """Change an Invitation between two profiles."""
@@ -144,6 +145,7 @@ class Invitable(models.Model):
         invite = self.invites.filter(profile_to=profile_to)
         invite.status = status
         invite.save()
+        return invite
 
     def uninvite(self, profile, profile_to):
         """Find the Invitaiton of the two profiles and remove."""
@@ -160,6 +162,7 @@ class Invitable(models.Model):
         invite.save()
         invite.delete()
         self.save()
+        return invite
 
 
 class Circle(
@@ -248,4 +251,4 @@ class CircleSetting(
 
     def __str__(self):
         """String representation of this model."""
-        return f'CircleSetting({self.id}: {self.circle.id})'
+        return f'CircleSetting({self.id}: {Circle.PREFIX}{self.circle.id})'
