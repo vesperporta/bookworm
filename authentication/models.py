@@ -172,7 +172,7 @@ class Profile(
     user = models.OneToOneField(
         User,
         related_name='profile',
-        verbose_name=_('Profiles\' User'),
+        verbose_name=_('User'),
         on_delete=models.CASCADE,
     )
     type = models.IntegerField(

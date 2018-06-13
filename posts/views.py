@@ -27,52 +27,63 @@ class EmoteViewSet(viewsets.ModelViewSet):
 
 class EmotableViewSet:
 
+    def _emote_error_handle(self, emoting_on, error):
+        """Handle error responses from emotes.
+
+        @param emoting_on: Emotable object.
+        @param error: Exeption object.
+
+        @return Response with 400 status code.
+        """
+        return Response(
+            {
+                'status': 'error',
+                'ok': '💩',
+                'aggregate': emoting_on.emote_aggregation,
+                'error': error.detail,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     @detail_route(methods=['post'])
     def emoted(self, request, pk, **kwargs):
+        """Add an Emote object to an object."""
         emoting_on = self.get_object()
         try:
             emoting_on.emoted(
                 request.POST.get('emote_type'),
                 Profile.objects.filter(user=request.user).first(),
             )
-        except DuplicateEmoteValidationError as e:
-            return Response(
-                {
-                    'status': 'error',
-                    'aggregate': emoting_on.emote_aggregation,
-                    'error': e.detail,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        except (
+            DuplicateEmoteValidationError,
+            InvalidEmoteModification,
+        ) as e:
+            return self._emote_error_handle(emoting_on, e)
         return Response(
             {
                 'status': 'emoted',
+                'ok': '🖖',
                 'aggregate': emoting_on.emote_aggregation,
             }
         )
 
     @detail_route(methods=['post'])
     def demote(self, request, pk, **kwargs):
+        """Remove an Emote from an object."""
         emoting_on = self.get_object()
         try:
             emoting_on.demote(
                 Profile.objects.filter(user=request.user).first(),
             )
-        except UnemoteValidationError as e:
-            return Response(
-                {
-                    'status': 'error',
-                    'aggregate': emoting_on.emote_aggregation,
-                    'error': e.detail,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        except InvalidEmoteModification as e:
-            # emoting_on._emote_aggregation_from_db(self, )
-            pass
+        except (
+            UnemoteValidationError,
+            InvalidEmoteModification,
+        ) as e:
+            return self._emote_error_handle(emoting_on, e)
         return Response(
             {
                 'status': 'demoted',
+                'ok': '🖖',
                 'aggregate': emoting_on.emote_aggregation,
             }
         )
