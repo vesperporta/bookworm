@@ -18,16 +18,6 @@ class DuplicateInvitationValidationError(ValidationError):
         logger.error(self)
 
 
-class UnInvitationValidationError(ValidationError):
-
-    def __init__(self, target, profile_to):
-        super().__init__([{
-            'code': 'un_invitation_validation_error',
-            'message': f'{target} has no Invitation active for {profile_to}',
-        }])
-        logger.error(self)
-
-
 class InvitationValidationError(ValidationError):
 
     def __init__(self, target, *args):

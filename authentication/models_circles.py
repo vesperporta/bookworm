@@ -12,7 +12,6 @@ from meta_info.models import MetaInfo, MetaInfoMixin
 from authentication.models import ContactMethod, Profile
 from authentication.exceptions import (
     DuplicateInvitationValidationError,
-    UnInvitationValidationError,
     InvitationValidationError,
     InvitationMissingError,
 )
@@ -81,7 +80,12 @@ class Invitable(models.Model):
         abstract = True
 
     def has_invited(self, profile_to):
-        """Check the unique togetherness of the two profiles."""
+        """Check the unique togetherness of the two profiles.
+
+        @param profile_to: Profile invited to this object.
+
+        @return Invitation or None
+        """
         return self.invites.filter(profile_to__id=profile_to.id).first()
 
     def _validate_invite_status_change(
@@ -92,11 +96,17 @@ class Invitable(models.Model):
     ):
         """Validate a change for Invitation objects.
 
-        rules of validation:
-        1. profile of self can do anything.
-        2. profile_from.status above accepted can ban or reject.
-        3. invited profile can withdraw.
+        Rules of validation are laid out as code comments: `Rule #: ...`.
+
+        @param status_to: Int determining the desired invite status.
+        @param profile_from: Profile of user making the request.
+        @param profile_to: Profile invited to object.
+
+        @return bool
+
+        @raises InvitationValidationError on validation failure.
         """
+        # Rule 1: Profile of self can do anything.
         if hasattr(self, 'profile') and self.profile == profile_from:
             return True
         profile_from_invite = self.invites.filter(profile=profile_from).first()
@@ -104,12 +114,14 @@ class Invitable(models.Model):
             Invitation.STATUSES.banned,
             Invitation.STATUSES.rejected,
         ]
+        # Rule 2: profile_from.status above accepted status can ban or reject.
         if (
             profile_from_invite and
             profile_from_invite.status > Invitation.STATUSES.accepted and
             status_to in elevated_action_list
         ):
             return True
+        # Rule 3: Invited profile can withdraw.
         if (
             self.invites.filter(
                 profile_to=profile_to,
@@ -119,6 +131,7 @@ class Invitable(models.Model):
             status_to == Invitation.STATUSES.withdrawn
         ):
             return True
+        # Failure to comply with rules exception.
         raise InvitationValidationError(
             self,
             status_to,
@@ -127,7 +140,16 @@ class Invitable(models.Model):
         )
 
     def invite(self, profile, profile_to, status=Invitation.STATUSES.invited):
-        """Create an Invitation between teh two profiles and assign."""
+        """Create an Invitation between teh two profiles and assign.
+
+        @param profile: Profile inviting profile_to.
+        @param profile_to: Profile being invited to this object.
+        @param status: Int defaults to 3 as invited.
+
+        @return Invitation
+
+        @raises DuplicateInvitationValidationError
+        """
         invite = self.has_invited(profile_to)
         if invite:
             raise DuplicateInvitationValidationError(self, invite)
@@ -141,7 +163,16 @@ class Invitable(models.Model):
         return invite
 
     def invite_change(self, profile, profile_to, status):
-        """Change an Invitation between two profiles."""
+        """Change an Invitation between two profiles.
+
+        @param profile: Profile inviting profile_to.
+        @param profile_to: Profile being invited to this object.
+        @param status: Int defaults to 3 as invited.
+
+        @return Invitation
+
+        @raises InvitationMissingError
+        """
         invite = self.has_invited(profile_to)
         if not invite:
             raise InvitationMissingError(self, profile_to)

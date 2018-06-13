@@ -88,7 +88,14 @@ class Emotable(models.Model):
             adding=True,
             save_obj=False,
     ):
-        """Aggregate values for an object to keep data synced."""
+        """Aggregate values for an object to keep data synced, without DB.
+
+        @param index: Int type of Emote being modified.
+        @param adding: bool to add or remove from emote tally.
+        @param save_obj: bool indicating save action after aggregation.
+
+        @raises InvalidEmoteModification
+        """
         all_emotes = self.emotes.all()
         aggregate = [0] * len(Emote.EMOTES)
         for item in all_emotes:
@@ -102,11 +109,24 @@ class Emotable(models.Model):
             self.save()
 
     def has_emoted(self, profile):
-        """Check if the profile has emoted with this model."""
+        """Check if the profile has emoted with this model.
+
+        @param profile: Profile of the Emote.
+
+        @return Emote or None
+        """
         return self.emotes.filter(profile__id=profile.id).first()
 
     def emoted(self, emote_type, profile):
-        """Add an Emote to this model."""
+        """Add an Emote to this model.
+
+        @param emote_type: Int type of Emote.
+        @param profile: Profile of user emoting.
+
+        @return Emote
+
+        @raises DuplicateEmoteValidationError
+        """
         emote = self.has_emoted(profile)
         if emote:
             if emote.type == emote_type:
@@ -122,7 +142,14 @@ class Emotable(models.Model):
         return emote
 
     def demote(self, profile):
-        """Remove an Emote from this model."""
+        """Remove an Emote from this model.
+
+        @param profile: Profile of user removing their Emote.
+
+        @return Emote removed from object.
+
+        @raises UnemoteValidationError
+        """
         emote = self.has_emoted(profile)
         if not emote:
             raise UnemoteValidationError(profile, self)
