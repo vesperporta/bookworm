@@ -22,7 +22,6 @@ from authentication.models_circles import (
 )
 from authentication.exceptions import (
     DuplicateInvitationValidationError,
-    UnInvitationValidationError,
     InvitationValidationError,
     InvitationMissingError,
 )
