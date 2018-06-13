@@ -14,6 +14,7 @@ from authentication.exceptions import (
     DuplicateInvitationValidationError,
     UnInvitationValidationError,
     InvitationValidationError,
+    InvitationMissingError,
 )
 
 
@@ -127,8 +128,9 @@ class Invitable(models.Model):
 
     def invite(self, profile, profile_to, status=Invitation.STATUSES.invited):
         """Create an Invitation between teh two profiles and assign."""
-        if self.has_invited(profile_to):
-            raise DuplicateInvitationValidationError(self, profile, profile_to)
+        invite = self.has_invited(profile_to)
+        if invite:
+            raise DuplicateInvitationValidationError(self, invite)
         self._validate_invite_status_change(status, profile, profile_to)
         invite = Invitation.objects.create(
             profile=profile,
@@ -136,32 +138,16 @@ class Invitable(models.Model):
             status=status,
         )
         self.invites.add(invite)
-        self.save()
         return invite
 
     def invite_change(self, profile, profile_to, status):
         """Change an Invitation between two profiles."""
-        self._validate_invite_status_change(status, profile, profile_to)
-        invite = self.invites.filter(profile_to=profile_to)
-        invite.status = status
-        invite.save()
-        return invite
-
-    def uninvite(self, profile, profile_to):
-        """Find the Invitaiton of the two profiles and remove."""
         invite = self.has_invited(profile_to)
         if not invite:
-            raise UnInvitationValidationError(self, profile_to)
-        self._validate_invite_status_change(
-            Invitation.STATUSES.rejected,
-            profile,
-            profile_to,
-        )
-        self.invites.remove(invite)
-        invite.status = Invitation.STATUSES.rejected
+            raise InvitationMissingError(self, profile_to)
+        self._validate_invite_status_change(status, profile, profile_to)
+        invite.status = status
         invite.save()
-        invite.delete()
-        self.save()
         return invite
 
 

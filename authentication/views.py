@@ -24,13 +24,31 @@ from authentication.exceptions import (
     DuplicateInvitationValidationError,
     UnInvitationValidationError,
     InvitationValidationError,
+    InvitationMissingError,
 )
 
 
 class InvitableViewSet:
 
+    def _invitation_error_handle(self, error):
+        """Handle errors supplied from invite actions.
+
+        @param error: Exception object.
+
+        @return Response with 404 status code.
+        """
+        return Response(
+            {
+                'status': 'error',
+                'ok': '💩',
+                'error': error.detail,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     @detail_route(methods=['post'])
     def invite(self, request, pk, **kwargs):
+        """Invite a profile to another object."""
         inviting_to = self.get_object()
         try:
             inviting_to.invite(
@@ -43,21 +61,17 @@ class InvitableViewSet:
             DuplicateInvitationValidationError,
             InvitationValidationError,
         ) as e:
-            return Response(
-                {
-                    'status': 'error',
-                    'error': e.detail,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return self._invitation_error_handle(e)
         return Response(
             {
                 'status': 'invited',
+                'ok': '🖖',
             }
         )
 
     @detail_route(methods=['post'])
     def invite_change(self, request, pk, **kwargs):
+        """Change an invitation for a profile to a different type."""
         changing_for = self.get_object()
         try:
             changing_for.invite_change(
@@ -67,43 +81,15 @@ class InvitableViewSet:
                 ).first(),
                 request.POST.get('status'),
             )
-        except InvitationValidationError as e:
-            return Response(
-                {
-                    'status': 'error',
-                    'error': e.detail,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        except (
+            InvitationValidationError,
+            InvitationMissingError,
+        ) as e:
+            return self._invitation_error_handle(e)
         return Response(
             {
                 'status': 'changed',
-            }
-        )
-
-    @detail_route(methods=['post'])
-    def uninvite(self, request, pk, **kwargs):
-        uninviting_from = self.get_object()
-        try:
-            uninviting_from.uninvite(
-                Profile.objects.filter(
-                    id=request.POST.get('profile_to'),
-                ).first(),
-            )
-        except (
-            UnInvitationValidationError,
-            InvitationValidationError,
-        ) as e:
-            return Response(
-                {
-                    'status': 'error',
-                    'error': e.detail,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return Response(
-            {
-                'status': 'uninvited',
+                'ok': '🖖',
             }
         )
 

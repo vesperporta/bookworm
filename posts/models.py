@@ -119,7 +119,6 @@ class Emotable(models.Model):
         )
         self.emotes.add(emote)
         self._emote_aggregation_update(emote_type, adding=True)
-        self.save()
         return emote
 
     def demote(self, profile):
@@ -127,11 +126,9 @@ class Emotable(models.Model):
         emote = self.has_emoted(profile)
         if not emote:
             raise UnemoteValidationError(profile, self)
-        emote_type = emote.type
         self.emotes.remove(emote)
         emote.delete()
-        self._emote_aggregation_update(emote_type, adding=False)
-        self.save()
+        self._emote_aggregation_update(emote.type, adding=False)
         return emote
 
 
