@@ -245,14 +245,17 @@ class ReadingList(
         verbose_name_plural = 'Reading Lists'
 
     @property
-    def count(self):
+    def book_count(self):
+        """Number of books in this ReadingList."""
         return self.books.all().count()
 
     def add_book(self, book):
+        """Add a book to the ReadingList object."""
         book = book if type(book) is Book else Book.objects.get(id=book)
         self.books.add(book)
 
     def remove_book(self, book):
+        """Remove a book from the ReadingList object."""
         book = book if type(book) is Book else Book.objects.get(id=book)
         self.books.remove(book)
 

@@ -54,12 +54,20 @@ class LanguageTag(TagMixin, PreserveModelMixin):
     )
 
     class Meta:
-        verbose_name = 'Language Tag'
-        verbose_name_plural = 'Language Tags'
+        verbose_name = 'Language'
+        verbose_name_plural = 'Languages'
+
+    @property
+    def default_language(self):
+        """Flag detailing this object as the default language."""
+        return bool(
+            self.tags.filter(slug__iexact='default') or
+            self.iso_639_3.lower() == settings.DEFAULT_LANGUAGE.lower()
+        )
 
     def __str__(self):
         """ISO and name of language."""
-        return '{} "{}"'.format(self.iso_639_3, self.copy[:30])
+        return 'LanguageTag({} "{}")'.format(self.iso_639_3, self.copy[:30])
 
 
 class LocationTag(TagMixin, PreserveModelMixin):
@@ -96,15 +104,23 @@ class LocationTag(TagMixin, PreserveModelMixin):
         blank=True,
         null=True,
     )
-    # TODO: long_lat  # noqa
+    # TODO: long_lat  # noqa T000
 
     class Meta:
-        verbose_name = 'Location Tag'
-        verbose_name_plural = 'Location Tags'
+        verbose_name = 'Location'
+        verbose_name_plural = 'Locations'
+
+    @property
+    def default_location(self):
+        """Flag detailing this object as the default location."""
+        return bool(
+            self.tags.filter(slug__iexact='default') or
+            self.iso_alpha_3.lower() == settings.DEFAULT_LOCATION.lower()
+        )
 
     def __str__(self):
         """ISO and name of location."""
-        return '{} "{}"'.format(self.iso_alpha_3, self.copy[:30])
+        return 'LocationTag({} "{}")'.format(self.iso_alpha_3, self.copy[:30])
 
 
 class LocaliseTag(PreserveModelMixin):
@@ -132,52 +148,38 @@ class LocaliseTag(PreserveModelMixin):
     )
     language = models.ForeignKey(
         LanguageTag,
-        related_name='locale_language+',
-        verbose_name=_('Localised Language Tag'),
+        related_name='localisations',
+        verbose_name=_('Language Tag'),
         on_delete=models.DO_NOTHING,
     )
     location = models.ForeignKey(
         LocationTag,
-        related_name='locale_language+',
-        verbose_name=_('Localised Country Tag'),
+        related_name='localisations',
+        verbose_name=_('Country Tag'),
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
     )
 
     class Meta:
-        verbose_name = 'Localisation Tag'
-        verbose_name_plural = 'Localisation Tags'
+        verbose_name = 'Localisation'
+        verbose_name_plural = 'Localisations'
 
     @property
-    def default_language(self):
-        language = LanguageTag.objects.filter(
-            tags__slug__iexact='default',
-        ).first()
-        if not language:
-            language = LanguageTag.objects.filter(
-                iso_639_3__iexact=settings.DEFAULT_LANGUAGE,
-            ).first()
-        return language
-
-    @property
-    def default_location(self):
-        location = LanguageTag.objects.filter(
-            tags__slug__iexact='default',
-        ).first()
-        if not location:
-            location = LanguageTag.objects.filter(
-                iso_alpha_3__iexact=settings.DEFAULT_LOCATION,
-            ).first()
-        return location
+    def default_localisation(self):
+        """Flag detailing this object as the default localisation."""
+        return bool(
+            self.language.default_language and
+            self.location.default_location
+        )
 
     @property
     def display_code(self):
-        rtn = '{}'.format(self.language.iso_639_3.lower())
-        if self.location:
-            rtn += '-{}'.format(self.location.iso_alpha_3.lower())
-        return rtn
+        """Display code representing a '{language}-{location}' pair."""
+        language = self.language.iso_639_3.lower()
+        location = self.location.iso_alpha_3.lower()
+        return f'{language}-{location}'
 
     def __str__(self):
         """ISO codes of language and location."""
-        return self.display_code
+        return f'LocaliseTag({self.display_code})'

@@ -57,8 +57,8 @@ class EmotableViewSet:
         except (
             DuplicateEmoteValidationError,
             InvalidEmoteModification,
-        ) as e:
-            return self._emote_error_handle(emoting_on, e)
+        ) as error:
+            return self._emote_error_handle(emoting_on, error)
         return Response(
             {
                 'status': 'emoted',
@@ -78,8 +78,8 @@ class EmotableViewSet:
         except (
             UnemoteValidationError,
             InvalidEmoteModification,
-        ) as e:
-            return self._emote_error_handle(emoting_on, e)
+        ) as error:
+            return self._emote_error_handle(emoting_on, error)
         return Response(
             {
                 'status': 'demoted',

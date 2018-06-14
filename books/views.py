@@ -74,47 +74,57 @@ class ReadingListViewSet(
     filter_backends = (filters.SearchFilter,)
     search_fields = ('title', 'books__title', )
 
+    def _book_error_handle(self, reading_list, error):
+        """Handle error responses from reading list.
+
+        @param reading_list: ReadingList object.
+        @param error: Exeption object.
+
+        @return Response with 400 status code.
+        """
+        return Response(
+            {
+                'status': 'error',
+                'ok': '💩',
+                'reading_list': reading_list.id,
+                'error': error.detail,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     @detail_route(methods=['post'])
     def add_book(self, request, pk, **kwargs):
+        """Add a book to a ReadingList object."""
         reading_list = self.get_object()
-        response = {
-            'status': 'added',
-            'reading_list': reading_list.id,
-            'book': request.POST.get('book'),
-        }
         try:
             reading_list.add_book(request.POST.get('book'))
-        except Book.DoesNotExist as e:
-            response.update({
-                'status': 'error',
-                'error': e.detail,
-            })
-            return Response(
-                response,
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return Response(response)
+        except Book.DoesNotExist as error:
+            return self._book_error_handle(reading_list, error)
+        return Response(
+            {
+                'status': 'added',
+                'ok': '🖖',
+                'reading_list': reading_list.id,
+                'book': request.POST.get('book'),
+            }
+        )
 
     @detail_route(methods=['post'])
     def remove_book(self, request, pk, **kwargs):
+        """Remove a book from a ReadingList object."""
         reading_list = self.get_object()
-        response = {
-            'status': 'removed',
-            'reading_list': reading_list.id,
-            'book': request.POST.get('book'),
-        }
         try:
             reading_list.remove_book(request.POST.get('book'))
-        except Book.DoesNotExist as e:
-            response.update({
-                'status': 'error',
-                'error': e.detail,
-            })
-            return Response(
-                response,
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return Response(response)
+        except Book.DoesNotExist as error:
+            return self._book_error_handle(reading_list, error)
+        return Response(
+            {
+                'status': 'removed',
+                'ok': '🖖',
+                'reading_list': reading_list.id,
+                'book': request.POST.get('book'),
+            }
+        )
 
 
 class ConfirmReadQuestionViewSet(

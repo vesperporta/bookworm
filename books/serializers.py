@@ -205,13 +205,13 @@ class ReadingListSerializer(
             'created_at',
             'modified_at',
             'deleted_at',
+            'books',
             'emotes',
             'emote_aggregate',
             'meta_info',
         )
         fields = read_only_fields + (
             'title',
-            'books',
         )
         exclude = []
 
