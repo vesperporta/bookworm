@@ -1,5 +1,6 @@
 """FileStore models."""
 
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -20,7 +21,6 @@ TAGS = (
 class FileMixin(models.Model):
     """Mixin for a basic file model."""
 
-    id = HashidAutoField(primary_key=True)
     title = models.CharField(
         max_length=200,
         db_index=True,
@@ -37,10 +37,28 @@ class FileMixin(models.Model):
         max_length=50,
         blank=True,
     )
-    progress = models.ForeignKey(
-        'books.BookProgress',
-        related_name='file_progress+',
-        verbose_name=_('Progress'),
+    source_url = models.URLField(
+        max_length=2000,
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class Image(FileMixin, ProfileReferredMixin, PreserveModelMixin):
+    """Image model."""
+
+    id = HashidAutoField(
+        primary_key=True,
+        salt=settings.SALT_FILESTORE_IMAGE,
+    )
+    image = models.ImageField()
+    original = models.ForeignKey(
+        'file_store.DisplayImage',
+        related_name='sizes',
+        verbose_name=_('Cropped Images'),
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
@@ -55,63 +73,32 @@ class FileMixin(models.Model):
     )
 
     class Meta:
-        abstract = True
-
-
-class DisplayImage(
-        FileMixin,
-        ProfileReferredMixin,
-        PreserveModelMixin,
-):
-    """Image model."""
-
-    image = models.ImageField()
-    original = models.ForeignKey(
-        'DisplayImage',
-        related_name='sizes',
-        verbose_name=_('Cropped Images'),
-        on_delete=models.DO_NOTHING,
-        blank=True,
-        null=True,
-    )
-    circle = models.ForeignKey(
-        'authentication.Circle',
-        related_name='images',
-        verbose_name=_('Circles\' image'),
-        on_delete=models.DO_NOTHING,
-        blank=True,
-        null=True,
-    )
-    book = models.ForeignKey(
-        'books.Book',
-        related_name='images',
-        verbose_name=_('Book'),
-        on_delete=models.DO_NOTHING,
-        blank=True,
-        null=True,
-    )
-
-    class Meta:
         verbose_name = 'Image'
         verbose_name_plural = 'Images'
 
 
-class StoredFile(
-        FileMixin,
-        ProfileReferredMixin,
-        PreserveModelMixin,
-):
-    """Publication file model.
+class Imagable(models.Model):
+    """Mixin to enable the storage of images against an object."""
 
-    TODO: If self.url is defined scrape file.  # noqa
-    """
-
-    file = models.FileField(
-        null=True,
-    )
-    url = models.URLField(
-        max_length=2000,
+    images = models.ManyToManyField(
+        Image,
+        related_name='object+',
+        verbose_name=_('Images'),
         blank=True,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class Document(FileMixin, ProfileReferredMixin, PreserveModelMixin):
+    """Publication file model."""
+
+    id = HashidAutoField(
+        primary_key=True,
+        salt=settings.SALT_FILESTORE_DOCUMENT,
+    )
+    file = models.FileField(
         null=True,
     )
     book = models.ForeignKey(
@@ -122,7 +109,15 @@ class StoredFile(
         blank=True,
         null=True,
     )
+    meta_info = models.ForeignKey(
+        MetaInfo,
+        related_name='files+',
+        verbose_name=_('Meta data'),
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
 
     class Meta:
-        verbose_name = 'Publication File'
-        verbose_name_plural = 'Publications\' Files'
+        verbose_name = 'Document'
+        verbose_name_plural = 'Documents'

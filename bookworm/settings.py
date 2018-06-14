@@ -298,6 +298,14 @@ SALT_POSTS_POST = os.getenv(
     'SALT_POSTS_POST',
     default='g5t|Q)XG3%$@fen9UlE4:BShuqW=]jH2',
 )
+SALT_FILESTORE_IMAGE = os.getenv(
+    'SALT_FILESTORE_IMAGE',
+    default='Hh$MXf2y2Cgoj~=lYL!BP;*n8!CZ4Iw6',
+)
+SALT_FILESTORE_DOCUMENT = os.getenv(
+    'SALT_FILESTORE_DOCUMENT',
+    default='kA&F$R`q5`38fc^ZF;Hn3~x-K~-@m:P(',
+)
 
 
 DEFAULT_LANGUAGE = 'en'
