@@ -112,7 +112,7 @@ class ReadingListAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'title',
-        'book_count',
+        'count_books',
     )
     search_fields = (
         'title',

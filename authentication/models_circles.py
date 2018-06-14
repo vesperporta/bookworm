@@ -192,10 +192,7 @@ class Invitable(models.Model):
         return self.invites.filter(status__in=status_list).count()
 
 
-class Circle(
-        Invitable,
-        PreserveModelMixin,
-):
+class Circle(Invitable, PreserveModelMixin):
     """Profile and group relationship model."""
 
     PREFIX = '¶'  # Pilcrow
@@ -246,10 +243,7 @@ class Circle(
         return f'Circle({self.PREFIX}{self.id}-{self.title})'
 
 
-class CircleSetting(
-        PreserveModelMixin,
-        MetaInfoMixin,
-):
+class CircleSetting(PreserveModelMixin, MetaInfoMixin):
     """Circle Settings model."""
 
     id = HashidAutoField(

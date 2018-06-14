@@ -13,7 +13,7 @@ from bookworm.mixins import (
     PreserveModelMixin,
 )
 from meta_info.models import MetaInfo
-from meta_info.models_localisation import LocaliseTag
+from meta_info.models_localisation import Localisable
 from posts.models import Emotable
 
 
@@ -71,12 +71,6 @@ class PublicationMixin(models.Model):
         db_index=True,
         blank=True,
     )
-    localisations = models.ManyToManyField(
-        LocaliseTag,
-        related_name='publications+',
-        verbose_name=_('Localised Copy'),
-        blank=True,
-    )
 
     class Meta:
         abstract = True
@@ -84,6 +78,7 @@ class PublicationMixin(models.Model):
 
 class Book(
         Emotable,
+        Localisable,
         PublicationMixin,
         PreserveModelMixin,
         ProfileReferredMixin,
@@ -118,7 +113,7 @@ class Book(
     def __str__(self):
         """Title and author of book."""
         author = self.author.display_name if self.author else 'Unknown'
-        return f'{self.title} by {author}'
+        return f'Book({self.id}: {self.title} by {author})'
 
 
 class BookProgress(
@@ -155,10 +150,10 @@ class BookProgress(
 
     def __str__(self):
         """Title and percent of book progress."""
-        return f'{self.book.title} at {self.percent}%'
+        return f'BookProgress({self.id}: {self.percent}% - {self.book.title})'
 
 
-class BookChapter(PreserveModelMixin):
+class BookChapter(Localisable, PreserveModelMixin):
     """Book chapter model."""
 
     id = HashidAutoField(
@@ -182,12 +177,6 @@ class BookChapter(PreserveModelMixin):
         verbose_name=_('Book'),
         on_delete=models.DO_NOTHING,
     )
-    localisations = models.ManyToManyField(
-        LocaliseTag,
-        related_name='publication_chapters+',
-        verbose_name=_('Localised Copy'),
-        blank=True,
-    )
     meta_info = models.ForeignKey(
         MetaInfo,
         related_name='book_chapters+',
@@ -202,11 +191,12 @@ class BookChapter(PreserveModelMixin):
         verbose_name_plural = 'Book Chapters'
 
     def __str__(self):
-        return f'{self.book.title} Chapter: {self.title}'
+        return f'BookChapter({self.id}: {self.title} - {self.book.title})'
 
 
 class ReadingList(
         Emotable,
+        Localisable,
         ProfileReferredMixin,
         PreserveModelMixin,
 ):
@@ -225,12 +215,6 @@ class ReadingList(
         related_name='reading_lists',
         verbose_name=_('Books'),
     )
-    localisations = models.ManyToManyField(
-        LocaliseTag,
-        related_name='reading_lists+',
-        verbose_name=_('Localised Copy'),
-        blank=True,
-    )
     meta_info = models.ForeignKey(
         MetaInfo,
         related_name='reading_lists+',
@@ -245,9 +229,9 @@ class ReadingList(
         verbose_name_plural = 'Reading Lists'
 
     @property
-    def book_count(self):
+    def count_books(self):
         """Number of books in this ReadingList."""
-        return self.books.all().count()
+        return self.books.count()
 
     def add_book(self, book):
         """Add a book to the ReadingList object."""
@@ -260,12 +244,14 @@ class ReadingList(
         self.books.remove(book)
 
     def __str__(self):
-        plural = 's' if len(self.books.all()) > 1 else ''
-        return f'{self.title} ({self.count} book{plural})'
+        plural = 's' if self.count_books > 1 else ''
+        book_num = f'{self.count_books} book{plural}'
+        return f'ReadingList({self.id}: {self.title} - {book_num})'
 
 
 class BookReview(
         Emotable,
+        Localisable,
         ProfileReferredMixin,
         PreserveModelMixin,
 ):
@@ -325,12 +311,6 @@ class BookReview(
         on_delete=models.DO_NOTHING,
         blank=True,
     )
-    localisations = models.ManyToManyField(
-        LocaliseTag,
-        related_name='publication_reviews+',
-        verbose_name=_('Localised Copy'),
-        blank=True,
-    )
     meta_info = models.ForeignKey(
         MetaInfo,
         related_name='book_reviews+',
@@ -345,4 +325,5 @@ class BookReview(
         verbose_name_plural = 'Book Reviews'
 
     def __str__(self):
-        return f'{self.book.title} reviewed by {self.profile.display_name}'
+        book_detail = f'{self.book.title} by {self.profile.display_name}'
+        return f'BookReview({self.id} - {book_detail})'

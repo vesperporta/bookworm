@@ -12,8 +12,8 @@ from bookworm.mixins import (
     ProfileReferredMixin,
     PreserveModelMixin,
 )
-from bookworm.mixins_publishable import PublishableModelMixin
 from meta_info.models import MetaInfo
+from meta_info.models_localisation import Localisable
 from posts.exceptions import (
     InvalidEmoteModification,
     DuplicateEmoteValidationError,
@@ -21,10 +21,7 @@ from posts.exceptions import (
 )
 
 
-class Emote(
-        PreserveModelMixin,
-        ProfileReferredMixin,
-):
+class Emote(PreserveModelMixin, ProfileReferredMixin):
     """Emote model."""
 
     EMOTES = Choices(
@@ -161,10 +158,10 @@ class Emotable(models.Model):
 
 
 class Post(
-        PublishableModelMixin,
         Emotable,
-        PreserveModelMixin,
+        Localisable,
         ProfileReferredMixin,
+        PreserveModelMixin,
 ):
     """Post model."""
 

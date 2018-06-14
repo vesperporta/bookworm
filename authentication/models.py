@@ -30,9 +30,7 @@ TAGS = (
 ) + SOCIAL_PLATFORMS
 
 
-class ContactMethod(
-        PreserveModelMixin,
-):
+class ContactMethod(PreserveModelMixin):
     """Contact method."""
 
     TYPES = Choices(
@@ -82,7 +80,7 @@ class ContactMethod(
     def __str__(self):
         """Valid email output of profile."""
         contact_type = self.TYPES[self.type]
-        return f'Contact {contact_type} {self.detail}'
+        return f'ContactMethod({self.id} - {contact_type} {self.detail})'
 
 
 class PersonMixin(models.Model):
@@ -153,10 +151,7 @@ class PersonMixin(models.Model):
         return name
 
 
-class Profile(
-        PersonMixin,
-        PreserveModelMixin,
-):
+class Profile(PersonMixin, PreserveModelMixin):
     """Profile model."""
 
     TYPES = Choices(
@@ -206,13 +201,10 @@ class Profile(
 
     def __str__(self):
         """Valid email output of profile."""
-        return f'{self.display_name or self.id} "{self.email}"'
+        return f'Profile({self.id} - {self.display_name} "{self.email}")'
 
 
-class Author(
-        PersonMixin,
-        PreserveModelMixin,
-):
+class Author(PersonMixin, PreserveModelMixin):
     """Author model."""
 
     id = HashidAutoField(
@@ -247,13 +239,10 @@ class Author(
 
     def __str__(self):
         """Valid email output of profile."""
-        return f'Author "{self.display_name or self.id}"'
+        return f'Author({self.id} "{self.display_name}")'
 
 
-class ProfileSetting(
-        PreserveModelMixin,
-        MetaInfoMixin,
-):
+class ProfileSetting(PreserveModelMixin, MetaInfoMixin):
     """Profile Settings model."""
 
     id = HashidAutoField(
