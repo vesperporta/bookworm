@@ -1,5 +1,6 @@
 """Books models."""
 
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -29,7 +30,7 @@ class ConfirmReadQuestion(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='L>fZ(XHL?!do[BlbGFIdA99fzkY;k!=+',
+        salt=settings.SALT_BOOKS_CONFIRMREADQUESTION,
     )
     difficulty = models.IntegerField(
         choices=DIFFICULTIES,
@@ -85,7 +86,7 @@ class ConfirmReadAnswer(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='JBKvt+AzL@mRF*^zw.9U$5;pnTFl[665',
+        salt=settings.SALT_BOOKS_CONFIRMREADANSWER,
     )
     question = models.ForeignKey(
         ConfirmReadQuestion,
@@ -154,7 +155,7 @@ class Read(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='M&!_eO>;`ZIO&nnUHH*,*-#3:P&0KD]$',
+        salt=settings.SALT_BOOKS_READ,
     )
     book = models.ForeignKey(
         'books.Book',

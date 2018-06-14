@@ -201,8 +201,103 @@ SMS_URL = os.getenv('SMS_URL', default="https://textbelt.com/text")
 SMS_TOKEN = os.getenv('SMS_TOKEN', default="textbelt")
 
 
-HASHID_FIELD_SALT = 'kj~*=b1)VJ^yO*~5qKc2U3AXqk|P/4YuD4bs+2@1.N.^HQO&u7'
-HASH_FIELD_ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
+# Hash field salts and alphabet
+HASHID_FIELD_SALT = os.getenv(
+    'HASHID_FIELD_SALT',
+    default='kj~*=b1)VJ^yO*~5qKc2U3AXqk|P/4YuD4bs+2@1.N.^HQO&u7',
+)
+HASH_FIELD_ALPHABET = os.getenv(
+    'HASH_FIELD_ALPHABET',
+    default='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890',
+)
+SALT_AUTHENTICATION_CONTACTMETHOD = os.getenv(
+    'SALT_AUTHENTICATION_CONTACTMETHOD',
+    default='K0jiY1y/MgN;zI06q|ffJSzjQ"U9`C+=',
+)
+SALT_AUTHENTICATION_PROFILE = os.getenv(
+    'SALT_AUTHENTICATION_PROFILE',
+    default='l6P=[!*eDzqt7eG5@k>wfAh@R-UH?l5x',
+)
+SALT_AUTHENTICATION_AUTHOR = os.getenv(
+    'SALT_AUTHENTICATION_AUTHOR',
+    default='IPc8v6ZbP;RKZ:Z|uw8=T!2yZLxtyPs5',
+)
+SALT_AUTHENTICATION_PROFILESETTING = os.getenv(
+    'SALT_AUTHENTICATION_PROFILESETTING',
+    default='W3>;@=ub(!k&a]n+OT~l_C8GqLHzm42e',
+)
+SALT_AUTHENTICATION_INVITATION = os.getenv(
+    'SALT_AUTHENTICATION_INVITATION',
+    default='XF5&39(7cM~,o4JQz6D.{.xbqvE_W4^b',
+)
+SALT_AUTHENTICATION_CIRCLE = os.getenv(
+    'SALT_AUTHENTICATION_CIRCLE',
+    default='ODB13"B/A!8]0w?m_7Dt(Li+!:C{-!}E',
+)
+SALT_AUTHENTICATION_CIRCLESETTING = os.getenv(
+    'SALT_AUTHENTICATION_CIRCLESETTING',
+    default='R;aU-Y.v_,nw8O+/2e!sMLy5m$=A6cbC',
+)
+SALT_BOOKS_BOOK = os.getenv(
+    'SALT_BOOKS_BOOK',
+    default='p^oE*^4(%7;Yb:p_5Nuccz3-H?>wYJ4c',
+)
+SALT_BOOKS_BOOKPROGRESS = os.getenv(
+    'SALT_BOOKS_BOOKPROGRESS',
+    default='KTEVvVde#Z*mO;db;e1I.5T]aVwUZN"1',
+)
+SALT_BOOKS_BOOKCHAPTER = os.getenv(
+    'SALT_BOOKS_BOOKCHAPTER',
+    default='oJI94-Ej+ylQ.lqxRIc`Y5!2_{_Q=zGh',
+)
+SALT_BOOKS_READINGLIST = os.getenv(
+    'SALT_BOOKS_READINGLIST',
+    default='cF6/9w*hf.1xWzqmleOlY}>,!iWl;2@i',
+)
+SALT_BOOKS_BOOKREVIEW = os.getenv(
+    'SALT_BOOKS_BOOKREVIEW',
+    default='p6|v5qADW64CC<-4gMTnFh/N7.sV,wPG',
+)
+SALT_BOOKS_CONFIRMREADQUESTION = os.getenv(
+    'SALT_BOOKS_CONFIRMREADQUESTION',
+    default='L>fZ(XHL?!do[BlbGFIdA99fzkY;k!=+',
+)
+SALT_BOOKS_CONFIRMREADANSWER = os.getenv(
+    'SALT_BOOKS_CONFIRMREADANSWER',
+    default='JBKvt+AzL@mRF*^zw.9U$5;pnTFl[665',
+)
+SALT_BOOKS_READ = os.getenv(
+    'SALT_BOOKS_READ',
+    default='M&!_eO>;`ZIO&nnUHH*,*-#3:P&0KD]$',
+)
+SALT_METAINFO_TAG = os.getenv(
+    'SALT_METAINFO_TAG',
+    default='F3<_/,p7x*|0`1N;!ug]UmQ(G"Y5SH8[',
+)
+SALT_METAINFO_METAINFO = os.getenv(
+    'SALT_METAINFO_METAINFO',
+    default='jZ/TE5>gnCerRiy<+U`8p&D9otm2c^C&',
+)
+SALT_METAINFO_LANGUAGETAG = os.getenv(
+    'SALT_METAINFO_LANGUAGETAG',
+    default='ZH_N/YK26txcVPFvSo^J7+$j8?aMmksq',
+)
+SALT_METAINFO_LOCATIONTAG = os.getenv(
+    'SALT_METAINFO_LOCATIONTAG',
+    default='X;Iq2*HJp+Bn,o7`P[!"<uK]ybdf#Q%8',
+)
+SALT_METAINFO_LOCALISETAG = os.getenv(
+    'SALT_METAINFO_LOCALISETAG',
+    default='l!?"pzK*2|`n81EW&-+#mPJeNyu>0o6[',
+)
+SALT_POSTS_EMOTE = os.getenv(
+    'SALT_POSTS_EMOTE',
+    default='cioP>D^|E*21?"R5&.)rg[8,W@76+VUu',
+)
+SALT_POSTS_POST = os.getenv(
+    'SALT_POSTS_POST',
+    default='g5t|Q)XG3%$@fen9UlE4:BShuqW=]jH2',
+)
 
 
 DEFAULT_LANGUAGE = 'en'

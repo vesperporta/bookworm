@@ -1,5 +1,6 @@
 """Books models."""
 
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -91,7 +92,7 @@ class Book(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='p^oE*^4(%7;Yb:p_5Nuccz3-H?>wYJ4c',
+        salt=settings.SALT_BOOKS_BOOK,
     )
     author = models.ForeignKey(
         Author,
@@ -128,7 +129,7 @@ class BookProgress(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='KTEVvVde#Z*mO;db;e1I.5T]aVwUZN"1',
+        salt=settings.SALT_BOOKS_BOOKPROGRESS,
     )
     percent = models.FloatField()
     page = models.PositiveSmallIntegerField(
@@ -162,7 +163,7 @@ class BookChapter(PreserveModelMixin):
 
     id = HashidAutoField(
         primary_key=True,
-        salt='oJI94-Ej+ylQ.lqxRIc`Y5!2_{_Q=zGh',
+        salt=settings.SALT_BOOKS_BOOKCHAPTER,
     )
     title = models.CharField(
         max_length=200,
@@ -213,7 +214,7 @@ class ReadingList(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='cF6/9w*hf.1xWzqmleOlY}>,!iWl;2@i',
+        salt=settings.SALT_BOOKS_READINGLIST,
     )
     title = models.CharField(
         max_length=200,
@@ -286,7 +287,7 @@ class BookReview(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='p6|v5qADW64CC<-4gMTnFh/N7.sV,wPG',
+        salt=settings.SALT_BOOKS_BOOKREVIEW,
     )
     type = models.IntegerField(
         choices=TYPES,

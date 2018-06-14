@@ -20,7 +20,7 @@ class LanguageTag(TagMixin, PreserveModelMixin):
 
     id = HashidAutoField(
         primary_key=True,
-        salt='ZH_N/YK26txcVPFvSo^J7+$j8?aMmksq',
+        salt=settings.SALT_METAINFO_LANGUAGETAG,
     )
     family = models.TextField(
         blank=True,
@@ -67,7 +67,7 @@ class LocationTag(TagMixin, PreserveModelMixin):
 
     id = HashidAutoField(
         primary_key=True,
-        salt='X;Iq2*HJp+Bn,o7`P[!"<uK]ybdf#Q%8',
+        salt=settings.SALT_METAINFO_LOCATIONTAG,
     )
     iso_alpha_2 = models.CharField(
         max_length=3,
@@ -112,7 +112,7 @@ class LocaliseTag(PreserveModelMixin):
 
     id = HashidAutoField(
         primary_key=True,
-        salt='l!?"pzK*2|`n81EW&-+#mPJeNyu>0o6[',
+        salt=settings.SALT_METAINFO_LOCALISETAG,
     )
     field_name = models.TextField(
         verbose_name=_('Models field name'),

@@ -1,5 +1,6 @@
 """Profile models."""
 
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_common.auth_backends import User
@@ -45,7 +46,7 @@ class ContactMethod(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='K0jiY1y/MgN;zI06q|ffJSzjQ\'U9`C+=',
+        salt=settings.SALT_AUTHENTICATION_CONTACTMETHOD,
     )
     type = models.IntegerField(
         choices=TYPES,
@@ -167,7 +168,7 @@ class Profile(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='l6P=[%*eDzqt7eG5@k>wfAh@R-UH?l5x',
+        salt=settings.SALT_AUTHENTICATION_PROFILE,
     )
     user = models.OneToOneField(
         User,
@@ -216,7 +217,7 @@ class Author(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='IPc8v6ZbP;RKZ:Z|uw8=T!2yZLxtyPs5',
+        salt=settings.SALT_AUTHENTICATION_AUTHOR,
     )
     contacts = models.ManyToManyField(
         ContactMethod,
@@ -257,7 +258,7 @@ class ProfileSetting(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='W3>;@=ub(!k&a]n+OT~l_C8GqLHzm42e',
+        salt=settings.SALT_AUTHENTICATION_PROFILESETTING,
     )
     profile = models.ForeignKey(
         Profile,

@@ -1,5 +1,6 @@
 """Profile models."""
 
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -35,7 +36,7 @@ class Invitation(PreserveModelMixin, ProfileReferredMixin):
 
     id = HashidAutoField(
         primary_key=True,
-        salt='XF5&39(7cM~,o4JQz6D.{.xbqvE_W4^b',
+        salt=settings.SALT_AUTHENTICATION_INVITATION,
     )
     status = models.IntegerField(
         choices=STATUSES,
@@ -181,6 +182,15 @@ class Invitable(models.Model):
         invite.save()
         return invite
 
+    @property
+    def invites_count(self):
+        """Number of Profiles accepted into Circle."""
+        status_list = [
+            Invitation.STATUSES.accepted,
+            Invitation.STATUSES.elevated,
+        ]
+        return self.invites.filter(status__in=status_list).count()
+
 
 class Circle(
         Invitable,
@@ -192,7 +202,7 @@ class Circle(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='ODB13\'B/A!8]0w?m_7Dt{Li+!:C{-!}E',
+        salt=settings.SALT_AUTHENTICATION_CIRCLE,
     )
     title = models.CharField(
         verbose_name=_('Reading Circle Title'),
@@ -227,15 +237,6 @@ class Circle(
         null=True,
     )
 
-    @property
-    def count(self):
-        """Number of Profiles accepted into Circle."""
-        status_list = [
-            Invitation.STATUSES.accepted,
-            Invitation.STATUSES.elevated,
-        ]
-        return self.invitations.filter(status__in=status_list).count()
-
     class Meta:
         verbose_name = 'Circle'
         verbose_name_plural = 'Circles'
@@ -253,7 +254,7 @@ class CircleSetting(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='R;aU-Y.v_,nw8O+/2e%sMLy5m$=A6cbC',
+        salt=settings.SALT_AUTHENTICATION_CIRCLESETTING,
     )
     circle = models.ForeignKey(
         Circle,

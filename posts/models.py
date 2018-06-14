@@ -1,5 +1,6 @@
 """Books models."""
 
+from django.conf import settings
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.utils.translation import ugettext_lazy as _
@@ -38,7 +39,7 @@ class Emote(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='cioP>D^|E*21?"R5&.)rg[8,W@76+VUu',
+        salt=settings.SALT_POSTS_EMOTE,
     )
     type = models.IntegerField(
         choices=EMOTES,
@@ -169,7 +170,7 @@ class Post(
 
     id = HashidAutoField(
         primary_key=True,
-        salt='g5t|Q)XG3%$@fen9UlE4:BShuqW=]jH2',
+        salt=settings.SALT_POSTS_POST,
     )
     copy = models.TextField(
         verbose_name=_('Post copy'),

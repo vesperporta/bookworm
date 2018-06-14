@@ -1,5 +1,6 @@
 """Meta Information models."""
 
+from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -71,7 +72,7 @@ class Tag(TagMixin, PreserveModelMixin):
 
     id = HashidAutoField(
         primary_key=True,
-        salt='F3<_/,p7x*|0`1N;!ug]UmQ(G"Y5SH8[',
+        salt=settings.SALT_METAINFO_TAG,
     )
 
     objects = TagManager()
@@ -113,7 +114,7 @@ class MetaInfo(MetaInfoMixin, PreserveModelMixin):
 
     id = HashidAutoField(
         primary_key=True,
-        salt='jZ/TE5>gnCerRiy<+U`8p&D9otm2c^C&',
+        salt=settings.SALT_METAINFO_METAINFO,
     )
     uri = models.URLField(
         max_length=2000,
