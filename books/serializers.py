@@ -108,6 +108,7 @@ class BookSerializer(
             'emotes',
             'emote_aggregate',
             'images',
+            'profile',
         )
         fields = read_only_fields + (
             'title',

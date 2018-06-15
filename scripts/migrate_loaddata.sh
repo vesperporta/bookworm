@@ -15,7 +15,7 @@ python manage.py create_model_tags
 
 # load default data
 echo "Creating default user..."
-python manage.py createdefaultsuperuser
+python manage.py createdefaultusers
 
 # echo "Load development data from fixtures..."
 # python manage.py loaddata localisation_data.json
