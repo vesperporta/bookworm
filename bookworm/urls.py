@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('books/', include('books.urls')),
     path('posts/', include('posts.urls')),
+    path('file_store/', include('file_store.urls')),
     path('meta_info/', include('meta_info.urls')),
     path('authentication/', include('authentication.urls')),
     path('', schema_view),

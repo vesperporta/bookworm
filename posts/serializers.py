@@ -6,6 +6,7 @@ from bookworm.serializers import PreservedModelSerializeMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 
 from authentication.models import Profile
+from file_store.models import Image
 from posts.models import (
     Emote,
     Post,
@@ -110,6 +111,20 @@ class PostSerializer(
         view_name='profile-detail',
         queryset=Profile.objects.all(),
     )
+    images = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='image-detail',
+        queryset=Image.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    cover_image = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='image-detail',
+        queryset=Image.objects.all(),
+        required=False,
+        allow_null=True,
+    )
     children = serializers.HyperlinkedRelatedField(
         many=True,
         read_only=True,
@@ -132,10 +147,12 @@ class PostSerializer(
             'children',
             'children_count',
             'children_preview',
+            'images',
         )
         fields = read_only_fields + (
             'copy',
             'parent',
+            'cover_image',
         )
         exclude = ()
 

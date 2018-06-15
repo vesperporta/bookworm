@@ -15,6 +15,7 @@ from bookworm.mixins import (
 from meta_info.models import MetaInfo
 from meta_info.models_localisation import Localisable
 from posts.models import Emotable
+from file_store.models import (Imagable, Documentable, DocumentRefferedMixin)
 
 
 GENRES = (
@@ -79,6 +80,8 @@ class PublicationMixin(models.Model):
 class Book(
         Emotable,
         Localisable,
+        Imagable,
+        Documentable,
         PublicationMixin,
         PreserveModelMixin,
         ProfileReferredMixin,
@@ -117,6 +120,7 @@ class Book(
 
 
 class BookProgress(
+        DocumentRefferedMixin,
         ProfileReferredMixin,
         PreserveModelMixin,
 ):
@@ -142,7 +146,6 @@ class BookProgress(
         verbose_name=_('Book'),
         on_delete=models.DO_NOTHING,
     )
-    # TODO: For screen reading ensure the file being read is recorded.
 
     class Meta:
         verbose_name = 'Progress'

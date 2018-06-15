@@ -7,6 +7,10 @@ from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 from posts.serializers import EmotableSerializerMixin
 from authentication.models import Profile
 
+from file_store.models import (
+    Image,
+    Document,
+)
 from books.models import (
     Book,
     BookProgress,
@@ -70,6 +74,27 @@ class BookSerializer(
         view_name='profile-detail',
         queryset=Profile.objects.all(),
     )
+    documents = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='document-detail',
+        queryset=Document.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    images = serializers.HyperlinkedRelatedField(
+        many=True,
+        view_name='image-detail',
+        queryset=Image.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    cover_image = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='image-detail',
+        queryset=Image.objects.all(),
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         model = Book
@@ -82,6 +107,7 @@ class BookSerializer(
             'meta_info',
             'emotes',
             'emote_aggregate',
+            'images',
         )
         fields = read_only_fields + (
             'title',
@@ -89,6 +115,8 @@ class BookSerializer(
             'description',
             'isbn',
             'ean',
+            'documents',
+            'cover_image',
         )
         exclude = []
 
@@ -107,6 +135,13 @@ class BookProgressSerializer(
         many=False,
         view_name='book-detail',
         queryset=Book.objects.all(),
+    )
+    document = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='document-detail',
+        queryset=Document.objects.all(),
+        required=False,
+        allow_null=True,
     )
     profile = serializers.HyperlinkedRelatedField(
         many=False,
@@ -130,6 +165,7 @@ class BookProgressSerializer(
             'start',
             'end',
             'book',
+            'document',
         )
 
 

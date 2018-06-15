@@ -14,6 +14,7 @@ from bookworm.mixins import (
 )
 from meta_info.models import MetaInfo
 from meta_info.models_localisation import Localisable
+from file_store.models import Imagable
 from posts.exceptions import (
     InvalidEmoteModification,
     DuplicateEmoteValidationError,
@@ -160,6 +161,7 @@ class Emotable(models.Model):
 class Post(
         Emotable,
         Localisable,
+        Imagable,
         ProfileReferredMixin,
         PreserveModelMixin,
 ):

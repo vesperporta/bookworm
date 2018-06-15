@@ -14,7 +14,6 @@ from meta_info.models import MetaInfo
 
 
 TAGS = (
-    'Hero',
 )
 
 
@@ -30,12 +29,14 @@ class FileMixin(models.Model):
         blank=True,
     )
     extension = models.CharField(
-        max_length=20,
+        max_length=50,
         blank=True,
+        null=True,
     )
     mime = models.CharField(
         max_length=50,
         blank=True,
+        null=True,
     )
     source_url = models.URLField(
         max_length=2000,
@@ -48,7 +49,10 @@ class FileMixin(models.Model):
 
 
 class Image(FileMixin, ProfileReferredMixin, PreserveModelMixin):
-    """Image model."""
+    """Image model.
+
+    Inherently part of an album through the Imagable mixin.
+    """
 
     id = HashidAutoField(
         primary_key=True,
@@ -56,7 +60,7 @@ class Image(FileMixin, ProfileReferredMixin, PreserveModelMixin):
     )
     image = models.ImageField()
     original = models.ForeignKey(
-        'file_store.DisplayImage',
+        'file_store.Image',
         related_name='sizes',
         verbose_name=_('Cropped Images'),
         on_delete=models.DO_NOTHING,
@@ -65,7 +69,7 @@ class Image(FileMixin, ProfileReferredMixin, PreserveModelMixin):
     )
     meta_info = models.ForeignKey(
         MetaInfo,
-        related_name='files+',
+        related_name='images+',
         verbose_name=_('Meta data'),
         on_delete=models.DO_NOTHING,
         blank=True,
@@ -82,13 +86,57 @@ class Imagable(models.Model):
 
     images = models.ManyToManyField(
         Image,
-        related_name='object+',
+        related_name='albums+',
         verbose_name=_('Images'),
         blank=True,
+    )
+    cover_image = models.ForeignKey(
+        Image,
+        related_name='album_covers+',
+        verbose_name=_('Cover Image'),
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
     )
 
     class Meta:
         abstract = True
+
+    def image_append(self, image, as_primary=False):
+        """Append an image to the images list.
+
+        @param image: Image object.
+        @param as_primary: Bool, default = False, assign as cover_image.
+        """
+        if image.original:
+            image = image.original
+        if not as_primary and self.images.count() < 1:
+            as_primary = True
+        if as_primary:
+            self.cover_image = image
+        if not image.original:
+            # TODO: Task to manage size cropping # noqa T000
+            pass
+        self.images.add(image)
+
+    def image_pop(self, image):
+        """Remove an image from the images list.
+
+        If the image beign removed is cover_image then:
+        - The first image other than the removed is used as cover_image.
+
+        @param image: Image object.
+        """
+        if self.cover_image == image and self.images.count() > 1:
+            self.cover_image = self.images.exclude(id=image.id).first()
+        if image.original:
+            size_ids = [image.original.id]
+            size_ids += image.original.sizes.values_list('id')
+            removals = self.images.filter(id__in=size_ids)
+            for remove in removals:
+                self.images.remove(remove)
+        else:
+            self.images.remove(image)
 
 
 class Document(FileMixin, ProfileReferredMixin, PreserveModelMixin):
@@ -101,10 +149,10 @@ class Document(FileMixin, ProfileReferredMixin, PreserveModelMixin):
     file = models.FileField(
         null=True,
     )
-    book = models.ForeignKey(
-        'books.Book',
-        related_name='files',
-        verbose_name=_('Book'),
+    cover = models.ForeignKey(
+        Image,
+        related_name='covers+',
+        verbose_name=_('Cover Image'),
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
@@ -121,3 +169,33 @@ class Document(FileMixin, ProfileReferredMixin, PreserveModelMixin):
     class Meta:
         verbose_name = 'Document'
         verbose_name_plural = 'Documents'
+
+
+class DocumentRefferedMixin(models.Model):
+    """Mixin referring to a document."""
+
+    document = models.ForeignKey(
+        Document,
+        related_name='coffee_table+',
+        verbose_name=_('Document'),
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class Documentable(models.Model):
+    """Mixin supplying documentation / files."""
+
+    documents = models.ManyToManyField(
+        Document,
+        related_name='shelves',
+        verbose_name=_('Documents'),
+        blank=True,
+    )
+
+    class Meta:
+        abstract = True

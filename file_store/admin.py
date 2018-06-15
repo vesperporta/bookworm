@@ -3,23 +3,23 @@
 from django.contrib import admin
 
 from file_store.models import (
-    DisplayImage,
-    StoredFile,
+    Image,
+    Document,
 )
 
 
-@admin.register(DisplayImage)
-class DisplayImageAdmin(admin.ModelAdmin):
-    """DisplayImage admin."""
+@admin.register(Image)
+class ImageAdmin(admin.ModelAdmin):
+    """Image admin."""
 
     list_display = (
         'id',
         'title',
-        'description',
-        'image'
+        'source_url'
     )
     search_fields = (
         'title',
+        'description',
         'tags__copy',
     )
     list_filter = ('title',)
@@ -30,16 +30,15 @@ class DisplayImageAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(StoredFile)
-class StoredFileAdmin(admin.ModelAdmin):
-    """StoredFile admin."""
+@admin.register(Document)
+class DocumentAdmin(admin.ModelAdmin):
+    """Document admin."""
 
     list_display = (
         'id',
         'title',
         'description',
         'file',
-        'url',
     )
     search_fields = (
         'title',
