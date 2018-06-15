@@ -18,6 +18,7 @@ from posts.exceptions import (
     DuplicateEmoteValidationError,
     UnemoteValidationError,
 )
+from file_store.views import ImagableViewSet
 
 
 class EmoteViewSet(viewsets.ModelViewSet):
@@ -91,6 +92,7 @@ class EmotableViewSet:
 
 class PostViewSet(
         EmotableViewSet,
+        ImagableViewSet,
         viewsets.ModelViewSet,
 ):
     queryset = Post.objects.all()

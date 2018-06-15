@@ -29,12 +29,14 @@ from books.serializers import (
     ReadSerializer,
 )
 from posts.views import EmotableViewSet
+from file_store.views import ImagableViewSet
 
 logger = logging.getLogger(__name__)
 
 
 class BookViewSet(
         EmotableViewSet,
+        ImagableViewSet,
         viewsets.ModelViewSet,
 ):
     queryset = Book.objects.all()
