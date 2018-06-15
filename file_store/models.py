@@ -13,8 +13,7 @@ from bookworm.mixins import (
 from meta_info.models import MetaInfo
 
 
-TAGS = (
-)
+TAGS = ()
 
 
 class FileMixin(models.Model):
