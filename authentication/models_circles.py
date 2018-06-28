@@ -206,6 +206,12 @@ class Circle(Invitable, PreserveModelMixin):
         max_length=254,
         db_index=True,
     )
+    verified_domain = models.CharField(
+        verbose_name=_('Verified circle domain'),
+        max_length=160,
+        default='',
+        blank=True,
+    )
     profile = models.ForeignKey(
         Profile,
         related_name='circles',
@@ -241,6 +247,11 @@ class Circle(Invitable, PreserveModelMixin):
     def __str__(self):
         """String representation of this model."""
         return f'Circle({self.PREFIX}{self.id}-{self.title})'
+
+    def verify(self, profile):
+        if self.verified_domain:
+            raise Exception('Circle already being verified')
+        domain = profile.email.split('@')[1]
 
 
 class CircleSetting(PreserveModelMixin, MetaInfoMixin):

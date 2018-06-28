@@ -7,4 +7,5 @@ class AuthenticationConfig(AppConfig):
 
     def ready(self):
         from authentication import models_circles  # noqa
+        from authentication import models_token  # noqa
         from authentication import signals  # noqa

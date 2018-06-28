@@ -2,6 +2,7 @@
 
 import logging
 import hashlib
+from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
@@ -193,6 +194,12 @@ class LocaliseTag(PreserveModelMixin):
         location = LocationTag.objects.filter(
             iso_alpha_2__iexact=codes[1],
         ).first()
+        if not language and not location:
+            raise LocalisationUnknownLocaleException(
+                localise_code,
+                language,
+                location,
+            )
         return language, location, localise_code
 
     @property
@@ -250,12 +257,6 @@ class Localisable(models.Model):
         original_value = getattr(self, field_name)
         original_hash = hashlib.md5(original_value.encode('utf-8')).hexdigest()
         language, location = LocaliseTag.locale_from_code(localise_code)
-        if not language and not location:
-            raise LocalisationUnknownLocaleException(
-                localise_code,
-                language,
-                location,
-            )
         localisation = self.localisations.filter(
             field_name=field_name,
             language=language,
@@ -303,3 +304,35 @@ class Localisable(models.Model):
             location=location,
         ).first()
         return localised.copy if localised else None
+
+    def locale_as(self, localise_code):
+        """Detail this objects localisations according to the code supplied.
+
+        To assist in JSON values being transcribed correctly for numbers
+        and boolean values there are basic checks to support these value types.
+
+        @:param localise_code: str representation of the localisation.
+
+        @:return dict with all localised fields.
+        """
+        language, location = LocaliseTag.locale_from_code(localise_code)
+        localised = self.localisations.filter(
+            language=language,
+            location=location,
+        )
+        return_dict = {}
+        for locale in list(localised):
+            locale_value = locale.copy
+            if type(getattr(self, locale.field_name)) is models.IntField:
+                locale_value = int(locale_value)
+            if type(getattr(self, locale.field_name)) is models.FloatField:
+                locale_value = float(locale_value)
+            if type(getattr(self, locale.field_name)) is models.DecimalField:
+                locale_value = Decimal(locale_value)
+            if type(getattr(self, locale.field_name)) in [
+                models.BooleanField,
+                models.NullBooleanField,
+            ]:
+                locale_value = bool(locale_value)
+            return_dict.update({locale.field_name: locale_value, })
+        return return_dict

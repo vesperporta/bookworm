@@ -238,6 +238,10 @@ SALT_AUTHENTICATION_CIRCLESETTING = os.getenv(
     'SALT_AUTHENTICATION_CIRCLESETTING',
     default='R;aU-Y.v_,nw8O+/2e!sMLy5m$=A6cbC',
 )
+SALT_AUTHENTICATION_TOKEN = os.getenv(
+    'SALT_AUTHENTICATION_TOKEN',
+    default='GlL_.!6RcTyu2|HhEw1k]7O~-V;Imads',
+)
 SALT_BOOKS_BOOK = os.getenv(
     'SALT_BOOKS_BOOK',
     default='p^oE*^4(%7;Yb:p_5Nuccz3-H?>wYJ4c',
@@ -309,6 +313,16 @@ SALT_FILESTORE_IMAGE = os.getenv(
 SALT_FILESTORE_DOCUMENT = os.getenv(
     'SALT_FILESTORE_DOCUMENT',
     default='kA&F$R`q5`38fc^ZF;Hn3~x-K~-@m:P(',
+)
+
+
+AES_KEY_AUTHENTICATION = os.getenv(
+    'AES_KEY_AUTHENTICATION',
+    default='CFhT4`GlA>&3Hfj6X,~SK2ONmZ*-(1wD#)75IWsU.^iMzk8o<"',
+)
+AES_IV456_AUTHENTICATION = os.getenv(
+    'AES_KEY_AUTHENTICATION',
+    default='TC:mr3?jueVhyWAf+[n7GoqO6dU*=M1;(~,0!|bBs>^`JIz.x4',
 )
 
 
