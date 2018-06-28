@@ -75,7 +75,13 @@ class ConfirmReadAnswer(
         ProfileReferredMixin,
         OwnerElevatedAndLockAccessMixin,
 ):
-    """Defines answers for read question."""
+    """Defines answers for read question.
+
+    To have publishable objcts copies of this object are expected.
+    Each replication of the parent / root object is required to have a list
+    of ReadingList, Profile ids, or key words defining pre-determined groups.
+    Pre-determined groups: gloable, or noone.
+    """
 
     TYPES = Choices(
         (0, 'choice', _('Multiple choice answer to select from.')),

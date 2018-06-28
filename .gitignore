@@ -131,3 +131,7 @@ bookworm/local_settings.py
 /celerybeat.pid
 celerybeat-schedule
 celerybeat.pid
+
+# InteliJ Idea
+*.iml
+.idea/*

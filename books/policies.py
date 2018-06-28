@@ -62,6 +62,25 @@ class OwnerElevatedAndLockAccessMixin:
     lock can only be modified by owner or administrator.
     """
 
+    def _auth_core(self, request):
+        return bool(
+            request.user.is_superuser or
+            request.user == self.profile.user
+        )
+
+    @staticmethod
+    def _auth_elevated(request):
+        elevated_type_min = int(settings.get('PROFILE_TYPE_ELEVATED__MIN'))
+        return request.user.profile.type >= elevated_type_min
+
+    @staticmethod
+    def _auth_admin(request):
+        admin_type_min = int(settings.get('PROFILE_TYPE_ADMIN__MIN'))
+        return (
+            request.user.profile.type >= admin_type_min or
+            request.user.is_superuser
+        )
+
     @staticmethod
     @authenticated_users
     def has_list_permission(request):

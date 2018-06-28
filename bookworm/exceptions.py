@@ -55,6 +55,16 @@ class PublishableValidationError(ValidationError):
         logger.error(self)
 
 
+class NoPublishedDataError(ValidationError):
+
+    def __init__(self, attempted_instance):
+        super().__init__([{
+            'code': 'publishable_not_published',
+            'message': f'{attempted_instance} invalid publish attempt.',
+        }])
+        logger.error(self)
+
+
 class DataMissingValidationError(ValidationError):
 
     def __init__(self, object, key_1, key_2):

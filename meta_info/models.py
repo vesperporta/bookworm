@@ -1,5 +1,7 @@
 """Meta Information models."""
 
+import hashlib
+
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
@@ -53,7 +55,7 @@ class TagManager(models.Manager):
         tag_tags = list(tag_rtn.tags.all())
         for tag in tags:
             if type(tag) is str:
-                sub_tag = self.create_tag(tag)
+                sub_tag = self.create(copy=tag)
             elif type(tag) is TagMixin:
                 sub_tag = tag
             if sub_tag:
@@ -83,7 +85,32 @@ class Tag(TagMixin, PreserveModelMixin):
 
     def __str__(self):
         """Display only as URI valid slug."""
-        return '{}{}'.format(self.PREFIX, self.copy)
+        return f'Tag({self.PREFIX}{self.copy})'
+
+
+class HashedTag(TagMixin, PreserveModelMixin):
+    """HashedTag model."""
+
+    PREFIX = '#'  # hash
+
+    id = HashidAutoField(
+        primary_key=True,
+        salt=settings.SALT_METAINFO_HASHEDTAG,
+    )
+
+    objects = TagManager()
+
+    class Meta:
+        verbose_name = 'HashedTag'
+        verbose_name_plural = 'HashedTags'
+
+    def save(self, *args, **kwargs):
+        self.slug = hashlib.md5(str(self.copy).encode('utf-8')).hexdigest()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        """Display only as URI valid slug."""
+        return f'HashedTag({self.PREFIX}{self.copy})'
 
 
 class MetaInfoMixin(models.Model):

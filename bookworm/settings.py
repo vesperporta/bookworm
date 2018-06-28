@@ -274,6 +274,10 @@ SALT_METAINFO_TAG = os.getenv(
     'SALT_METAINFO_TAG',
     default='F3<_/,p7x*|0`1N;!ug]UmQ(G"Y5SH8[',
 )
+SALT_METAINFO_HASHEDTAG = os.getenv(
+    'SALT_METAINFO_HASHEDTAG',
+    default='dVhoQ/H5CLf*7bmNYPk4"`TZlRtwJ@3W',
+)
 SALT_METAINFO_METAINFO = os.getenv(
     'SALT_METAINFO_METAINFO',
     default='jZ/TE5>gnCerRiy<+U`8p&D9otm2c^C&',

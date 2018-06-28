@@ -248,7 +248,7 @@ class Localisable(models.Model):
         if not hasattr(self, field_name):
             raise LocalisationNoFieldException(self, field_name)
         original_value = getattr(self, field_name)
-        original_hash = hashlib.md5(original_value).hexdigest()
+        original_hash = hashlib.md5(original_value.encode('utf-8')).hexdigest()
         language, location = LocaliseTag.locale_from_code(localise_code)
         if not language and not location:
             raise LocalisationUnknownLocaleException(
@@ -274,7 +274,7 @@ class Localisable(models.Model):
             LocaliseTag.objects.create(
                 field_name=field_name,
                 copy=localised_value,
-                original=hashlib.md5(original_value).hexdigest(),
+                original=original_hash,
                 language=language,
                 location=location,
             )

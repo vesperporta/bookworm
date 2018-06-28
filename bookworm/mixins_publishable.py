@@ -6,33 +6,31 @@ import logging
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from meta_info.models import MetaInfo
+from meta_info.models import HashedTag, MetaInfo
 from bookworm.exceptions import (
     PublishableObjectNotDefined,
     PublishableValidationError,
+    NoPublishedDataError,
 )
 
 
 logger = logging.getLogger(__name__)
 
 
+TAGS = (
+    'Global',
+    'No-one',
+)
+
+
 class PublishableModelMixin(models.Model):
     """Enable a model to be publishable and visible to public view."""
 
-    PUBLISHED_SOURCE_KEY = 'source'
-
-    published_content = models.ForeignKey(
+    published_meta = models.ForeignKey(
         MetaInfo,
-        related_name='published_content+',
+        related_name='published_meta+',
         verbose_name=_('Published Content'),
         on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-    )
-    published_at = models.DateTimeField(
-        verbose_name=_('Published date'),
-        auto_now=False,
-        auto_now_add=False,
         blank=True,
         null=True,
     )
@@ -41,123 +39,118 @@ class PublishableModelMixin(models.Model):
         abstract = True
 
     @property
-    def published(self):
-        """Published state of this model."""
-        return bool(self.published_at)
+    def published_at(self):
+        return self.published_meta.created_at if self.published_meta else None
 
     @property
-    def published_json(self):
-        """Content expected to publically rendered."""
-        if not self.published:
-            return None
-        content = self.published_content
-        content.pop(self.PUBLISHED_SOURCE_KEY)
-        return content
+    def published_content(self):
+        try:
+            return self.published_meta.json.output
+        except AttributeError:
+            raise NoPublishedDataError(self)
 
-    def _validate_for_publication(self, publish=True):
-        """Passes `publishable_verification` for fields required verified.
+    def has_published_naive_access(self, object_id):
+        """Identify if the `object_id` can access this object.
 
-        This value should be a list of lists or tuples of the following format:
-        (
-        [0]    'field name',
-        [1]    ['field value', 'other value', ],
-        [2]    'error message optional',
-        )
+        Will return `False, None` if self has no published data.
 
-        Additional values can be passed to allow error message rendering
-        with better details, an example: 'error from {3} with value {4}'.
+        @:param id, str of identifier requesting access.
+
+        @:return bool, int
+        Integer is the index within the tuple access is granted.
         """
-        valid = True
-        errors = {}
-        if not hasattr(self, 'Publishable'):
-            publish_type = 'publish' if publish else 'unpublish'
-            raise PublishableObjectNotDefined(self, publish_type)
-        if not self.Publishable.publishable_verification or not publish:
-            return valid
-        for obj in self.Publishable.publishable_verification:
-            field = getattr(self, obj[0], None)
-            msg = 'Field {0} is not equal or not in {1}'
-            if field != obj[1] or field not in obj[1]:
-                valid = False
-                if obj[2]:
-                    msg = obj[2]
-                errors[obj[0]] = [msg.format(*obj)]
-        if errors:
-            raise PublishableValidationError(errors)
-        return valid
+        if not self.published_at:
+            return False, None
+        published_access = self.published_meta.json.access
+        try:
+            id_index = published_access.granted_flat.index(object_id)
+            return True, id_index
+        except ValueError:
+            return False, None
 
-    def _handle_child_publication(self, publish=True):
-        """Publish chain for child objects known"""
-        if not self.Publishable.publishable_children:
-            return
-        for obj in self.Publishable.publishable_children:
-            child = getattr(self, obj, None)
-            if not child:
-                continue
-            try:
-                if publish:
-                    child.publish()
-                else:
-                    child.unpublish()
-            except AttributeError:
-                logger.warn(
-                    'Publish attempt on unpublishable child object {}.'.format(
-                        child
-                    )
-                )
+    def _validate_publish(self, granted_list, block_list):
+        """Validate the publishable state of this object with parameters.
 
-    def publish(self, skip_children=False):
+        @:param granted_list, tuple supplied to `self.publish`.
+        @:param block_list, tuple supplied to `self.publish`.
+
+        @:see self.publish
+
+        @:raises PublishableObjectNotDefined
+        @:raises PublishableValidationError
+        """
+        publishable_class = getattr(self, 'Publishable', None)
+        if not publishable_class:
+            raise PublishableObjectNotDefined(self)
+        validate_errors = ()
+        if not hasattr(publishable_class, 'serializer'):
+            validate_errors += ('Publishable class has no serializer.', )
+        if len(granted_list) < 1:
+            validate_errors += ('Publishing with no granted objects.', )
+        granted_numerical = sum([len(n) for n in granted_list]) % 2
+        block_numerical = sum([len(n) for n in block_list]) % 2
+        if granted_numerical + block_numerical > 0:
+            validate_errors += ('Format of grant and block lists invalid', )
+        if validate_errors:
+            raise PublishableValidationError(self, validate_errors)
+
+    def publish(self, granted_list, block_list):
         """Publish this object.
 
-        @param skip_children=False flag to handle child object publication.
+        management of what is access and blocked:
+        (
+            ('global', 'keyword'),
+            ('id', '__class__'),
+        )
+
+        @:param granted_list, tuple as described above.
+        @:param block_list, tuple as described above.
+
+        @:raises PublishableObjectNotDefined
         """
-        self._validate_for_publication(publish=True)
-        if not skip_children:
-            self._handle_child_publication(publish=True)
+        self._validate_publish(granted_list, block_list)
         output_source = {
-            self.PUBLISHED_SOURCE_KEY: {
+            'source': {
                 'id': self.id,
                 'class': self.__class__,
             },
+            'access': {
+                'granted': granted_list,
+                'granted_flat': [n[0] for n in granted_list],
+                'denied': block_list,
+                'denied_flat': [n[0] for n in block_list],
+            },
+            'output': getattr(self, 'Publishable').serializer(self).data,
         }
-        output = self.Publishable.serializer(self).data
-        output.update(output_source)
-        meta_info = MetaInfo.objects.create(
-            json=output,
-            copy=json.dumps(output),
+        if self.published_meta:
+            self.published_meta.delete()
+        self.published_meta = MetaInfo.objects.create(
+            json=output_source,
+            copy=json.dumps(output_source),
         )
-        if self.published_content:
-            self.published_content.delete()
-        self.published_content = meta_info
-        self.published_at = self.published_content.created_at
         self.save()
 
-    def unpublish(self, skip_children=False):
-        """Unpublish this object.
-
-        @param skip_children=False flag to handle child object publication.
-        """
-        self._validate_for_publication(publish=False)
-        if not skip_children:
-            self._handle_child_publication(publish=False)
-        self.published_at = None
-        self.published_content.delete()
-        self.published_content = None
+    def unpublish(self):
+        """Un-publish this object."""
+        if not self.published_meta:
+            raise PublishableValidationError(
+                self,
+                ('No published data to un-publish', ),
+            )
+        self.published_meta.delete()
+        self.published_meta = None
         self.save()
 
     def unpublish_purge(self):
-        """Unpublishes content and removes all history.
-
-        Retainment of datetime stamps of previous publishes with no content.
-        """
+        """Un-publishes content and removes all output history."""
         self.unpublish()
-        published_meta_list = MetaInfo.objects.filter(
+        published_meta_list = MetaInfo.all_objects.filter(
             json__source__id=self.id,
             json__source__class=self.__class__,
         )
         for item in list(published_meta_list):
-            for key in item.json.keys():
-                if key is not self.PUBLISHED_SOURCE_KEY:
-                    item.json.pop(key)
+            if not hasattr(item.json, 'output'):
+                continue
+            item.json.pop('output')
             item.copy = json.dumps(item.json)
             item.save()
