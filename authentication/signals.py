@@ -59,19 +59,6 @@ def pre_save_emotable_aggregate(sender, instance, *args, **kwargs):
         instance.emote_aggregate = [0 for k in enumerate(Emote.EMOTES)]
 
 
-@receiver(post_save, sender=Circle)
-def post_save_circle_create(sender, instance, created, **kwargs):
-    """Circle creation initialise first administrator of the Circle."""
-    if not created:
-        return
-    Invitation.objects.create(
-        profile=instance.profile,
-        profile_to=instance.profile,
-        circle=instance,
-        status=Invitation.STATUSES.elevated,
-    )
-
-
 @receiver(post_delete, sender=Invitation)
 def post_delete_inviation(sender, instance, *args, **kwargs):
     """set the status of the instance."""

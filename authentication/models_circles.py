@@ -11,15 +11,19 @@ from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
 from books.models import ReadingList
 from meta_info.models import MetaInfo, MetaInfoMixin
 from authentication.models import ContactMethod, Profile
+from authentication.models_token import Token
 from authentication.exceptions import (
     DuplicateInvitationValidationError,
     InvitationValidationError,
     InvitationMissingError,
+    CircleDomainAlreadyVerifiedError,
+    CircleDomainTokenNotExistError,
+    CircleDomainInProgressError,
 )
 
 
 class Invitation(PreserveModelMixin, ProfileReferredMixin):
-    """Invitiation object to link two profiles for an object.
+    """Invitation object to link two profiles for an object.
 
     The current user requesting the invitation is defined as `self.profile`.
     This object is also a representation of authorisation within a group.
@@ -154,6 +158,9 @@ class Invitable(models.Model):
         invite = self.has_invited(profile_to)
         if invite:
             raise DuplicateInvitationValidationError(self, invite)
+        if hasattr(self, 'invite_same_domain'):
+            if self.invite_same_domain.verified:
+                pass
         self._validate_invite_status_change(status, profile, profile_to)
         invite = Invitation.objects.create(
             profile=profile,
@@ -206,17 +213,13 @@ class Circle(Invitable, PreserveModelMixin):
         max_length=254,
         db_index=True,
     )
-    verified_domain = models.CharField(
-        verbose_name=_('Verified circle domain'),
-        max_length=160,
-        default='',
-        blank=True,
-    )
-    profile = models.ForeignKey(
-        Profile,
-        related_name='circles',
-        verbose_name=_('Created by'),
+    invite_same_domain = models.ForeignKey(
+        Token,
+        related_name='circles+',
+        verbose_name=_('Verified domain token'),
         on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
     )
     contacts = models.ManyToManyField(
         ContactMethod,
@@ -248,10 +251,33 @@ class Circle(Invitable, PreserveModelMixin):
         """String representation of this model."""
         return f'Circle({self.PREFIX}{self.id}-{self.title})'
 
-    def verify(self, profile):
-        if self.verified_domain:
-            raise Exception('Circle already being verified')
+    def create_verified_token(self, profile):
+        if self.verified_token:
+            if self.verified_token.validated:
+                raise CircleDomainAlreadyVerifiedError(self)
+            raise CircleDomainInProgressError(self)
         domain = profile.email.split('@')[1]
+        self.invites.filter(profile_to__email__icontains=domain)
+        self.verified_token = Token.create(f'{self.id}#{profile.email}')
+        self.save()
+
+    def verify_domain(self, token):
+        if not self.verified_token:
+            raise CircleDomainTokenNotExistError(self)
+        elif self.verified_token.validated:
+            raise CircleDomainAlreadyVerifiedError(self)
+        validated = self.verified_token.validate(token)
+        return validated
+
+    @staticmethod
+    def create(profile, **kwargs):
+        circle = Circle.objects.create(**kwargs)
+        Invitation.objects.create(
+            profile=profile,
+            profile_to=profile,
+            circle=circle,
+            status=Invitation.STATUSES.elevated,
+        )
 
 
 class CircleSetting(PreserveModelMixin, MetaInfoMixin):

@@ -38,3 +38,33 @@ class InvitationMissingError(ValidationError):
                        f'{profile_to.display_name}.',
         }])
         logger.error(self)
+
+
+class CircleDomainAlreadyVerifiedError(ValidationError):
+
+    def __init__(self, target):
+        super().__init__([{
+            'code': 'circle_domain_already_verified_error',
+            'message': f'{target} already has a verified domain.',
+        }])
+        logger.error(self)
+
+
+class CircleDomainInProgressError(ValidationError):
+
+    def __init__(self, target):
+        super().__init__([{
+            'code': 'circle_domain_in_progress_error',
+            'message': f'{target} domain verification is already in progress.',
+        }])
+        logger.error(self)
+
+
+class CircleDomainTokenNotExistError(ValidationError):
+
+    def __init__(self, target):
+        super().__init__([{
+            'code': 'circle_domain_token_not_exist_error',
+            'message': f'{target} domain verification does not exist.',
+        }])
+        logger.error(self)

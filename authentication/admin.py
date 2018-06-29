@@ -81,7 +81,6 @@ class CircleAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'title',
-        'profile',
     )
     exclude = (
         'created_at',

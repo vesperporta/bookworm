@@ -325,6 +325,15 @@ AES_IV456_AUTHENTICATION = os.getenv(
     default='TC:mr3?jueVhyWAf+[n7GoqO6dU*=M1;(~,0!|bBs>^`JIz.x4',
 )
 
+TOKEN_SALT_START = os.getenv(
+    'TOKEN_SALT_START',
+    default='Kx(62Q~o0kjRyl|_sr1<*z8+.HN>b/5ci4LtMqmT,Y3@^`fJEh',
+)
+TOKEN_SALT_END = os.getenv(
+    'TOKEN_SALT_END',
+    default='HDQcA&yv<^Chf2u*L>wJ]BOtW;K=9$x8Zl?Viz!7,3Xp[1.:0s',
+)
+
 
 DEFAULT_LANGUAGE = 'en'
 DEFAULT_LOCATION = 'gb'
