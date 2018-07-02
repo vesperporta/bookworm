@@ -300,10 +300,10 @@ class BookReview(
         verbose_name=_('Book'),
         on_delete=models.PROTECT,
     )
-    infered_progress = models.ForeignKey(
+    inferred_progress = models.ForeignKey(
         BookProgress,
-        related_name='infered_reviewed_at+',
-        verbose_name=_('Infered Progress'),
+        related_name='inferred_reviewed_at+',
+        verbose_name=_('Inferred Progress'),
         on_delete=models.DO_NOTHING,
         blank=True,
     )
