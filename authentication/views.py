@@ -27,6 +27,7 @@ from authentication.exceptions import (
     InvitationTokenNotExistError,
     InvitationAlreadyVerifiedError,
 )
+from authentication.tasks import task_send_message_invitable_action
 
 
 class InvitableViewSet:
@@ -63,6 +64,7 @@ class InvitableViewSet:
             InvitationValidationError,
         ) as e:
             return self._invitation_error_handle(e)
+        task_send_message_invitable_action.delay('invite', inviting_to)
         return Response(
             {
                 'status': 'invited',
@@ -87,6 +89,7 @@ class InvitableViewSet:
             InvitationMissingError,
         ) as e:
             return self._invitation_error_handle(e)
+        task_send_message_invitable_action.delay('invite_change', changing_for)
         return Response(
             {
                 'status': 'changed',
@@ -107,7 +110,8 @@ class InvitableViewSet:
                 InvitationAlreadyVerifiedError,
         ) as e:
             return self._invitation_error_handle(e)
-        # TODO: Message required profile for acceptance.
+        task_send_message_invitable_action.delay(
+            'invite_validate', changing_for)
         return Response(
             {
                 'status': 'validated',
@@ -125,7 +129,8 @@ class InvitableViewSet:
             invite.token_recreate()
         except InvitationAlreadyVerifiedError as e:
             return self._invitation_error_handle(e)
-        # TODO: Message to required profile for renewal acceptance.
+        task_send_message_invitable_action.delay(
+            'invite_token_renew', changing_for)
         return Response(
             {
                 'status': 'validated',
