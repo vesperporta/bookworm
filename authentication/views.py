@@ -24,6 +24,8 @@ from authentication.exceptions import (
     DuplicateInvitationValidationError,
     InvitationValidationError,
     InvitationMissingError,
+    InvitationTokenNotExistError,
+    InvitationAlreadyVerifiedError,
 )
 
 
@@ -92,6 +94,45 @@ class InvitableViewSet:
             }
         )
 
+    @detail_route(methods=['post'])
+    def invite_validate(self, request, pk, **kwargs):
+        changing_for = self.get_object()
+        invite = changing_for.invites.filter(
+            profile_to=request.data.get('profile_to')
+        )
+        try:
+            invite.token_verify(request.data.get('token'))
+        except (
+                InvitationTokenNotExistError,
+                InvitationAlreadyVerifiedError,
+        ) as e:
+            return self._invitation_error_handle(e)
+        # TODO: Message required profile for acceptance.
+        return Response(
+            {
+                'status': 'validated',
+                'ok': '🖖',
+            }
+        )
+
+    @detail_route(methods=['post'])
+    def invite_token_renew(self, request, pk, **kwargs):
+        changing_for = self.get_object()
+        invite = changing_for.invites.filter(
+            profile_to=request.data.get('profile_to')
+        )
+        try:
+            invite.token_recreate()
+        except InvitationAlreadyVerifiedError as e:
+            return self._invitation_error_handle(e)
+        # TODO: Message to required profile for renewal acceptance.
+        return Response(
+            {
+                'status': 'validated',
+                'ok': '🖖',
+            }
+        )
+
 
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
@@ -134,7 +175,9 @@ class CircleViewSet(
     )
 
     def create(self, request):
-        return Circle.create(request.user.profile, **request.data)
+        return Circle.objects.create_circle(
+            request.user.profile, **request.data
+        )
 
 
 class InvitationViewSet(viewsets.ModelViewSet):

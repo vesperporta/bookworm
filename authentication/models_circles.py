@@ -110,6 +110,13 @@ class Invitation(PreserveModelMixin, ProfileReferredMixin):
 class Invitable(models.Model):
     """Invitations based mixins to add support in managing invites."""
 
+    INVITE_VALIDATION_STATUSES = Choices(
+        (0, 'owner', _('Owner')),
+        (1, 'self_invite', _('Self Invited')),
+        (2, 'elevated', _('Elevated')),
+        (3, 'withdraw', _('Withdraw')),
+    )
+
     invites = models.ManyToManyField(
         Invitation,
         related_name='invited_to+',
@@ -152,28 +159,28 @@ class Invitable(models.Model):
         ]
         # Rule 1: Profile of self can do anything.
         if hasattr(self, 'profile') and self.profile == profile_from:
-            return True
+            return self.INVITE_VALIDATION_STATUSES.owner
         profile_to_invite = self.invites.filter(profile_to=profile_to).first()
         # Rule 2: Self-invites `profile_from=None` can only create.
         if (
-            not profile_from and
+            (not profile_from or profile_from == profile_to) and
             status_to == Invitation.STATUSES.invited and
             not profile_to_invite
         ):
-            return True
+            return self.INVITE_VALIDATION_STATUSES.self_invite
         # Rule 3: profile_from.status above accepted status can ban or reject.
         if (
             profile_to_invite and profile_to_invite.profile == profile_from and
             profile_to_invite.status > Invitation.STATUSES.accepted and
             status_to in elevated_action_list
         ):
-            return True
+            return self.INVITE_VALIDATION_STATUSES.elevated
         # Rule 4: Invited profile can withdraw.
         if (
             profile_to_invite.status == Invitation.STATUSES.invited and
             status_to == Invitation.STATUSES.withdrawn
         ):
-            return True
+            return self.INVITE_VALIDATION_STATUSES.withdraw
         # Failure to comply with rules exception.
         raise InvitationValidationError(
             self,
@@ -199,10 +206,11 @@ class Invitable(models.Model):
         if hasattr(self, 'invite_same_domain'):
             if self.invite_same_domain.verified:
                 pass
-        self._invite_validate_status_change(status, profile, profile_to)
-        time_delta = timedelta(
-            days=settings.INVITE_TIMEOUT) if profile else timedelta(
-            days=settings.INVITE_SELF_TIMEOUT)
+        validation_code = self._invite_validate_status_change(
+            status, profile, profile_to)
+        time_delta = timedelta(days=settings.INVITE_TIMEOUT)
+        if validation_code == self.INVITE_VALIDATION_STATUSES.self_invite:
+            time_delta = timedelta(days=settings.INVITE_SELF_TIMEOUT)
         invite = Invitation.objects.create(
             profile=profile,
             profile_to=profile_to,
@@ -236,12 +244,43 @@ class Invitable(models.Model):
 
     @property
     def invites_count(self):
-        """Number of Profiles accepted into Circle."""
+        """Number of Profiles accepted into Circle.
+
+        @:return int
+        """
         status_list = [
             Invitation.STATUSES.accepted,
             Invitation.STATUSES.elevated,
         ]
         return self.invites.filter(status__in=status_list).count()
+
+
+class CircleManager(models.Manager):
+    """Manager for Circles."""
+
+    def create_circle(self, profile, **kwargs):
+        """Create a new Circle object with the creator as an elevated owner.
+
+        @:param profile: Profile of the owner of the new Circle.
+        @:param **kwargs: values defined required for creation of a Circle.
+
+        @:return Circle
+        """
+        token = Token.objects.create_token(
+            f'original#{profile.email}',
+            token_value=Token.objects.generate_sha256(profile.email),
+        )
+        invite = Invitation.objects.create(
+            profile=profile,
+            profile_to=profile,
+            status=Invitation.STATUSES.elevated,
+            token=token,
+        )
+        circle = self.create(**kwargs, invites=[invite])
+        token.validated = True
+        token.expiry = timezone.now()
+        token.save()
+        return circle
 
 
 class Circle(Invitable, PreserveModelMixin):
@@ -280,6 +319,8 @@ class Circle(Invitable, PreserveModelMixin):
         null=True,
     )
 
+    objects = CircleManager()
+
     class Meta:
         verbose_name = 'Circle'
         verbose_name_plural = 'Circles'
@@ -287,31 +328,6 @@ class Circle(Invitable, PreserveModelMixin):
     def __str__(self):
         """String representation of this model."""
         return f'Circle({self.PREFIX}{self.id}-{self.title})'
-
-    @staticmethod
-    def create(profile, **kwargs):
-        """Create a new Circle object with the creator as an elevated owner.
-
-        @:param profile: Profile of the owner of the new Circle.
-        @:param **kwargs: values defined required for creation of a Circle.
-
-        @:return Circle
-        """
-        token = Token.objects.create_token(
-            f'original#{profile.email}',
-            token_value=Token.objects.generate_sha256(profile.email),
-        )
-        invite = Invitation.objects.create(
-            profile=profile,
-            profile_to=profile,
-            status=Invitation.STATUSES.elevated,
-            token=token,
-        )
-        circle = Circle.objects.create(**kwargs, invites=[invite])
-        token.validated = True
-        token.expiry = timezone.now()
-        token.save()
-        return circle
 
 
 class CircleSetting(PreserveModelMixin, MetaInfoMixin):
