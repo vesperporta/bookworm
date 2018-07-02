@@ -53,7 +53,7 @@ class InvitableViewSet:
             inviting_to.invite(
                 Profile.objects.filter(user=request.user).first(),
                 Profile.objects.filter(
-                    id=request.POST.get('profile_to'),
+                    id=request.data.get('profile_to'),
                 ).first(),
             )
         except (
@@ -76,7 +76,7 @@ class InvitableViewSet:
             changing_for.invite_change(
                 Profile.objects.filter(user=request.user).first(),
                 Profile.objects.filter(
-                    id=request.POST.get('profile_to'),
+                    id=request.data.get('profile_to'),
                 ).first(),
                 request.POST.get('status'),
             )
@@ -132,6 +132,9 @@ class CircleViewSet(
     search_fields = (
         'title',
     )
+
+    def create(self, request):
+        return Circle.create(request.user.profile, **request.data)
 
 
 class InvitationViewSet(viewsets.ModelViewSet):

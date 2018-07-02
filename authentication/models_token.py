@@ -14,6 +14,74 @@ from hashid_field import HashidAutoField
 from bookworm.mixins import PreserveModelMixin
 
 
+class TokenManager(models.Manager):
+
+    def get_cipher(self):
+        """Create AES cipher to manage the storage of values.
+
+        @:return Crypto.cipher.AES
+        """
+        return AES.new(
+            settings.AES_KEY_AUTHENTICATION,
+            AES.MODE_CBC,
+            settings.AES_IV456_AUTHENTICATION,
+        )
+
+    def generate_sha256(self, seed=None):
+        """Generate a random hexadecimal str, 2 salts are used.
+
+        @:param seed: str to set for hashing or now timestamp is used.
+
+        @:return str
+        """
+        sha_hash = SHA256.new()
+        if not seed:
+            seed = str(timezone.now().timestamp())
+        sha_hash.update(
+            f'{settings.TOKEN_SALT_START}{seed}{settings.TOKEN_SALT_END}'
+        )
+        return sha_hash.hexdigest()
+
+    def create_token(
+            self, token_key, token_value=None, expiry=None, single_use=True):
+        """Create a token.
+
+        @:param token_key: str the key to identify this Token by.
+        @:param token_value: str optional value to store as validation value.
+        @:param expiry: datetime the token will expire.
+        @:param single_use: bool determines a one off use.
+
+        @:return Token
+        """
+        expire_in_day = timezone.now() + timedelta(days=1)
+        expiry_expected = expiry if expiry else expire_in_day
+        aes_object = TokenManager.get_cipher()
+        if not token_value:
+            token_value = TokenManager.generate_sha256(token_key)
+        cipher_text = aes_object.encrypt(token_value)
+        self.filter(
+            key=token_key,
+            validated=False,
+        ).delete()
+        return Token.objects.create(
+            key=token_key,
+            value=cipher_text,
+            expiry=expiry_expected,
+            single_use=single_use,
+        )
+
+    def validation(self, token_key, token_value):
+        """Validate a key value pair.
+
+        @:param token_key: str identifier.
+        @:param token_value: str value stored in cipher.
+
+        @:return bool
+        """
+        token = Token.objects.filter(key=token_key).first()
+        return token.validate(token_value)
+
+
 class Token(PreserveModelMixin):
     """Simple token object."""
 
@@ -43,67 +111,7 @@ class Token(PreserveModelMixin):
         null=True,
     )
 
-    @staticmethod
-    def _get_cipher():
-        """Create AES cipher to manage the storage of values.
-
-        @:return Crypto.cipher.AES
-        """
-        return AES.new(
-            settings.AES_KEY_AUTHENTICATION,
-            AES.MODE_CBC,
-            settings.AES_IV456_AUTHENTICATION,
-        )
-
-    @staticmethod
-    def generate_sha256(seed):
-        """Generate a random hexadecimal str.
-
-        @:return str
-        """
-        sha_hash = SHA256.new()
-        sha_hash.update(
-            f'{settings.TOKEN_SALT_START}{seed}{settings.TOKEN_SALT_END}'
-        )
-        return sha_hash.hexdigest()
-
-    @staticmethod
-    def create(token_key, token_value=None, expiry=None, single_use=True):
-        """Create a token.
-
-        @:param token_key: str the key to identify this Token by.
-        @:param token_value: str optional value to store as validation value.
-
-        @:return Token
-        """
-        expire_in_day = timezone.now() + timedelta(days=1)
-        expiry_expected = expiry if expiry else expire_in_day
-        aes_object = Token._get_cipher()
-        if not token_value:
-            token_value = Token.generate_sha256(token_key)
-        cipher_text = aes_object.encrypt(token_value)
-        Token.objects.filter(
-            key=token_key,
-            validated=False,
-        ).delete()
-        return Token.objects.create(
-            key=token_key,
-            value=cipher_text,
-            expiry=expiry_expected,
-            single_use=single_use,
-        )
-
-    @staticmethod
-    def validation(token_key, token_value):
-        """Validate a key value pair.
-
-        @:param token_key: str identifier.
-        @:param token_value: str value stored in cipher.
-
-        @:return bool
-        """
-        token = Token.objects.filter(key=token_key).first()
-        return token.validate(token_value)
+    objects = TokenManager()
 
     def validate(self, expected_value):
         """Validate the stored value against an expected.
@@ -115,8 +123,8 @@ class Token(PreserveModelMixin):
         if not self.value:
             return False
         now = timezone.now()
-        aes_object = Token._get_cipher()
         expired = self.expiry < now
+        aes_object = self.objects.get_cipher()
         is_valid = aes_object.decrypt(self.value) == expected_value
         if expired or is_valid:
             self.validated = True
