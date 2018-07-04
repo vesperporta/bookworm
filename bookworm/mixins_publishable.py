@@ -56,17 +56,25 @@ class PublishableModelMixin(models.Model):
 
         @:param id, str of identifier requesting access.
 
-        @:return bool, int
+        @:return bool, int, str
         Integer is the index within the tuple access is granted.
+        Last str returned is the `object_id` matching access.
         """
         if not self.published_at:
             return False, None
         published_access = self.published_meta.json.access
         try:
-            id_index = published_access.granted_flat.index(object_id)
-            return True, id_index
+            id_index = published_access.denied_flat.index(object_id)
+            return False, id_index, object_id
         except ValueError:
-            return False, None
+            pass
+        if 'global' in published_access.granted_flat:
+            object_id = 'global'
+        try:
+            id_index = published_access.granted_flat.index(object_id)
+            return True, id_index, object_id
+        except ValueError:
+            return False, None, object_id
 
     def _validate_publish(self, granted_list, block_list):
         """Validate the publishable state of this object with parameters.

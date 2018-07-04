@@ -25,3 +25,14 @@ class LocalisationUnknownLocaleException(ValidationError):
                        f' Language: {language}, Location: {location}.',
         }])
         logger.error(self)
+
+
+class LocalisationCodeRequiredValidation(ValidationError):
+
+    def __init__(self, param):
+        super().__init__([{
+            'code': 'localisation_code_required_validation',
+            'message': f'Localisation code parameter required for request:'
+                       f' {param}.',
+        }])
+        logger.error(self)

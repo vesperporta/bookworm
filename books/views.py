@@ -28,8 +28,10 @@ from books.serializers import (
     ConfirmReadAnswerSerializer,
     ReadSerializer,
 )
+from books.exceptions import BookRequiredValidation
 from posts.views import EmotableViewSet
 from file_store.views import ImagableViewSet
+from meta_info.views import LocalisableViewSetMixin
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +39,7 @@ logger = logging.getLogger(__name__)
 class BookViewSet(
         EmotableViewSet,
         ImagableViewSet,
+        LocalisableViewSetMixin,
         viewsets.ModelViewSet,
 ):
     queryset = Book.objects.all()
@@ -52,6 +55,7 @@ class BookProgressViewSet(viewsets.ModelViewSet):
 
 class BookReviewViewSet(
         EmotableViewSet,
+        LocalisableViewSetMixin,
         viewsets.ModelViewSet,
 ):
     queryset = BookReview.objects.all()
@@ -60,7 +64,10 @@ class BookReviewViewSet(
     search_fields = ('copy', 'book__title', )
 
 
-class BookChapterViewSet(viewsets.ModelViewSet):
+class BookChapterViewSet(
+        LocalisableViewSetMixin,
+        viewsets.ModelViewSet,
+):
     queryset = BookChapter.objects.all()
     serializer_class = BookChapterSerializer
     filter_backends = (filters.SearchFilter,)
@@ -69,6 +76,7 @@ class BookChapterViewSet(viewsets.ModelViewSet):
 
 class ReadingListViewSet(
         EmotableViewSet,
+        LocalisableViewSetMixin,
         viewsets.ModelViewSet,
 ):
     queryset = ReadingList.objects.all()
@@ -98,8 +106,14 @@ class ReadingListViewSet(
     def add_book(self, request, pk, **kwargs):
         """Add a book to a ReadingList object."""
         reading_list = self.get_object()
+        book_id = request.data.get('book')
+        if not book_id:
+            self._book_error_handle(
+                reading_list,
+                BookRequiredValidation('book'),
+            )
         try:
-            reading_list.add_book(request.POST.get('book'))
+            reading_list.add_book(book_id)
         except Book.DoesNotExist as error:
             return self._book_error_handle(reading_list, error)
         return Response(
@@ -115,8 +129,14 @@ class ReadingListViewSet(
     def remove_book(self, request, pk, **kwargs):
         """Remove a book from a ReadingList object."""
         reading_list = self.get_object()
+        book_id = request.data.get('book')
+        if not book_id:
+            self._book_error_handle(
+                reading_list,
+                BookRequiredValidation('book'),
+            )
         try:
-            reading_list.remove_book(request.POST.get('book'))
+            reading_list.remove_book(book_id)
         except Book.DoesNotExist as error:
             return self._book_error_handle(reading_list, error)
         return Response(
