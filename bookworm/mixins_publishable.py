@@ -11,6 +11,7 @@ from bookworm.exceptions import (
     PublishableObjectNotDefined,
     PublishableValidationError,
     NoPublishedDataError,
+    PublishedUnauthorisedValidation,
 )
 
 
@@ -25,6 +26,9 @@ TAGS = (
 
 class PublishableModelMixin(models.Model):
     """Enable a model to be publishable and visible to public view."""
+
+    PUBLISHED_GLOBAL_KEY = 'global-keyword'
+    PUBLISHED_KEYWORDS = [PUBLISHED_GLOBAL_KEY, 'global', ]
 
     published_meta = models.ForeignKey(
         MetaInfo,
@@ -42,8 +46,23 @@ class PublishableModelMixin(models.Model):
     def published_at(self):
         return self.published_meta.created_at if self.published_meta else None
 
-    @property
-    def published_content(self):
+    def published_content(self, object_accessing):
+        """Fetch the published information for this object.
+
+        @:param object_accessing: object wanting access to the published data.
+
+        @:return dict
+
+        @:raises PublishedUnauthorisedValidation
+        @:raises NoPublishedDataError
+        """
+        if object_accessing in PublishableModelMixin.PUBLISHED_KEYWORDS:
+            key = PublishableModelMixin.PUBLISHED_GLOBAL_KEY
+        else:
+            key = f'{object_accessing.id}-{object_accessing.__class__}'
+        access = self.has_published_naive_access(key)
+        if not access:
+            raise PublishedUnauthorisedValidation(object_accessing)
         try:
             return self.published_meta.json.output
         except AttributeError:
@@ -54,29 +73,29 @@ class PublishableModelMixin(models.Model):
 
         Will return `False, None` if self has no published data.
 
-        @:param id, str of identifier requesting access.
+        @:param object_id, str of identifier requesting access.
 
         @:return bool, int, str
         Integer is the index within the tuple access is granted.
         Last str returned is the `object_id` matching access.
         """
         if not self.published_at:
-            return False, None
+            return False, None, object_id
         published_access = self.published_meta.json.access
         try:
             id_index = published_access.denied_flat.index(object_id)
             return False, id_index, object_id
         except ValueError:
             pass
-        if 'global' in published_access.granted_flat:
-            object_id = 'global'
+        if self.PUBLISHED_GLOBAL_KEY in published_access.granted_flat:
+            object_id = self.PUBLISHED_GLOBAL_KEY
         try:
             id_index = published_access.granted_flat.index(object_id)
             return True, id_index, object_id
         except ValueError:
             return False, None, object_id
 
-    def _validate_publish(self, granted_list, block_list):
+    def validate_publish(self, granted_list, block_list):
         """Validate the publishable state of this object with parameters.
 
         @:param granted_list, tuple supplied to `self.publish`.
@@ -102,12 +121,37 @@ class PublishableModelMixin(models.Model):
         if validate_errors:
             raise PublishableValidationError(self, validate_errors)
 
+    def _generate_access_json(self, granted_list, block_list):
+        """Create access and deny object to be stroed with published data.
+
+        @:param granted_list, tuple as described above.
+        @:param block_list, tuple as described above.
+
+        @:return dict
+        """
+        granted_flat = [
+            '-'.join(n)
+            if n != self.PUBLISHED_GLOBAL_KEY else n
+            for n in granted_list
+        ]
+        denied_flat = [
+            '-'.join(n)
+            if n != self.PUBLISHED_GLOBAL_KEY else n
+            for n in block_list
+        ]
+        return {
+            'granted': granted_list,
+            'granted_flat': granted_flat,
+            'denied': block_list,
+            'denied_flat': denied_flat,
+        }
+
     def publish(self, granted_list, block_list):
         """Publish this object.
 
         management of what is access and blocked:
         (
-            ('global', 'keyword'),
+            PublishableModelMixin.PUBLISHED_GLOBAL_KEY,
             ('id', '__class__'),
         )
 
@@ -116,18 +160,13 @@ class PublishableModelMixin(models.Model):
 
         @:raises PublishableObjectNotDefined
         """
-        self._validate_publish(granted_list, block_list)
+        self.validate_publish(granted_list, block_list)
         output_source = {
             'source': {
                 'id': self.id,
                 'class': self.__class__,
             },
-            'access': {
-                'granted': granted_list,
-                'granted_flat': [n[0] for n in granted_list],
-                'denied': block_list,
-                'denied_flat': [n[0] for n in block_list],
-            },
+            'access': self._generate_access_json(granted_list, block_list),
             'output': getattr(self, 'Publishable').serializer(self).data,
         }
         if self.published_meta:

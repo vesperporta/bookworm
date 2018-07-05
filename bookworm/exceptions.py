@@ -111,3 +111,13 @@ class DataMissingIntegrityError(IntegrityError):
                     ),
         }])
         logger.error(self)
+
+
+class PublishedUnauthorisedValidation(ValidationError):
+
+    def __init__(self, access_from):
+        super().__init__([{
+            'code': 'published_access_unauthorised_validation',
+            'message': f'Object {access_from} not authorised.',
+        }])
+        logger.error(self)

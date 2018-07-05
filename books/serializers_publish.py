@@ -2,73 +2,41 @@
 
 from rest_framework import serializers
 
+from books.models import BookReview
 
-class PublishBookSerializer(serializers.ModelSerializer):
-    """Book model serializer for publishing."""
+
+class BookReviewPublishSerializer(serializers.ModelSerializer):
+    """BookReview publishable serializer."""
+
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='bookreview-detail',
+    )
+    book = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='book-detail',
+        queryset=Book.objects.all(),
+    )
+    progress = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='bookprogress-detail',
+        queryset=BookProgress.objects.all(),
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
-        model = 'books.models.Book'
+        model = BookReview
         read_only_fields = (
             'id',
-            'modified_at',
-        )
-        fields = read_only_fields + (
-            'title',
-            'description',
-        )
-        exclude = []
-
-
-class PublishBookProgressSerializer(serializers.ModelSerializer):
-    """BookProgress model serializer for publishing."""
-    book = PublishBookSerializer(many=False)
-
-    class Meta:
-        model = 'books.models.BookProgress'
-        exclude = []
-        read_only_fields = (
-            'modified_at',
-        )
-        fields = read_only_fields + (
-            'percent',
-            'page',
-            'progress',
-            'book',
-        )
-
-
-class PublishReadingListSerializer(serializers.ModelSerializer):
-    """ReadingList publish serializer."""
-    books = PublishBookSerializer(many=True)
-
-    class Meta:
-        model = 'books.models.ReadingList'
-        read_only_fields = (
-            'modified_at',
-        )
-        fields = read_only_fields + (
-            'title',
-            'copy',
-            'books',
-        )
-        exclude = []
-
-
-class PublishBookReviewSerializer(serializers.ModelSerializer):
-    """BookReview publishable serializer."""
-    book = PublishBookSerializer(many=False)
-    progress = PublishBookProgressSerializer(many=False)
-
-    class Meta:
-        model = 'books.models.BookReview'
-        read_only_fields = (
-            'modified_at',
-        )
-        fields = read_only_fields + (
+            'created_at',
+            'profile',
             'type',
             'copy',
             'rating',
             'book',
             'progress',
         )
+        fields = read_only_fields
         exclude = []
