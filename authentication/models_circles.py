@@ -267,7 +267,7 @@ class CircleManager(models.Manager):
         @:return Circle
         """
         token = Token.objects.create_token(
-            f'original#{profile.email}',
+            f'creator#{profile.email}',
             token_value=Token.objects.generate_sha256(profile.email),
         )
         invite = Invitation.objects.create(
@@ -276,7 +276,7 @@ class CircleManager(models.Manager):
             status=Invitation.STATUSES.elevated,
             token=token,
         )
-        circle = self.create(**kwargs, invites=[invite])
+        circle = self.create(invites=[invite], **kwargs)
         token.validated = True
         token.expiry = timezone.now()
         token.save()
