@@ -13,10 +13,12 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 from __future__ import absolute_import
 
 import os
+import datetime
+import environ
 
 from celery.schedules import crontab
 
-import environ
+# from authentication.tasks import task_get_user_secret_key
 
 
 env = environ.Env()
@@ -138,14 +140,16 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissions'
+        'rest_framework.permissions.DjangoModelPermissions',
+        'rest_framework.permissions.IsAuthenticated',
     ],
 
     # Only allow Token Authentication for API in production
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
     ),
 
     # ... other configurations
@@ -153,6 +157,41 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'django_filters.rest_framework.DjangoFilterBackend',
     )
+}
+
+JWT_AUTH = {
+    'JWT_ENCODE_HANDLER':
+        'rest_framework_jwt.utils.jwt_encode_handler',
+
+    'JWT_DECODE_HANDLER':
+        'rest_framework_jwt.utils.jwt_decode_handler',
+
+    'JWT_PAYLOAD_HANDLER':
+        'rest_framework_jwt.utils.jwt_payload_handler',
+
+    'JWT_PAYLOAD_GET_USER_ID_HANDLER':
+        'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
+
+    'JWT_RESPONSE_PAYLOAD_HANDLER':
+        'rest_framework_jwt.utils.jwt_response_payload_handler',
+
+    'JWT_SECRET_KEY': SECRET_KEY,
+    'JWT_GET_USER_SECRET_KEY': 'authentication.tasks.task_get_user_secret_key',
+    'JWT_PUBLIC_KEY': None,
+    'JWT_PRIVATE_KEY': None,
+    'JWT_ALGORITHM': 'HS512',
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_LEEWAY': 0,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=300),
+    'JWT_AUDIENCE': None,
+    'JWT_ISSUER': None,
+
+    'JWT_ALLOW_REFRESH': False,
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+
+    'JWT_AUTH_HEADER_PREFIX': 'JWT',
+    'JWT_AUTH_COOKIE': None,
 }
 
 # Internationalization
@@ -323,13 +362,15 @@ SALT_FILESTORE_DOCUMENT = env(
 
 AES_KEY_AUTHENTICATION = env(
     'AES_KEY_AUTHENTICATION',
-    default='CFhT4`GlA>&3Hfj6X,~SK2ONmZ*-(1wD#)75IWsU.^iMzk8o<"',
+    default='EMI164xKw7lQhmCGuH82DXtgFvbnV9yO',
 )
 AES_IV456_AUTHENTICATION = env(
-    'AES_KEY_AUTHENTICATION',
-    default='TC:mr3?jueVhyWAf+[n7GoqO6dU*=M1;(~,0!|bBs>^`JIz.x4',
+    'AES_IV456_AUTHENTICATION',
+    default='U\x80\x83&\x97\xb29\x07\xc9\x17\xb6\xcak0\x11\xb9',
 )
 
+TOKEN_RANDOM_KEY_LENGTH = env.int('TOKEN_RANDOM_KEY_LENGTH', default=32)
+TOKEN_RANDOM_VALUE_LENGTH = env.int('TOKEN_RANDOM_VALUE_LENGTH', default=64)
 TOKEN_SALT_START = env(
     'TOKEN_SALT_START',
     default='Kx(62Q~o0kjRyl|_sr1<*z8+.HN>b/5ci4LtMqmT,Y3@^`fJEh',

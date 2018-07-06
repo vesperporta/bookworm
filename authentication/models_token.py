@@ -1,5 +1,7 @@
 """Tokenisation of objects for simple authentication."""
 
+import random
+
 from datetime import timedelta
 
 from django.conf import settings
@@ -27,6 +29,16 @@ class TokenManager(models.Manager):
             settings.AES_IV456_AUTHENTICATION,
         )
 
+    def get_value(self, token):
+        """Using known values attempt to decrypt a tokens value.
+
+        @:param token: Token object.
+
+        @:returns str
+        """
+        aes_object = self.get_cipher()
+        return aes_object.decrypt(bytes(token.value)).rstrip()
+
     def generate_sha256(self, seed=None):
         """Generate a random hexadecimal str, 2 salts are used.
 
@@ -42,6 +54,31 @@ class TokenManager(models.Manager):
         )
         return sha_hash.hexdigest()
 
+    def create_random(self, expiry=None, single_use=True):
+        """Generate a token based on a random key and value.
+
+        @:param expiry: datetime the token will expire.
+        @:param single_use: bool determines a one off use.
+
+        @:return Token
+        """
+        return self.create_token(
+            ''.join(
+                [
+                    random.choice(settings.HASH_FIELD_ALPHABET)
+                    for i in range(settings.TOKEN_RANDOM_KEY_LENGTH)
+                ]
+            ),
+            token_value=''.join(
+                [
+                    random.choice(settings.HASH_FIELD_ALPHABET)
+                    for i in range(settings.TOKEN_RANDOM_VALUE_LENGTH)
+                ]
+            ),
+            expiry=expiry,
+            single_use=single_use,
+        )
+
     def create_token(
             self, token_key, token_value=None, expiry=None, single_use=True):
         """Create a token.
@@ -55,9 +92,13 @@ class TokenManager(models.Manager):
         """
         expire_in_day = timezone.now() + timedelta(days=1)
         expiry_expected = expiry if expiry else expire_in_day
-        aes_object = TokenManager.get_cipher()
+        aes_object = self.get_cipher()
         if not token_value:
-            token_value = TokenManager.generate_sha256(token_key)
+            token_value = self.generate_sha256(token_key)
+        # padding_req = len(token_value) % 16
+        # if padding_req != 0:
+        #     token_value = token_value.ljust(16 - padding_req)
+        # raise Exception(f'length = {len(token_value)}')
         cipher_text = aes_object.encrypt(token_value)
         self.filter(
             key=token_key,
@@ -92,7 +133,7 @@ class Token(PreserveModelMixin):
     key = models.TextField(
         verbose_name=_('Token key'),
     )
-    value = models.TextField(
+    value = models.BinaryField(
         verbose_name=_('Token value'),
         blank=True,
     )
@@ -124,8 +165,7 @@ class Token(PreserveModelMixin):
             return False
         now = timezone.now()
         expired = self.expiry < now
-        aes_object = self.objects.get_cipher()
-        is_valid = aes_object.decrypt(self.value) == expected_value
+        is_valid = self.objects.get_value(self) == expected_value
         if expired or is_valid:
             self.validated = True
             self.expiry = now

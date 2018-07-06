@@ -8,6 +8,7 @@ from django_common.auth_backends import User
 from model_utils import Choices
 from hashid_field import HashidAutoField
 
+from authentication.models_token import Token
 from bookworm.mixins import PreserveModelMixin
 from meta_info.models import MetaInfo, MetaInfoMixin
 
@@ -190,6 +191,14 @@ class Profile(PersonMixin, PreserveModelMixin):
         MetaInfo,
         related_name='profiles+',
         verbose_name=_('Meta data'),
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
+    auth_token = models.ForeignKey(
+        Token,
+        related_name='authentication_token+',
+        verbose_name=_('Authentication'),
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,

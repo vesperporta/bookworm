@@ -1,5 +1,8 @@
 """Tasks required from authentication service."""
 
+from authentication.models_token import Token
+
+
 def task_send_message_invitable_action(action_performed, object_actioned):
     """Task expected from Invitable actions to process messages required.
 
@@ -7,3 +10,27 @@ def task_send_message_invitable_action(action_performed, object_actioned):
     @:param object_actioned: object invitable action taken upon.
     """
     pass
+
+
+def task_reset_user_secret_key(user):
+    """Rest authentication token for a users profile.
+
+    @:param user: User object.
+
+    @:returns str
+    """
+    user.profile.auth_token = Token.objects.create_random()
+    user.profile.save()
+    return Token.objects.get_value(user.profile.auth_token)
+
+
+def task_get_user_secret_key(user):
+    """Obtain authentication token for a users profile.
+
+    @:param user: User object.
+
+    @:returns str
+    """
+    if not user.profile.auth_token:
+        return task_reset_user_secret_key(user)
+    return Token.objects.get_value(user.profile.auth_token)
