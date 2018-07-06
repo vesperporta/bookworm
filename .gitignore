@@ -96,13 +96,6 @@ celerybeat-schedule
 venv/
 ENV/
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
 # mkdocs documentation
 /site
 
@@ -114,17 +107,8 @@ __pycache__/
 # ignore sql lite database
 db.*
 
-# pyenv
-.python-version
-
-# Pycharm/IntelliJ
-.idea/
-
 # Ignore anything in static/admin
 static/admin/
-
-# Ignore the local_settings.py
-bookworm/local_settings.py
 
 #Ipython Notebook
 .ipynb_checkpoints
@@ -132,8 +116,5 @@ bookworm/local_settings.py
 celerybeat-schedule
 celerybeat.pid
 
-# InteliJ Idea
-*.iml
-.idea/*
-
-TODO.md
+# Ignore the local_settings.py
+bookworm/local_settings.py
