@@ -95,10 +95,6 @@ class TokenManager(models.Manager):
         aes_object = self.get_cipher()
         if not token_value:
             token_value = self.generate_sha256(token_key)
-        # padding_req = len(token_value) % 16
-        # if padding_req != 0:
-        #     token_value = token_value.ljust(16 - padding_req)
-        # raise Exception(f'length = {len(token_value)}')
         cipher_text = aes_object.encrypt(token_value)
         self.filter(
             key=token_key,
