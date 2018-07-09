@@ -1,6 +1,9 @@
 """Books app serializers."""
 
+from django_common.auth_backends import User
+
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from bookworm.exceptions import InvalidOperation
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
@@ -13,6 +16,7 @@ from authentication.models_circles import (
     Circle,
     Invitation,
 )
+from authentication.models_token import Token
 
 
 class ProfileSerializer(
@@ -23,6 +27,10 @@ class ProfileSerializer(
         many=False,
         read_only=True,
         view_name='profile-detail',
+    )
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=Profile.objects.all())]
     )
     pen_names = serializers.HyperlinkedRelatedField(
         many=True,
@@ -72,6 +80,23 @@ class ProfileSerializer(
             'invitations',
         )
         exclude = []
+
+    def create(self, validated_data):
+        email = validated_data.get('email')
+        created_profile = super().create(validated_data)
+        validated_data.update(
+            {
+                'profile': created_profile,
+            }
+        )
+        username = Token.objects.generate_sha256(email)
+        User.objects.create_user(
+            username[:150],
+            email=email,
+            password=validated_data.get('password'),
+            **validated_data,
+        )
+        return created_profile
 
 
 class AuthorSerializer(
