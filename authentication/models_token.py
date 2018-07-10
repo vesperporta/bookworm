@@ -49,9 +49,8 @@ class TokenManager(models.Manager):
         sha_hash = SHA256.new()
         if not seed:
             seed = str(timezone.now().timestamp())
-        sha_hash.update(
-            f'{settings.TOKEN_SALT_START}{seed}{settings.TOKEN_SALT_END}'
-        )
+        hashing = f'{settings.TOKEN_SALT_START}{seed}{settings.TOKEN_SALT_END}'
+        sha_hash.update(hashing.encode('utf-8'))
         return sha_hash.hexdigest()
 
     def create_random(self, expiry=None, single_use=True):

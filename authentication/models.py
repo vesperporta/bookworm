@@ -105,11 +105,13 @@ class PersonMixin(models.Model):
         max_length=64,
         db_index=True,
         blank=True,
+        null=True,
     )
     name_family = models.CharField(
         max_length=64,
         db_index=True,
         blank=True,
+        null=True,
     )
     name_middle = models.CharField(
         max_length=128,
@@ -119,14 +121,16 @@ class PersonMixin(models.Model):
     name_display = models.CharField(
         max_length=254,
         db_index=True,
+        blank=True,
+        null=True,
     )
     birth_date = models.DateField(
-        null=True,
         blank=True,
+        null=True,
     )
     death_date = models.DateField(
-        null=True,
         blank=True,
+        null=True,
     )
 
     class Meta:

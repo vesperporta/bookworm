@@ -3,6 +3,11 @@
 from rest_framework import (status, viewsets, filters)
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAdminUser,
+)
 
 from authentication.models import (
     ContactMethod,
@@ -139,10 +144,20 @@ class InvitableViewSet:
         )
 
 
+class ProfilePermission(IsAuthenticated):
+
+    def has_permission(self, request, view):
+        return (
+                view.action in ['create']
+                or super().has_permission(request, view)
+        )
+
+
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-    filter_backends = (filters.SearchFilter,)
+    permission_classes = (ProfilePermission, )
+    filter_backends = (filters.SearchFilter, )
     search_fields = (
         'name_first',
         'name_last',

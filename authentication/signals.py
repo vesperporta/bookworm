@@ -109,40 +109,18 @@ def create_user_profile(sender, instance, created, **kwargs):
         detail=instance.email,
         email=instance.email,
     )
-    if not instance.profile:
-        profile = Profile(
-            user=instance,
-            email=instance.email,
-        )
-        if instance.is_staff:
-            profile.type = Profile.TYPES.admin
-        if instance.is_superuser:
-            profile.type = Profile.TYPES.destroyer
-        profile.save()
-        profile.contacts.add(contact)
-
-
-@receiver(post_save, sender=Profile)
-def post_save_profile_user(sender, instance, **kwargs):
-    """Update User object related to profile changes."""
-    save_changes = False
-    if instance.type == Profile.TYPES.admin and not instance.user.is_staff:
-        save_changes = True
-        instance.user.is_staff = True
-    if (
-            instance.type == Profile.TYPES.destroyer and
-            not instance.user.is_superuser
-    ):
-        save_changes = True
-        instance.user.is_superuser = True
-    if instance.type < Profile.TYPES.admin:
-        save_changes = True
-        if instance.user.is_staff:
-            instance.user.is_staff = False
-        if instance.user.is_superuser:
-            instance.user.is_superuser = False
-    if save_changes:
-        instance.user.save()
+    profile_type = Profile.TYPES.user
+    if instance.is_staff:
+        profile_type = Profile.TYPES.admin
+    if instance.is_superuser:
+        profile_type = Profile.TYPES.destroyer
+    profile = Profile.objects.create(
+        user=instance,
+        email=instance.email,
+        type=profile_type,
+    )
+    profile.save()
+    profile.contacts.add(contact)
 
 
 @receiver(post_save, sender=User)

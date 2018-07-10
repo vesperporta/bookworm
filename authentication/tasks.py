@@ -1,6 +1,7 @@
 """Tasks required from authentication service."""
 
 from authentication.models_token import Token
+from authentication.serializers import ProfileSerializer
 
 
 def task_send_message_invitable_action(action_performed, object_actioned):
@@ -34,3 +35,14 @@ def task_get_user_secret_key(user):
     if not user.profile.auth_token:
         return task_reset_user_secret_key(user)
     return Token.objects.get_value(user.profile.auth_token)
+
+
+def jwt_response_payload_handler(token, user=None, request=None):
+    """JWT login response with serialized Profile data."""
+    return {
+        'token': token,
+        'profile': ProfileSerializer(
+            user.profile,
+            context={'request': request},
+        ).data
+    }

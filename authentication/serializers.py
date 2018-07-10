@@ -45,16 +45,6 @@ class ProfileSerializer(
         view_name='contactmethod-detail',
         queryset=ContactMethod.objects.all(),
     )
-    circles = serializers.HyperlinkedRelatedField(
-        many=True,
-        view_name='circle-detail',
-        queryset=Circle.objects.all(),
-    )
-    invitations = serializers.HyperlinkedRelatedField(
-        many=True,
-        read_only=True,
-        view_name='invitation-detail',
-    )
 
     class Meta:
         model = Profile
@@ -77,8 +67,6 @@ class ProfileSerializer(
             'death_date',
             'pen_names',
             'contacts',
-            'circles',
-            'invitations',
         )
         exclude = []
 
@@ -99,22 +87,17 @@ class ProfileSerializer(
             # Signals pre and post are contained within transaction.atomic.
             # User objects username field character limit is 150.
             created_user = User.objects.create_user(
-                username[:150],
+                username=username[:150],
                 email=email,
                 password=validated_data.get('password'),
-                **validated_data,
             )
         allowed_keys = [
             'name_title', 'name_first', 'name_family', 'name_middle',
             'name_display', 'birth_date', 'death_date',
         ]
-        for key, val in validated_data.items():
-            if key not in allowed_keys:
-                validated_data.pop(key)
-                continue
-            setattr(created_user.profile, key, val)
-        if validated_data:
-            created_user.profile.save()
+        for key in allowed_keys:
+            setattr(created_user.profile, key, validated_data.get(key))
+        created_user.profile.save(update_fields=allowed_keys)
         return created_user.profile
 
 
