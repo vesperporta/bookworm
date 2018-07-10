@@ -180,7 +180,9 @@ class ContactMethodViewSet(viewsets.ModelViewSet):
     queryset = ContactMethod.objects.all()
     serializer_class = ContactMethodSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('detail',)
+    search_fields = (
+        'detail',
+    )
 
 
 class CircleViewSet(
