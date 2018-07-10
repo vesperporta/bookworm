@@ -179,11 +179,6 @@ class CircleViewSet(
         'title',
     )
 
-    def create(self, request):
-        return Circle.objects.create_circle(
-            request.user.profile, **request.data
-        )
-
 
 class InvitationViewSet(viewsets.ModelViewSet):
     queryset = Invitation.objects.all()

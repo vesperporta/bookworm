@@ -104,6 +104,11 @@ def create_user_profile(sender, instance, created, **kwargs):
     """Create profile when an user instance is created."""
     if not created:
         return
+    contact = ContactMethod.objects.create(
+        type=ContactMethod.TYPES.email,
+        detail=instance.email,
+        email=instance.email,
+    )
     if not instance.profile:
         profile = Profile(
             user=instance,
@@ -114,12 +119,7 @@ def create_user_profile(sender, instance, created, **kwargs):
         if instance.is_superuser:
             profile.type = Profile.TYPES.destroyer
         profile.save()
-    contact = ContactMethod.objects.create(
-        type=ContactMethod.TYPES.email,
-        detail=instance.email,
-        email=instance.email,
-    )
-    profile.contacts.set([contact])
+        profile.contacts.add(contact)
 
 
 @receiver(post_save, sender=Profile)
