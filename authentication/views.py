@@ -4,9 +4,8 @@ from rest_framework import (status, viewsets, filters)
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.permissions import (
-    AllowAny,
     IsAuthenticated,
-    IsAdminUser,
+    AllowAny,
 )
 
 from authentication.models import (
@@ -144,12 +143,21 @@ class InvitableViewSet:
         )
 
 
-class ProfilePermission(IsAuthenticated):
+class ProfilePermission(AllowAny):
 
     def has_permission(self, request, view):
+        """Allow creation, listing and viewing your own profile unless
+        authenticated as an admin to view all objects."""
         return (
                 view.action in ['create']
-                or super().has_permission(request, view)
+                or request.user.profile.type >= Profile.TYPES.admin
+                or (request.user and request.user.is_authenticated)
+        )
+
+    def has_object_permission(self, request, view, obj):
+        """Users may only see their own Profile information."""
+        return (
+                obj.id == request.user.profile.id
         )
 
 
@@ -163,6 +171,16 @@ class ProfileViewSet(viewsets.ModelViewSet):
         'name_last',
         'email',
     )
+
+    def get_queryset(self):
+        """When listing profiles show all only to administrators."""
+        queryset = super().get_queryset()
+        if (
+                self.action in ['list']
+                and self.request.user.profile.type < Profile.TYPES.admin
+        ):
+            return queryset.filter(id=self.request.user.profile.id)
+        return queryset
 
 
 class AuthorViewSet(viewsets.ModelViewSet):
