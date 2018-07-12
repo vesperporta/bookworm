@@ -148,6 +148,28 @@ class InvitableViewSet:
             }
         )
 
+    @detail_route(methods=['get'])
+    def invites_withdrawn(self, request, pk, **kwargs):
+        """Invite a profile to another object."""
+        inspecting = self.get_object()
+        if not inspecting.invites.filter(
+                profile_to__id=request.user.profile.id,
+                status=Invitation.STATUSES.elevated,
+        ).first():
+            return self._invitation_error_handle(
+                {'detail': _('unauthorized'), },
+                error_status=status.HTTP_401_UNAUTHORIZED,
+            )
+        return Response(
+            {
+                'status': 'ok',
+                'ok': '🖖',
+                'withdrawn': list(inspecting.invites.filter(
+                    status=Invitation.STATUSES.withdrawn,
+                )),
+            }
+        )
+
 
 class ProfilePermission(permissions.IsAuthenticated):
 
@@ -291,31 +313,6 @@ class CircleViewSet(
             return queryset
         return queryset.filter(
             invites__profile_to__id=self.request.user.profile.id,
-        )
-
-    @detail_route(methods=['get'])
-    def invites_withdrawn(self, request, pk, **kwargs):
-        """Invite a profile to another object."""
-        circle_inspecting = self.get_object()
-        if not circle_inspecting.invites.filter(
-            profile_to__id=request.user.profile.id,
-            status=Invitation.STATUSES.elevated,
-        ).first():
-            return Response(
-                {
-                    'status': 'unauthorized',
-                    'ok': '💩',
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-        return Response(
-            {
-                'status': 'ok',
-                'ok': '🖖',
-                'withdrawn': list(circle_inspecting.invites.filter(
-                    status=Invitation.STATUSES.withdrawn,
-                )),
-            }
         )
 
 
