@@ -81,7 +81,10 @@ class ProfileViewSet(viewsets.ModelViewSet):
 class AuthorPermission(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
-        """Permissions for the Author view.
+        """Author objects are viewable by all.
+
+        User authentication required otherwise.
+        Admins can do all actions.
         """
         authenticated = super().has_permission(request, view)
         if authenticated:
@@ -92,7 +95,10 @@ class AuthorPermission(permissions.IsAuthenticated):
         return authenticated
 
     def has_object_permission(self, request, view, obj):
-        """Author object level.
+        """Authentication required to update an author.
+
+        Owners of an Author are able to update that author.
+        Admins can do all actions.
         """
         authenticated = super().has_object_permission(request, view, obj)
         if authenticated:
@@ -105,7 +111,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
     permission_classes = (AuthorPermission, )
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, )
     search_fields = (
         'name_first',
         'name_last',
@@ -135,7 +141,7 @@ class ContactMethodViewSet(viewsets.ModelViewSet):
         AuthenticatedOrAdminPermission,
         ContactMethodPermission,
     )
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, )
     search_fields = (
         'detail',
     )
@@ -183,8 +189,11 @@ class CirclePermission(permissions.IsAuthenticated):
 class CircleViewSet(InvitableViewSetMixin, viewsets.ModelViewSet):
     queryset = Circle.objects.all()
     serializer_class = CircleSerializer
-    permission_classes = (AuthenticatedOrAdminPermission, CirclePermission, )
-    filter_backends = (filters.SearchFilter,)
+    permission_classes = (
+        AuthenticatedOrAdminPermission,
+        CirclePermission,
+    )
+    filter_backends = (filters.SearchFilter, )
     search_fields = (
         'title',
     )
@@ -215,7 +224,7 @@ class AuthenticatedAndReadOnlyPermission(permissions.IsAuthenticated):
         """Permissions required:
 
         Admin can view all.
-        Request method is in fae methods and User is authenticated.
+        Request method is in safe methods and User is authenticated.
         """
         authenticated = super().has_permission(request, view)
         if authenticated:
@@ -236,7 +245,7 @@ class CircleInvitedViewSet(viewsets.ModelViewSet):
     queryset = Circle.objects.all()
     serializer_class = CircleSerializer
     permission_classes = (AuthenticatedAndReadOnlyPermission, )
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, )
     search_fields = (
         'title',
     )
@@ -260,7 +269,7 @@ class CircleRejectedViewSet(viewsets.ModelViewSet):
     queryset = Circle.objects.all()
     serializer_class = CircleSerializer
     permission_classes = (AuthenticatedAndReadOnlyPermission, )
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, )
     search_fields = (
         'title',
     )
