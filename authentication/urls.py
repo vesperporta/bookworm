@@ -24,8 +24,8 @@ router.register(r'profile', ProfileViewSet)
 router.register(r'author', AuthorViewSet)
 router.register(r'contact', ContactMethodViewSet)
 router.register(r'circle', CircleViewSet)
-router.register(r'circle/invited', CircleInvitedViewSet)
-router.register(r'circle/rejected', CircleRejectedViewSet)
+router.register(r'circles-invited', CircleInvitedViewSet)
+router.register(r'circles-rejected', CircleRejectedViewSet)
 router.register(r'invitation', InvitationViewSet)
 
 urlpatterns = router.urls
