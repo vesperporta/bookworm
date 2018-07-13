@@ -21,10 +21,21 @@ from authentication.models_circles import (
 from authentication.views_invitable import InvitableViewSetMixin
 
 
+class AuthenticatedOrAdminPermission(permissions.IsAuthenticated):
+
+    def has_permission(self, request, view):
+        """Permissions required are an authenticated user or admin."""
+        authenticated = super().has_permission(request, view)
+        if authenticated:
+            if request.user.profile.type >= Profile.TYPES.admin:
+                return True
+        return authenticated
+
+
 class ProfilePermission(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
-        """Permissions for the Profile model.
+        """Permissions for the Profile view.
 
         Always allow create when not authenticated.
         To view or manage your profile: be authenticated.
@@ -77,9 +88,33 @@ class ProfileViewSet(viewsets.ModelViewSet):
         return queryset
 
 
+class AuthorPermission(permissions.IsAuthenticated):
+
+    def has_permission(self, request, view):
+        """Permissions for the Author view.
+        """
+        authenticated = super().has_permission(request, view)
+        if authenticated:
+            if request.user.profile.type >= Profile.TYPES.admin:
+                return True
+        if view.action in ['list', 'retrieve', ]:
+            return True
+        return authenticated
+
+    def has_object_permission(self, request, view, obj):
+        """Author object level.
+        """
+        authenticated = super().has_object_permission(request, view, obj)
+        if authenticated:
+            if request.user.profile.type >= Profile.TYPES.admin:
+                return True
+        return authenticated and obj.profile.id == request.user.profile.id
+
+
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
+    permission_classes = (AuthorPermission, )
     filter_backends = (filters.SearchFilter,)
     search_fields = (
         'name_first',
@@ -88,24 +123,45 @@ class AuthorViewSet(viewsets.ModelViewSet):
     )
 
 
+class ContactMethodPermission(permissions.IsAuthenticated):
+
+    def has_object_permission(self, request, view, obj):
+        """ContactMethod object permissions.
+
+        Non admins can only interact with ContactMethod's associated with
+        their own Profile.
+        """
+        authenticated = super().has_object_permission(request, view, obj)
+        if authenticated:
+            if request.user.profile.type >= Profile.TYPES.admin:
+                return True
+        return authenticated and obj.profile.contacts.filter(id__in=[obj.id])
+
+
 class ContactMethodViewSet(viewsets.ModelViewSet):
     queryset = ContactMethod.objects.all()
     serializer_class = ContactMethodSerializer
+    permission_classes = (
+        AuthenticatedOrAdminPermission,
+        ContactMethodPermission,
+    )
     filter_backends = (filters.SearchFilter,)
     search_fields = (
         'detail',
     )
 
+    def get_queryset(self):
+        """ContactMethod queryset.
 
-class AuthenticatedOrAdminPermission(permissions.IsAuthenticated):
-
-    def has_permission(self, request, view):
-        """Permissions required are an authenticated user or admin."""
-        authenticated = super().has_permission(request, view)
-        if authenticated:
-            if request.user.profile.type >= Profile.TYPES.admin:
-                return True
-        return authenticated
+        Non admins only see their own ContactMethods.
+        """
+        queryset = super().get_queryset()
+        if (
+                self.action in ['list', 'retrieve', ]
+                and self.request.user.profile.type < Profile.TYPES.admin
+        ):
+            return self.request.user.profile.contacts.all()
+        return queryset
 
 
 class CirclePermission(permissions.IsAuthenticated):
