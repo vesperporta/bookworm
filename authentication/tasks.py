@@ -4,7 +4,11 @@ from authentication.models_token import Token
 from authentication.serializers import ProfileSerializer
 
 
-def task_send_message_invitable_action(action_performed, object_actioned):
+def task_send_message_invitable_action(
+        action_performed,
+        object_actioned,
+        invite_validated,
+):
     """Task expected from Invitable actions to process messages required.
 
     @:param action_performed: str representation of action.

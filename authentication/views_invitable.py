@@ -85,9 +85,11 @@ class InvitableViewSetMixin:
 
     @detail_route(methods=['post'])
     def invite_validate(self, request, pk, **kwargs):
+        """Validate a token of an Invitation and accept Invitation."""
         changing_for = self.get_object()
         invite = changing_for.invites.filter(
-            profile_to=request.data.get('profile_to')
+            profile_to=request.data.get('profile_to'),
+            status=Invitation.STATUSES.invited,
         )
         try:
             invite.token_verify(request.data.get('token'))
@@ -96,8 +98,10 @@ class InvitableViewSetMixin:
                 error, error_status=status.HTTP_404_NOT_FOUND, )
         except InvitationAlreadyVerifiedError as error:
             return self._invitation_error_handle(error)
+        invite.status = Invitation.STATUSES.accepted
+        invite.save()
         task_send_message_invitable_action.delay(
-            'invite_validate', changing_for)
+            'invite_validate', changing_for, invite)
         return Response(
             {
                 'status': 'validated',
@@ -115,6 +119,7 @@ class InvitableViewSetMixin:
         invite = changing_for.invites.filter(
             profile_to__id=request.data.get('profile_to'),
             profile__id=request.user.profile.id,
+            status=Invitation.STATUSES.invited,
         )
         if not invite:
             return self._invitation_error_handle(
@@ -129,14 +134,14 @@ class InvitableViewSetMixin:
             'invite_token_renew', changing_for)
         return Response(
             {
-                'status': 'validated',
+                'status': 'renewed',
                 'ok': '🖖',
             }
         )
 
     @detail_route(methods=['get'])
     def invites_withdrawn(self, request, pk, **kwargs):
-        """Invite a profile to another object."""
+        """List Invitations a Profile has withdrawn from."""
         inspecting = self.get_object()
         if not inspecting.invites.filter(
                 profile_to__id=request.user.profile.id,

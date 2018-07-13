@@ -164,6 +164,7 @@ class ContactMethodSerializer(
             'meta_info',
         )
         fields = read_only_fields + (
+            'profile',
             'detail',
             'email',
         )
