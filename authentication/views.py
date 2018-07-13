@@ -2,6 +2,7 @@
 
 from rest_framework import (viewsets, filters, permissions)
 
+from authentication.permissions import AuthenticatedOrAdminPermission
 from authentication.models import (
     ContactMethod,
     Profile,
@@ -19,17 +20,6 @@ from authentication.models_circles import (
     Invitation,
 )
 from authentication.views_invitable import InvitableViewSetMixin
-
-
-class AuthenticatedOrAdminPermission(permissions.IsAuthenticated):
-
-    def has_permission(self, request, view):
-        """Permissions required are an authenticated user or admin."""
-        authenticated = super().has_permission(request, view)
-        if authenticated:
-            if request.user.profile.type >= Profile.TYPES.admin:
-                return True
-        return authenticated
 
 
 class ProfilePermission(permissions.IsAuthenticated):
@@ -71,7 +61,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
     search_fields = (
         'name_first',
         'name_last',
-        'email',
+        'contacts__detail',
     )
 
     def get_queryset(self):
@@ -119,7 +109,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
     search_fields = (
         'name_first',
         'name_last',
-        'email',
+        'contacts__detail',
     )
 
 
