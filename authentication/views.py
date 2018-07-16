@@ -179,11 +179,11 @@ class CirclePermission(permissions.IsAuthenticated):
             status__gt=Invitation.STATUSES.invited,
         ).first()
         if not accepted_invite:
-            return request.method in ['create']
+            return view.action in ['create']
         invite_elevated = accepted_invite.status == Invitation.STATUSES.elevated
         if (
                 not invite_elevated and not is_admin
-                and request.method in ['update', 'partial_update', 'destroy']
+                and view.action in ['update', 'partial_update', 'destroy']
         ):
             return False
         return invite_elevated or is_admin
@@ -204,63 +204,27 @@ class CircleViewSet(InvitableViewSetMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         """Queryset for Circle management.
 
-        Users invited to Circle's
+        User can view their active Circle's by default.
+
+        With request query_params the follow switches are applied disregarding
+        default behaviour:
+        `invited_only=True`: Show Circle's you are invited to only.
+        `rejected_only=True`: Show Circle's you are rejected from only.
+
+        @:returns QuerySet
         """
         visible_circles = [
             Invitation.STATUSES.invited,
             Invitation.STATUSES.accepted,
             Invitation.STATUSES.elevated,
         ]
+        if self.action in ['list', 'retrieve', ]:
+            if self.request.query_params.get('invited_only'):
+                visible_circles = [Invitation.STATUSES.invited, ]
+            if self.request.query_params.get('rejected_only'):
+                visible_circles = [Invitation.STATUSES.rejected, ]
         queryset = super().get_queryset().filter(
             invites__status__in=visible_circles,
-        )
-        if self.request.user.profile.type > Profile.TYPES.elevated:
-            return queryset
-        return queryset.filter(
-            invites__profile_to__id=self.request.user.profile.id,
-        )
-
-
-class CircleInvitedViewSet(viewsets.ModelViewSet):
-    queryset = Circle.objects.all()
-    serializer_class = CircleSerializer
-    permission_classes = (AuthenticatedAndReadOnlyPermission, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = (
-        'title',
-    )
-
-    def get_queryset(self):
-        """Queryset for invited to Circle management.
-
-        Circles the user is invited to which are not accepted.
-        """
-        queryset = super().get_queryset().filter(
-            invites__status=Invitation.STATUSES.invited,
-        )
-        if self.request.user.profile.type > Profile.TYPES.elevated:
-            return queryset
-        return queryset.filter(
-            invites__profile_to__id=self.request.user.profile.id,
-        )
-
-
-class CircleRejectedViewSet(viewsets.ModelViewSet):
-    queryset = Circle.objects.all()
-    serializer_class = CircleSerializer
-    permission_classes = (AuthenticatedAndReadOnlyPermission, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = (
-        'title',
-    )
-
-    def get_queryset(self):
-        """Queryset for invited to Circle management.
-
-        Circles the user is invited to which are not accepted.
-        """
-        queryset = super().get_queryset().filter(
-            invites__status=Invitation.STATUSES.rejected,
         )
         if self.request.user.profile.type > Profile.TYPES.elevated:
             return queryset
