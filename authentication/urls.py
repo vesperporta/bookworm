@@ -12,15 +12,15 @@ from authentication.views import (
     AuthorViewSet,
     ContactMethodViewSet,
     CircleViewSet,
-    CircleInvitedViewSet,
-    CircleRejectedViewSet,
     InvitationViewSet,
+    ProfileMeViewSet,
 )
 from authentication.serializers_jwt import UsernameEmailJWTSerializer
 
 
 router = routers.SimpleRouter()
 router.register(r'profile', ProfileViewSet)
+router.register(r'me', ProfileMeViewSet)
 router.register(r'author', AuthorViewSet)
 router.register(r'contact', ContactMethodViewSet)
 router.register(r'circle', CircleViewSet)

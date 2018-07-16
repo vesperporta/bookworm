@@ -13,7 +13,6 @@ from authentication.exceptions import (
     InvitationTokenNotExistError,
     InvitationAlreadyVerifiedError,
 )
-from authentication.serializers import InvitationSerializer
 from authentication.tasks import task_send_message_invitable_action
 
 

@@ -272,3 +272,47 @@ class CircleSerializer(
             self.context['request'].user.profile,
             **validated_data,
         )
+
+
+class ProfileMeSerializer(
+    MetaInfoAvailabledSerializerMixin,
+    serializers.HyperlinkedModelSerializer,
+):
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='profile-detail',
+    )
+    email = serializers.EmailField()
+    pen_names = AuthorSerializer(
+        many=True,
+        view_name='author-list',
+    )
+    contacts = ContactMethodSerializer(
+        many=True,
+        view_name='contactmethod-list',
+    )
+
+    class Meta:
+        model = Profile
+        read_only_fields = (
+            'id',
+            'created_at',
+            'modified_at',
+            'deleted_at',
+            'meta_info',
+            'email',
+            'type',
+        )
+        fields = read_only_fields + (
+            'name_title',
+            'name_first',
+            'name_family',
+            'name_middle',
+            'name_display',
+            'birth_date',
+            'death_date',
+            'pen_names',
+            'contacts',
+        )
+        exclude = []

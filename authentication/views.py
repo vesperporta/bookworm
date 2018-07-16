@@ -1,10 +1,9 @@
 """Authentication view sets."""
 
-from rest_framework import (viewsets, filters, permissions)
+from rest_framework import (mixins, viewsets, filters, permissions)
 
 from authentication.permissions import (
     AuthenticatedOrAdminPermission,
-    AuthenticatedAndReadOnlyPermission,
 )
 from authentication.models import (
     ContactMethod,
@@ -17,6 +16,7 @@ from authentication.serializers import (
     AuthorSerializer,
     CircleSerializer,
     InvitationSerializer,
+    ProfileMeSerializer,
 )
 from authentication.models_circles import (
     Circle,
@@ -79,6 +79,17 @@ class ProfileViewSet(viewsets.ModelViewSet):
         ):
             return queryset.filter(id=self.request.user.profile.id)
         return queryset
+
+
+class ProfileMeViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileMeSerializer
+    permission_classes = (permissions.IsAuthenticated, )
+
+    def get_queryset(self):
+        """This view can only read the authenticated users Profile."""
+        queryset = super().get_queryset()
+        return queryset.filter(id=self.request.user.profile.id)
 
 
 class AuthorPermission(permissions.IsAuthenticated):
