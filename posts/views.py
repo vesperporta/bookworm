@@ -1,17 +1,20 @@
 """Posts app views."""
 
 from rest_framework import (status, viewsets, filters)
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import (detail_route, permission_classes, )
+from rest_framework import permissions
 from rest_framework.response import Response
 
 from authentication.models import Profile
+from books.permissions import AnyReadOwnerCreateEditPermission
 from posts.models import (
     Emote,
     Post,
 )
 from posts.serializers import (
-    EmoteSerializer,
     PostSerializer,
+    EmoteSerializer,
+    SmallEmoteSerializer,
 )
 from posts.exceptions import (
     InvalidEmoteModification,
@@ -24,6 +27,7 @@ from file_store.views import ImagableViewSet
 class EmoteViewSet(viewsets.ModelViewSet):
     queryset = Emote.objects.all()
     serializer_class = EmoteSerializer
+    permission_classes = (AnyReadOwnerCreateEditPermission, )
 
 
 class EmotableViewSet:
@@ -47,13 +51,14 @@ class EmotableViewSet:
         )
 
     @detail_route(methods=['post'])
+    @permission_classes((permissions.AllowAny, ))
     def emoted(self, request, pk, **kwargs):
         """Add an Emote object to an object."""
         emoting_on = self.get_object()
         try:
-            emoting_on.emoted(
+            emote = emoting_on.emoted(
                 request.POST.get('emote_type'),
-                Profile.objects.filter(user=request.user).first(),
+                request.user.profile,
             )
         except (
             DuplicateEmoteValidationError,
@@ -64,18 +69,18 @@ class EmotableViewSet:
             {
                 'status': 'emoted',
                 'ok': '🖖',
+                'emote': SmallEmoteSerializer(emote).data,
                 'aggregate': emoting_on.emote_aggregation,
             }
         )
 
     @detail_route(methods=['post'])
-    def demote(self, request, pk, **kwargs):
+    @permission_classes((permissions.AllowAny, ))
+    def de_emote(self, request, pk, **kwargs):
         """Remove an Emote from an object."""
         emoting_on = self.get_object()
         try:
-            emoting_on.demote(
-                Profile.objects.filter(user=request.user).first(),
-            )
+            emoting_on.de_emote(request.user.profile)
         except (
             UnemoteValidationError,
             InvalidEmoteModification,
@@ -99,3 +104,4 @@ class PostViewSet(
     serializer_class = PostSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('copy', 'parent__id', )
+    permission_classes = (AnyReadOwnerCreateEditPermission, )

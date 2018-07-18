@@ -140,7 +140,7 @@ class Emotable(models.Model):
         self._emote_aggregation_update(emote_type, adding=True)
         return emote
 
-    def demote(self, profile):
+    def de_emote(self, profile):
         """Remove an Emote from this model.
 
         @param profile: Profile of user removing their Emote.

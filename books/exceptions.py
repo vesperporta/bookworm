@@ -14,3 +14,24 @@ class BookRequiredValidation(ValidationError):
             'message': f'Book parameter required for request: {param}.',
         })
         logger.error(self)
+
+
+class AnswerAlreadyAcceptedValidation(ValidationError):
+
+    def __init__(self, profile_accepted):
+        super().__init__({
+            'code': 'read_answer_already_accepted_validation',
+            'message': f'Answer already accepted by: '
+                       f'{profile_accepted.display_name}.',
+        })
+        logger.error(self)
+
+
+class CannotAcceptOwnAnswerValidation(ValidationError):
+
+    def __init__(self):
+        super().__init__({
+            'code': 'cannot_accept_own_answer_validation',
+            'message': f'Accepting your own answer, 😂.',
+        })
+        logger.error(self)

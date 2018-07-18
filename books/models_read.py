@@ -3,20 +3,22 @@
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.timezone import now
 
 from model_utils import Choices
 from hashid_field import HashidAutoField
 
+from books.exceptions import AnswerAlreadyAcceptedValidation, \
+    CannotAcceptOwnAnswerValidation
+from books.tasks import answer_accepted_create_read
 from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
 from posts.models import Emotable, Post
-from books.policies import OwnerElevatedAndLockAccessMixin
 
 
 class ConfirmReadQuestion(
         Emotable,
         PreserveModelMixin,
         ProfileReferredMixin,
-        OwnerElevatedAndLockAccessMixin,
 ):
     """ConfirmRead model."""
 
@@ -55,11 +57,6 @@ class ConfirmReadQuestion(
         verbose_name=_('Question'),
         max_length=400,
     )
-    lock = models.BooleanField(
-        verbose_name=_('Lock Changes'),
-        blank=True,
-        default=False,
-    )
 
     class Meta:
         verbose_name = 'Confirm Read Question'
@@ -73,7 +70,6 @@ class ConfirmReadQuestion(
 class ConfirmReadAnswer(
         PreserveModelMixin,
         ProfileReferredMixin,
-        OwnerElevatedAndLockAccessMixin,
 ):
     """Defines answers for read question.
 
@@ -103,11 +99,6 @@ class ConfirmReadAnswer(
     copy = models.CharField(
         verbose_name=_('Answer copy'),
         max_length=400,
-    )
-    lock = models.BooleanField(
-        verbose_name=_('Lock Changes'),
-        blank=True,
-        default=False,
     )
     is_true = models.BooleanField(
         verbose_name=_('Boolean Answer'),
@@ -149,15 +140,25 @@ class ConfirmReadAnswer(
         answers = '👍' if self.correct else '👎'
         return f'{self.id} {answers} for question: {self.question.id}'
 
+    def accept_answer(self, accepted_from):
+        """Assign a Profile as the object accepting this answer."""
+        if self.accepted_by:
+            raise AnswerAlreadyAcceptedValidation(self.accepted_by)
+        if accepted_from.id == self.profile.id:
+            raise CannotAcceptOwnAnswerValidation()
+        self.accepted_at = now(USE_TZ=True)
+        self.accepted_by = accepted_from
+        self.save()
+        answer_accepted_create_read(self)
 
-class Read(
-        Emotable,
-        PreserveModelMixin,
-        ProfileReferredMixin,
-):
-    """Read model."""
 
-    PREFIX = '📖'  # 📖 = Read
+class Read(Emotable, PreserveModelMixin, ProfileReferredMixin):
+    """Read model.
+
+    📖 = Read
+    """
+
+    PREFIX = '📖'
 
     id = HashidAutoField(
         primary_key=True,
@@ -191,7 +192,7 @@ class Read(
     @property
     def answered_correctly(self):
         """Read declaration is correct, answer given defines correctness."""
-        return self.answer.correct
+        return bool(self.answer.accepted_at)
 
     def __str__(self):
         """Display only as URI valid slug."""

@@ -1,15 +1,44 @@
 """Mixin views."""
 
-from rest_framework import status
-from rest_framework.decorators import detail_route
+from rest_framework import (status, permissions, )
+from rest_framework.decorators import (detail_route, permission_classes)
 from rest_framework.response import Response
 
+from authentication.permissions import AuthenticatedOrAdminPermission
+from authentication.models import Profile
 from bookworm.exceptions import (
     PublishableValidationError,
     PublishableObjectNotDefined,
     PublishedUnauthorisedValidation,
     NoPublishedDataError,
 )
+
+
+class PublishedContentReadPermission(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        """Users may only see and manage their own Profile.
+
+        Admins are allowed to manage other peoples profiles.
+        """
+        return (
+            request.user.profile.type >= Profile.TYPES.admin or
+            obj.has_published_naive_access(request.user.profile) or
+            obj.profile.id == request.user.profile.id
+        )
+
+
+class PublishObjectPermission(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        """Users may only see and manage their own Profile.
+
+        Admins are allowed to manage other peoples profiles.
+        """
+        return (
+            request.user.profile.type >= Profile.TYPES.admin or
+            request.user.profile.id == obj.profile.id
+        )
 
 
 class PublishableViewSetMixin:
@@ -32,24 +61,29 @@ class PublishableViewSetMixin:
         )
 
     @detail_route(methods=['get'])
+    @permission_classes((
+            AuthenticatedOrAdminPermission,
+            PublishedContentReadPermission,
+    ))
     def published_content(self, request, pk, **kwargs):
         """Respond with the published content for this object."""
         published = self.get_object()
         try:
             content = published.published_content(request.user.profile)
-        except PublishedUnauthorisedValidation as error:
-            return self._publishing_error_handle(
-                error,
-                status.HTTP_401_UNAUTHORIZED,
-            )
-        except NoPublishedDataError as error:
+        except (
+                NoPublishedDataError,
+                PublishedUnauthorisedValidation,
+        ) as error:
             return self._publishing_error_handle(error)
         return Response(content)
 
     @detail_route(methods=['post'])
+    @permission_classes((
+            AuthenticatedOrAdminPermission,
+            PublishObjectPermission,
+    ))
     def publish(self, request, pk, **kwargs):
         """Publish this object."""
-        # TODO: Authentication for publishing.
         publishing = self.get_object()
         try:
             publishing.publish(
@@ -70,9 +104,12 @@ class PublishableViewSetMixin:
         )
 
     @detail_route(methods=['post'])
+    @permission_classes((
+            AuthenticatedOrAdminPermission,
+            PublishObjectPermission,
+    ))
     def unpublish(self, request, pk, **kwargs):
         """Unpublish this object."""
-        # TODO: Authentication for unpublishing.
         unpublishing = self.get_object()
         unpublish_method = 'unpublish'
         if bool(request.data.get('purge')):

@@ -286,11 +286,9 @@ class ProfileMeSerializer(
     email = serializers.EmailField()
     pen_names = AuthorSerializer(
         many=True,
-        view_name='author-list',
     )
     contacts = ContactMethodSerializer(
         many=True,
-        view_name='contactmethod-list',
     )
 
     class Meta:

@@ -44,6 +44,26 @@ class EmoteSerializer(
         )
 
 
+class SmallEmoteSerializer(serializers.HyperlinkedModelSerializer):
+    """Small Emote serializer."""
+
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='emote-detail',
+    )
+    created_at = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Emote
+        read_only_fields = (
+            'id',
+            'created_at',
+            'type',
+        )
+        fields = ()
+
+
 class EmotableSerializerMixin:
     """Generic Emotable serializer."""
 
