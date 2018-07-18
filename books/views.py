@@ -23,6 +23,7 @@ from books.permissions import (
     ElevatedCreateEditPermission,
     AnyReadOrElevatedPermission,
     AnyReadOwnerCreateEditPermission,
+    OwnerAndAdminPermission,
 )
 from books.serializers import (
     BookSerializer,
@@ -118,6 +119,7 @@ class ReadingListViewSet(
         )
 
     @decorators.detail_route(methods=['post'])
+    @decorators.permission_classes((OwnerAndAdminPermission, ))
     def add_book(self, request, pk, **kwargs):
         """Add a book to a ReadingList object."""
         reading_list = self.get_object()
@@ -141,6 +143,7 @@ class ReadingListViewSet(
         )
 
     @decorators.detail_route(methods=['post'])
+    @decorators.permission_classes((OwnerAndAdminPermission, ))
     def remove_book(self, request, pk, **kwargs):
         """Remove a book from a ReadingList object."""
         reading_list = self.get_object()

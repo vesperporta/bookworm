@@ -55,3 +55,17 @@ class AnyReadOwnerCreateEditPermission(permissions.IsAuthenticated):
             return True
         authenticated = super().has_object_permission(request, view, obj)
         return authenticated and obj.profile.id == request.user.profile.id
+
+
+class OwnerAndAdminPermission(permissions.IsAuthenticated):
+
+    def has_object_permission(self, request, view, obj):
+        """Owner and admin have access."""
+        authenticated = super().has_permission(request, view)
+        return (
+            authenticated and
+            (
+                obj.profile.id == request.user.profile.id or
+                request.user.profile.type >= Profile.TYPES.admin
+            )
+        )

@@ -5,7 +5,6 @@ from rest_framework.decorators import (detail_route, permission_classes, )
 from rest_framework import permissions
 from rest_framework.response import Response
 
-from authentication.models import Profile
 from books.permissions import AnyReadOwnerCreateEditPermission
 from posts.models import (
     Emote,
@@ -51,7 +50,7 @@ class EmotableViewSet:
         )
 
     @detail_route(methods=['post'])
-    @permission_classes((permissions.AllowAny, ))
+    @permission_classes((permissions.IsAuthenticated, ))
     def emoted(self, request, pk, **kwargs):
         """Add an Emote object to an object."""
         emoting_on = self.get_object()
@@ -75,7 +74,7 @@ class EmotableViewSet:
         )
 
     @detail_route(methods=['post'])
-    @permission_classes((permissions.AllowAny, ))
+    @permission_classes((permissions.IsAuthenticated, ))
     def de_emote(self, request, pk, **kwargs):
         """Remove an Emote from an object."""
         emoting_on = self.get_object()
