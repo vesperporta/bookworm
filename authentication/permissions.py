@@ -42,3 +42,10 @@ class AuthenticatedAndReadOnlyPermission(permissions.IsAuthenticated):
             if request.user.profile.type >= Profile.TYPES.admin:
                 return True
         return request.method in permissions.SAFE_METHODS and authenticated
+
+
+class NoCreatePermission(permissions.AllowAny):
+
+    def has_permission(self, request, view):
+        """Not allowing create methods."""
+        return view.action not in ['create', ]

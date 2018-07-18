@@ -1,6 +1,6 @@
 """Books app views."""
 
-from rest_framework import (status, viewsets, filters)
+from rest_framework import (status, viewsets, filters, mixins)
 from rest_framework.decorators import (detail_route, permission_classes)
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -28,7 +28,7 @@ class TagViewSet(viewsets.ModelViewSet):
     permission_classes = (ElevatedForDeletePermission, )
 
 
-class MetaViewSet(viewsets.ModelViewSet):
+class MetaViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet,):
     queryset = MetaInfo.objects.all()
     serializer_class = MetaInfoSerializer
 

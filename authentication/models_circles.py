@@ -57,7 +57,7 @@ class Invitation(PreserveModelMixin, ProfileReferredMixin):
     )
     token = models.ForeignKey(
         Token,
-        related_name='circles+',
+        related_name='invitations+',
         verbose_name=_('Verified domain token'),
         on_delete=models.DO_NOTHING,
         blank=True,
@@ -75,7 +75,6 @@ class Invitation(PreserveModelMixin, ProfileReferredMixin):
     class Meta:
         verbose_name = 'Invitation'
         verbose_name_plural = 'Invitations'
-        unique_together = ('profile', 'profile_to', )
 
     def __str__(self):
         """Short description of what this invitation is intended."""
@@ -276,7 +275,8 @@ class CircleManager(models.Manager):
             status=Invitation.STATUSES.elevated,
             token=token,
         )
-        circle = self.create(invites=[invite], **kwargs)
+        circle = self.create(**kwargs)
+        circle.invites.add(invite)
         token.validated = True
         token.expiry = timezone.now()
         token.save()

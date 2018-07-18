@@ -37,7 +37,7 @@ urlpatterns += [
     url(
         r'me/',
         ProfileMeViewSet.as_view(
-            {'get': 'retrieve', 'put': 'partial_update', },
+            {'get': 'retrieve', 'patch': 'partial_update', },
         )
     )
 ]

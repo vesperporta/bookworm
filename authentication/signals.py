@@ -99,6 +99,20 @@ def post_save_contact_method(sender, instance, *args, **kwargs):
         instance.meta_info.save()
 
 
+@receiver(post_delete, sender=ContactMethod)
+def post_delete_contact_method(sender, instance, *args, **kwargs):
+    """Remove this ContactMethod from Profile, Author, and Circle objects."""
+    profiles = Profile.objects.filter(contacts__id=instance.id)
+    authors = Author.objects.filter(contacts__id=instance.id)
+    circles = Circle.objects.filter(contacts__id=instance.id)
+    for profile in profiles:
+        profile.contacts.remove(instance)
+    for author in authors:
+        author.contacts.remove(instance)
+    for circle in circles:
+        circle.contacts.remove(instance)
+
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     """Create profile when an user instance is created."""

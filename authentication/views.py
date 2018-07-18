@@ -2,9 +2,10 @@
 
 from rest_framework import (mixins, viewsets, filters, permissions)
 
+from authentication.exceptions import CircleUniquePerProfileError
 from authentication.permissions import (
     AuthenticatedOrAdminPermission,
-)
+    NoCreatePermission)
 from authentication.models import (
     ContactMethod,
     Profile,
@@ -154,6 +155,7 @@ class ContactMethodViewSet(viewsets.ModelViewSet):
     queryset = ContactMethod.objects.all()
     serializer_class = ContactMethodSerializer
     permission_classes = (
+        NoCreatePermission,
         AuthenticatedOrAdminPermission,
         ContactMethodPermission,
     )
@@ -245,7 +247,17 @@ class CircleViewSet(InvitableViewSetMixin, viewsets.ModelViewSet):
             invites__profile_to__id=self.request.user.profile.id,
         )
 
+    def create(self, request, *args, **kwargs):
+        unique_title = Circle.objects.filter(
+            title__iexact=request.data.get('title'),
+            invites__profile=request.user.profile,
+        ).first()
+        if unique_title:
+            raise CircleUniquePerProfileError(request.data.get('title'))
+        instance = super().create(request, *args, **kwargs)
+        return instance
 
-class InvitationViewSet(viewsets.ModelViewSet):
+
+class InvitationViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Invitation.objects.all()
     serializer_class = InvitationSerializer

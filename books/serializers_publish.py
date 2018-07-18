@@ -44,7 +44,7 @@ class ShortBookPublishSerializer(serializers.ModelSerializer):
             'description',
             'cover_image',
         )
-        fields = ()
+        fields = read_only_fields
         exclude = [
             'created_at',
             'modified_at',
@@ -89,7 +89,7 @@ class ShortBookProgressPublishSerializer(
             'start',
             'end',
         )
-        fields = ()
+        fields = read_only_fields
 
 
 class ShortBookChapterPublishSerializer(serializers.HyperlinkedModelSerializer):
@@ -109,7 +109,7 @@ class ShortBookChapterPublishSerializer(serializers.HyperlinkedModelSerializer):
             'title',
             'progress',
         )
-        fields = ()
+        fields = read_only_fields
         exclude = [
             'created_at',
             'modified_at',
@@ -145,7 +145,7 @@ class BookReviewPublishSerializer(serializers.ModelSerializer):
             'progress',
             'inferred_progress',
         )
-        fields = ()
+        fields = read_only_fields
         exclude = []
 
     def get_created_at(self):
@@ -170,7 +170,7 @@ class ShortConfirmReadQuestionPublishSerializer(
             'difficulty',
             'copy',
         )
-        fields = ()
+        fields = read_only_fields
         exclude = [
             'created_at',
             'modified_at',
@@ -205,7 +205,7 @@ class ConfirmReadQuestionPublishSerializer(
             'chapter',
             'copy',
         )
-        fields = ()
+        fields = read_only_fields
         exclude = [
             'created_at',
             'modified_at',
@@ -243,7 +243,7 @@ class ConfirmReadAnswerPublishSerializer(
             'is_true',
             'copy',
         )
-        fields = ()
+        fields = read_only_fields
         exclude = [
             'is_answer',
             'created_at',
@@ -272,7 +272,7 @@ class ReadPublishSerializer(serializers.HyperlinkedModelSerializer):
             'answered_correctly',
             'answer',
         )
-        fields = ()
+        fields = read_only_fields
         exclude = [
             'created_at',
             'modified_at',

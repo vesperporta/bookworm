@@ -68,3 +68,13 @@ class InvitationTokenNotExistError(ValidationError):
             'message': f'{target} verification does not exist.',
         })
         logger.error(self)
+
+
+class CircleUniquePerProfileError(ValidationError):
+
+    def __init__(self, title):
+        super().__init__({
+            'code': 'circle_unique_per_profile_error',
+            'message': f'Cannot have the same title "{title}" twice, 😵!',
+        })
+        logger.error(self)

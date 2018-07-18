@@ -36,14 +36,12 @@ class ProfileSerializer(
     pen_names = serializers.HyperlinkedRelatedField(
         many=True,
         view_name='author-detail',
-        queryset=Author.objects.all(),
-        required=False,
-        allow_null=True,
+        read_only=True,
     )
     contacts = serializers.HyperlinkedRelatedField(
         many=True,
         view_name='contactmethod-detail',
-        queryset=ContactMethod.objects.all(),
+        read_only=True,
     )
 
     class Meta:
@@ -193,11 +191,11 @@ class InvitationSerializer(
             'modified_at',
             'deleted_at',
             'meta_info',
-        )
-        fields = read_only_fields + (
             'status',
+            'profile',
             'profile_to',
         )
+        fields = read_only_fields
         exclude = []
 
     def validate(self, data):
@@ -220,20 +218,12 @@ class CircleSerializer(
     contacts = serializers.HyperlinkedRelatedField(
         many=True,
         view_name='contactmethod-detail',
-        queryset=ContactMethod.objects.all(),
-        required=False,
-        allow_null=True,
+        read_only=True,
     )
-    invitations = serializers.HyperlinkedRelatedField(
+    invites = serializers.HyperlinkedRelatedField(
         many=True,
         read_only=True,
         view_name='invitation-detail',
-        required=False,
-    )
-    profile = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
         required=False,
     )
 
@@ -244,14 +234,13 @@ class CircleSerializer(
             'created_at',
             'modified_at',
             'deleted_at',
-            'profile',
             'meta_info',
         )
         fields = read_only_fields + (
             'title',
             'contacts',
             'reading_list',
-            'invitations',
+            'invites',
         )
         exclude = []
 
