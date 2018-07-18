@@ -9,18 +9,17 @@ from rest_framework_jwt.views import (
 
 from authentication.views import (
     ProfileViewSet,
+    ProfileMeViewSet,
     AuthorViewSet,
     ContactMethodViewSet,
     CircleViewSet,
     InvitationViewSet,
-    ProfileMeViewSet,
 )
 from authentication.serializers_jwt import UsernameEmailJWTSerializer
 
 
 router = routers.SimpleRouter()
 router.register(r'profile', ProfileViewSet)
-router.register(r'me', ProfileMeViewSet)
 router.register(r'author', AuthorViewSet)
 router.register(r'contact', ContactMethodViewSet)
 router.register(r'circle', CircleViewSet)
@@ -35,4 +34,10 @@ urlpatterns += [
     ),
     url(r'^token-refresh/', refresh_jwt_token),
     url(r'^token-verify/', verify_jwt_token),
+    url(
+        r'me/',
+        ProfileMeViewSet.as_view(
+            {'get': 'retrieve', 'put': 'partial_update', },
+        )
+    )
 ]

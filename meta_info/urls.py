@@ -8,5 +8,6 @@ from meta_info.views import (
 
 router = routers.SimpleRouter()
 router.register(r'tag', TagViewSet)
+router.register(r'meta', MetaViewSet)
 
 urlpatterns = router.urls

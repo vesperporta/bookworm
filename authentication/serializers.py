@@ -148,11 +148,6 @@ class ContactMethodSerializer(
         read_only=True,
         view_name='contactmethod-detail',
     )
-    profile = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
-    )
 
     class Meta:
         model = ContactMethod
@@ -164,7 +159,6 @@ class ContactMethodSerializer(
             'meta_info',
         )
         fields = read_only_fields + (
-            'profile',
             'detail',
             'email',
         )
@@ -286,9 +280,11 @@ class ProfileMeSerializer(
     email = serializers.EmailField()
     pen_names = AuthorSerializer(
         many=True,
+        read_only=True,
     )
     contacts = ContactMethodSerializer(
         many=True,
+        read_only=True,
     )
 
     class Meta:

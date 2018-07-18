@@ -81,15 +81,17 @@ class ProfileViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class ProfileMeViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    queryset = Profile.objects.all()
+class ProfileMeViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     serializer_class = ProfileMeSerializer
     permission_classes = (permissions.IsAuthenticated, )
 
-    def get_queryset(self):
-        """This view can only read the authenticated users Profile."""
-        queryset = super().get_queryset()
-        return queryset.filter(id=self.request.user.profile.id)
+    def get_object(self):
+        """View your own Profile object."""
+        return self.request.user.profile
 
 
 class AuthorPermission(permissions.IsAuthenticated):
