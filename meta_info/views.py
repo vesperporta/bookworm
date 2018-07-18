@@ -1,13 +1,15 @@
 """Books app views."""
 
 from rest_framework import (status, viewsets, filters)
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import (detail_route, permission_classes)
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from meta_info.models import (
     Tag,
     MetaInfo,
 )
+from meta_info.permissions import ElevatedForDeletePermission
 from meta_info.serializers import (
     TagSerializer,
     MetaInfoSerializer,
@@ -23,6 +25,7 @@ class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('copy',)
+    permission_classes = (ElevatedForDeletePermission, )
 
 
 class MetaViewSet(viewsets.ModelViewSet):
@@ -49,6 +52,7 @@ class LocalisableViewSetMixin:
         )
 
     @detail_route(methods=['get'])
+    @permission_classes((AllowAny, ))
     def localised(self, request, pk, **kwargs):
         """Localise object to specified '{language}-{location}'."""
         localising_for = self.get_object()

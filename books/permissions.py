@@ -19,7 +19,7 @@ class ReadOnlyPermission(permissions.BasePermission):
         """
         if request.user.profile.type >= Profile.TYPES.admin:
             return True
-        return view.action in permissions.SAFE_METHODS
+        return request.method in permissions.SAFE_METHODS
 
 
 class ElevatedCreateEditPermission(permissions.IsAuthenticated):
