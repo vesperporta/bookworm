@@ -98,7 +98,7 @@ class TokenManager(models.Manager):
         self.filter(
             key=token_key,
             validated=False,
-        ).delete()
+        ).update(deleted_at=timezone.now())
         return Token.objects.create(
             key=token_key,
             value=cipher_text,

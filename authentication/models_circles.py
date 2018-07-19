@@ -275,7 +275,11 @@ class CircleManager(models.Manager):
             status=Invitation.STATUSES.elevated,
             token=token,
         )
-        circle = self.create(**kwargs)
+        reading_list = ReadingList.objects.create(
+            profile=profile,
+            title=kwargs.get('title'),
+        )
+        circle = self.create(reading_list=reading_list, **kwargs)
         circle.invites.add(invite)
         token.validated = True
         token.expiry = timezone.now()

@@ -12,8 +12,6 @@ from bookworm.mixins import (
     ProfileReferredMixin,
     PreserveModelMixin,
 )
-# from bookworm.mixins_publishable import PublishableModelMixin
-# from books.serializers_publish import BookReviewPublishSerializer
 from meta_info.models import MetaInfo
 from meta_info.models_localisation import Localisable
 from posts.models import Emotable
@@ -257,7 +255,6 @@ class ReadingList(
 class BookReview(
         Emotable,
         Localisable,
-        # PublishableModelMixin,
         ProfileReferredMixin,
         PreserveModelMixin,
 ):
@@ -333,6 +330,3 @@ class BookReview(
     def __str__(self):
         book_detail = f'{self.book.title} by {self.profile.display_name}'
         return f'BookReview({self.id} - {book_detail})'
-
-    # class Publishable:
-    #     serializer = BookReviewPublishSerializer
