@@ -35,3 +35,13 @@ class UnemoteValidationError(ValidationError):
             'message': f'Profile:{profile} had not emoted on {target}',
         })
         logger.error(self)
+
+
+class EmoteFieldMissingValidationError(ValidationError):
+
+    def __init__(self, field):
+        super().__init__({
+            'code': 'emote__field_missing_validation_error',
+            'message': f'Required request paramater `{field}` not supplied.',
+        })
+        logger.error(self)

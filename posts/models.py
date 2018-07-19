@@ -81,31 +81,14 @@ class Emotable(models.Model):
             [Emote.EMOTES[k], v] for k, v in enumerate(self.emote_aggregate)
         ]
 
-    def _emote_aggregation_update(
-            self,
-            index=None,
-            adding=True,
-            save_obj=False,
-    ):
-        """Aggregate values for an object to keep data synced, without DB.
-
-        @param index: Int type of Emote being modified.
-        @param adding: bool to add or remove from emote tally.
-        @param save_obj: bool indicating save action after aggregation.
-
-        @raises InvalidEmoteModification
-        """
-        all_emotes = self.emotes.all()
+    def _emote_aggregation_update(self):
+        """Aggregate values for an object to keep data synced, without DB."""
+        all_emotes = self.emotes.filter(deleted_at__isnull=True)
         aggregate = [0] * len(Emote.EMOTES)
         for item in all_emotes:
-            aggregate[item[0]] += 1
-        if index is not None:
-            aggregate[index] += 1 if adding else -1
-            if aggregate[index] < 0:
-                raise InvalidEmoteModification(item, self)
+            aggregate[int(item.type)] += 1
         self.emote_aggregate = aggregate
-        if save_obj:
-            self.save()
+        self.save()
 
     def has_emoted(self, profile):
         """Check if the profile has emoted with this model.
@@ -114,7 +97,10 @@ class Emotable(models.Model):
 
         @return Emote or None
         """
-        return self.emotes.filter(profile__id=profile.id).first()
+        return self.emotes.filter(
+            profile=profile,
+            deleted_at__isnull=True,
+        ).first()
 
     def emoted(self, emote_type, profile):
         """Add an Emote to this model.
@@ -130,17 +116,16 @@ class Emotable(models.Model):
         if emote:
             if emote.type == emote_type:
                 raise DuplicateEmoteValidationError(profile, self)
-            self.emotes.remove(emote)
             emote.delete()
         emote = Emote.objects.create(
             type=emote_type,
             profile=profile,
         )
         self.emotes.add(emote)
-        self._emote_aggregation_update(emote_type, adding=True)
+        self._emote_aggregation_update()
         return emote
 
-    def de_emote(self, profile):
+    def un_emote(self, profile):
         """Remove an Emote from this model.
 
         @param profile: Profile of user removing their Emote.
@@ -152,9 +137,8 @@ class Emotable(models.Model):
         emote = self.has_emoted(profile)
         if not emote:
             raise UnemoteValidationError(profile, self)
-        self.emotes.remove(emote)
         emote.delete()
-        self._emote_aggregation_update(emote.type, adding=False)
+        self._emote_aggregation_update()
         return emote
 
 

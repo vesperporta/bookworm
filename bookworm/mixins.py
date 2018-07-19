@@ -59,13 +59,13 @@ class PreserveModelMixin(ModifiedModelMixin):
 
     @property
     def is_deleted(self):
-        bool(self.deleted_at)
+        return bool(self.deleted_at)
 
     def delete(self, *args, **kwargs):
         pre_delete.send(sender=self.__class__, instance=self)
-        self.deleted_at = now(USE_TZ=True)
+        self.deleted_at = now()
         self.__class__.objects.filter(id=self.id).update(
-            deleted_at=self.deleted_at
+            deleted_at=self.deleted_at,
         )
         post_delete.send(sender=self.__class__, instance=self)
 

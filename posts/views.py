@@ -19,7 +19,7 @@ from posts.exceptions import (
     InvalidEmoteModification,
     DuplicateEmoteValidationError,
     UnemoteValidationError,
-)
+    EmoteFieldMissingValidationError)
 from file_store.views import ImagableViewSet
 
 
@@ -54,9 +54,14 @@ class EmotableViewSet:
     def emoted(self, request, pk, **kwargs):
         """Add an Emote object to an object."""
         emoting_on = self.get_object()
+        if not request.data.get('emote_type'):
+            return self._emote_error_handle(
+                emoting_on,
+                EmoteFieldMissingValidationError('emote_type'),
+            )
         try:
             emote = emoting_on.emoted(
-                request.POST.get('emote_type'),
+                request.data.get('emote_type'),
                 request.user.profile,
             )
         except (
@@ -68,18 +73,21 @@ class EmotableViewSet:
             {
                 'status': 'emoted',
                 'ok': '🖖',
-                'emote': SmallEmoteSerializer(emote).data,
+                'emote': SmallEmoteSerializer(
+                    emote,
+                    context={'request': request}
+                ).data,
                 'aggregate': emoting_on.emote_aggregation,
             }
         )
 
     @detail_route(methods=['post'])
     @permission_classes((permissions.IsAuthenticated, ))
-    def de_emote(self, request, pk, **kwargs):
+    def un_emote(self, request, pk, **kwargs):
         """Remove an Emote from an object."""
         emoting_on = self.get_object()
         try:
-            emoting_on.de_emote(request.user.profile)
+            emoting_on.un_emote(request.user.profile)
         except (
             UnemoteValidationError,
             InvalidEmoteModification,
@@ -87,7 +95,7 @@ class EmotableViewSet:
             return self._emote_error_handle(emoting_on, error)
         return Response(
             {
-                'status': 'demoted',
+                'status': 'un-emoted',
                 'ok': '🖖',
                 'aggregate': emoting_on.emote_aggregation,
             }

@@ -247,7 +247,7 @@ class ReadingList(
         self.books.remove(book)
 
     def __str__(self):
-        plural = 's' if self.count_books > 1 else ''
+        plural = 's' if self.count_books != 1 else ''
         book_num = f'{self.count_books} book{plural}'
         return f'ReadingList({self.id}: {self.title} - {book_num})'
 

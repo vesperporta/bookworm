@@ -61,7 +61,7 @@ class SmallEmoteSerializer(serializers.HyperlinkedModelSerializer):
             'created_at',
             'type',
         )
-        fields = ()
+        fields = read_only_fields
 
 
 class EmotableSerializerMixin:
@@ -72,6 +72,19 @@ class EmotableSerializerMixin:
         view_name='emote-detail',
         queryset=Emote.objects.all(),
     )
+    emote_aggregate = serializers.ListField(
+        child=serializers.IntegerField(
+            min_value=0,
+            max_value=None,
+        ),
+        min_length=len(Emote.EMOTES),
+        max_length=len(Emote.EMOTES),
+    )
+
+
+class EmotableAggregateSerializerMixin:
+    """Aggregation for Emotable serializer."""
+
     emote_aggregate = serializers.ListField(
         child=serializers.IntegerField(
             min_value=0,

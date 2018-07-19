@@ -4,7 +4,10 @@ from rest_framework import serializers
 
 from bookworm.serializers import PreservedModelSerializeMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
-from posts.serializers import EmotableSerializerMixin
+from posts.serializers import (
+    EmotableSerializerMixin,
+    EmotableAggregateSerializerMixin,
+)
 from authentication.models import Profile
 
 from file_store.models import (
@@ -26,7 +29,7 @@ from books.models_read import (
 
 
 class BookReviewShortSerializer(
-        EmotableSerializerMixin,
+        EmotableAggregateSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
     """BookReview serializer."""
@@ -41,7 +44,6 @@ class BookReviewShortSerializer(
         model = BookReview
         read_only_fields = (
             'id',
-            'emotes',
             'emote_aggregate',
         )
         fields = read_only_fields + (
@@ -53,7 +55,7 @@ class BookReviewShortSerializer(
 
 
 class BookSerializer(
-        EmotableSerializerMixin,
+        EmotableAggregateSerializerMixin,
         PreservedModelSerializeMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
@@ -105,7 +107,6 @@ class BookSerializer(
             'deleted_at',
             'reviews',
             'meta_info',
-            'emotes',
             'emote_aggregate',
             'images',
             'profile',
@@ -212,7 +213,7 @@ class BookChapterSerializer(
 
 
 class ReadingListSerializer(
-        EmotableSerializerMixin,
+        EmotableAggregateSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
@@ -243,7 +244,6 @@ class ReadingListSerializer(
             'modified_at',
             'deleted_at',
             'books',
-            'emotes',
             'emote_aggregate',
             'meta_info',
         )
@@ -254,7 +254,7 @@ class ReadingListSerializer(
 
 
 class BookReviewSerializer(
-        EmotableSerializerMixin,
+        EmotableAggregateSerializerMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
@@ -287,7 +287,6 @@ class BookReviewSerializer(
             'deleted_at',
             'meta_info',
             'profile',
-            'emotes',
             'emote_aggregate',
         )
         fields = read_only_fields + (
@@ -301,7 +300,7 @@ class BookReviewSerializer(
 
 
 class ConfirmReadQuestionSerializer(
-        EmotableSerializerMixin,
+        EmotableAggregateSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmReadQuestion model serializer."""
@@ -337,7 +336,6 @@ class ConfirmReadQuestionSerializer(
             'modified_at',
             'deleted_at',
             'profile',
-            'emotes',
             'emote_aggregate',
         )
         fields = read_only_fields + (
@@ -395,7 +393,7 @@ class ConfirmReadAnswerSerializer(
 
 
 class ReadSerializer(
-        EmotableSerializerMixin,
+        EmotableAggregateSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmRead model serializer."""
@@ -432,8 +430,8 @@ class ReadSerializer(
             'modified_at',
             'deleted_at',
             'answered_correctly',
-            'emotes',
             'emote_aggregate',
+            'profile',
         )
         fields = read_only_fields + (
             'book',
