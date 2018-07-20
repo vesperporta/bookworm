@@ -34,11 +34,12 @@ from books.serializers import (
     ConfirmReadQuestionSerializer,
     ConfirmReadAnswerSerializer,
     ReadSerializer,
-)
+    SmallBookSerializer)
 from books.exceptions import (
     BookRequiredValidation,
     AnswerAlreadyAcceptedValidation,
     CannotAcceptOwnAnswerValidation,
+    BookDoesNotExistException,
 )
 from posts.views import EmotableViewSet
 from file_store.views import ImagableViewSet
@@ -125,7 +126,10 @@ class ReadingListViewSet(
             {
                 'status': 'error',
                 'ok': '💩',
-                'reading_list': reading_list.id,
+                'reading_list': ReadingListSerializer(
+                    reading_list,
+                    context={'request': self.request},
+                ).data,
                 'error': error.detail,
             },
             status=status.HTTP_400_BAD_REQUEST,
@@ -136,22 +140,31 @@ class ReadingListViewSet(
     def add_book(self, request, pk, **kwargs):
         """Add a book to a ReadingList object."""
         reading_list = self.get_object()
-        book_id = request.data.get('book')
-        if not book_id:
+        if not request.data.get('book'):
             self._book_error_handle(
                 reading_list,
                 BookRequiredValidation('book'),
             )
         try:
-            reading_list.add_book(book_id)
-        except Book.DoesNotExist as error:
-            return self._book_error_handle(reading_list, error)
+            book = Book.objects.get(id=request.data.get('book'))
+        except Book.DoesNotExist:
+            return self._book_error_handle(
+                reading_list,
+                BookDoesNotExistException('book'),
+            )
+        reading_list.add_book(book)
         return Response(
             {
                 'status': 'added',
                 'ok': '🖖',
-                'reading_list': reading_list.id,
-                'book': request.POST.get('book'),
+                'reading_list': ReadingListSerializer(
+                    reading_list,
+                    context={'request': self.request},
+                ).data,
+                'added': SmallBookSerializer(
+                    book,
+                    context={'request': self.request},
+                ).data,
             }
         )
 
@@ -160,22 +173,31 @@ class ReadingListViewSet(
     def remove_book(self, request, pk, **kwargs):
         """Remove a book from a ReadingList object."""
         reading_list = self.get_object()
-        book_id = request.data.get('book')
-        if not book_id:
+        if not request.data.get('book'):
             self._book_error_handle(
                 reading_list,
                 BookRequiredValidation('book'),
             )
         try:
-            reading_list.remove_book(book_id)
-        except Book.DoesNotExist as error:
-            return self._book_error_handle(reading_list, error)
+            book = Book.objects.get(id=request.data.get('book'))
+        except Book.DoesNotExist:
+            return self._book_error_handle(
+                reading_list,
+                BookDoesNotExistException('book'),
+            )
+        reading_list.remove_book(book)
         return Response(
             {
                 'status': 'removed',
                 'ok': '🖖',
-                'reading_list': reading_list.id,
-                'book': request.POST.get('book'),
+                'reading_list': ReadingListSerializer(
+                    reading_list,
+                    context={'request': self.request},
+                ).data,
+                'removed': SmallBookSerializer(
+                    book,
+                    context={'request': self.request},
+                ).data,
             }
         )
 

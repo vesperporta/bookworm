@@ -138,6 +138,26 @@ class AuthorSerializer(
         exclude = []
 
 
+class SmallAuthorSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='author-detail',
+    )
+
+    class Meta:
+        model = Author
+        read_only_fields = (
+            'id',
+        )
+        fields = read_only_fields + (
+            'display_name',
+            'birth_date',
+            'death_date',
+        )
+        exclude = []
+
+
 class ContactMethodSerializer(
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,

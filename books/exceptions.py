@@ -16,6 +16,16 @@ class BookRequiredValidation(ValidationError):
         logger.error(self)
 
 
+class BookDoesNotExistException(ValidationError):
+
+    def __init__(self, param):
+        super().__init__({
+            'code': 'book_does_not_exist_error',
+            'message': f'Book of id {param}, does not exist.',
+        })
+        logger.error(self)
+
+
 class AnswerAlreadyAcceptedValidation(ValidationError):
 
     def __init__(self, profile_accepted):

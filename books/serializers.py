@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 
-from authentication.serializers import AuthorSerializer
+from authentication.serializers import AuthorSerializer, SmallAuthorSerializer
 from bookworm.serializers import PreservedModelSerializeMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 from posts.serializers import EmotableAggregateSerializerMixin
@@ -126,6 +126,46 @@ class BookSerializer(
         exclude = []
 
 
+class SmallBookSerializer(
+        PreservedModelSerializeMixin,
+        serializers.HyperlinkedModelSerializer,
+):
+    """Book model serializer."""
+
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='book-detail',
+    )
+    cover_image = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='image-detail',
+        queryset=Image.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    author = SmallAuthorSerializer(
+        many=False,
+        required=False,
+        allow_null=True,
+    )
+
+    class Meta:
+        model = Book
+        read_only_fields = (
+            'id',
+            'created_at',
+            'modified_at',
+            'deleted_at',
+            'title',
+            'author',
+            'description',
+            'cover_image',
+        )
+        fields = read_only_fields
+        exclude = []
+
+
 class BookProgressSerializer(
         serializers.HyperlinkedModelSerializer,
 ):
@@ -227,10 +267,8 @@ class ReadingListSerializer(
         read_only=True,
         view_name='readinglist-detail',
     )
-    books = serializers.HyperlinkedRelatedField(
+    books = SmallBookSerializer(
         many=True,
-        view_name='book-detail',
-        queryset=Book.objects.all(),
     )
     profile = serializers.HyperlinkedRelatedField(
         many=False,
