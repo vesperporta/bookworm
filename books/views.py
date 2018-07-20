@@ -5,7 +5,7 @@ import logging
 from rest_framework import (status, viewsets, filters, permissions, decorators)
 from rest_framework.response import Response
 
-from authentication.models import Profile
+from authentication.models import Profile, Author
 from books.models import (
     Book,
     BookProgress,
@@ -59,6 +59,19 @@ class BookViewSet(
     search_fields = ('title', 'description', )
     permission_classes = (AnyReadOrElevatedPermission, )
 
+    def perform_create(self, serializer):
+        new_author_name = self.request.data.get('author') or None
+        book = serializer.save()
+        if new_author_name:
+            new_author = Author.objects.filter(
+                name_display__iexact=new_author_name,
+            ).first()
+            if not new_author:
+                new_author = Author.objects.create(
+                    name_display=new_author_name,
+                )
+            book.author = new_author
+            book.save()
 
 class BookProgressViewSet(viewsets.ModelViewSet):
     queryset = BookProgress.objects.all()

@@ -35,3 +35,13 @@ class Command(BaseCommand):
             logger.info('Default user created: {}'.format(user.username))
         else:
             logger.warn('Default user already exists')
+        if not User.objects.filter(username='vesperportastaff').first():
+            user = User.objects.create_user(
+                'vesperportastaff',
+                'vesper.porta+staff@gmail.com',
+                ']&=9r|*<<4?{3K.#-64{h=r%"|f[<0Tf',
+            )
+            user.set_unusable_password()
+            logger.info('Default user created: {}'.format(user.username))
+        else:
+            logger.warn('Default user already exists')

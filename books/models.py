@@ -70,7 +70,9 @@ class PublicationMixin(models.Model):
         verbose_name=_('International Article Number'),
         max_length=13,
         db_index=True,
+        unique=True,
         blank=True,
+        null=True,
     )
 
     class Meta:

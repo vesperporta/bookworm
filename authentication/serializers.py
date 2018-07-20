@@ -130,6 +130,7 @@ class AuthorSerializer(
             'name_first',
             'name_family',
             'name_middle',
+            'display_name',
             'birth_date',
             'death_date',
             'contacts',

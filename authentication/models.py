@@ -11,7 +11,7 @@ from hashid_field import HashidAutoField
 from authentication.models_token import Token
 from bookworm.mixins import PreserveModelMixin
 from meta_info.models import MetaInfo, MetaInfoMixin
-
+from posts.models import Emotable
 
 SOCIAL_PLATFORMS = (
     ('Facebook', ('social', ), ),
@@ -217,7 +217,7 @@ class Profile(PersonMixin, PreserveModelMixin):
         return f'Profile({self.id} - {self.display_name} "{self.email}")'
 
 
-class Author(PersonMixin, PreserveModelMixin):
+class Author(Emotable, PersonMixin, PreserveModelMixin):
     """Author model."""
 
     id = HashidAutoField(

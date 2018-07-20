@@ -2,12 +2,10 @@
 
 from rest_framework import serializers
 
+from authentication.serializers import AuthorSerializer
 from bookworm.serializers import PreservedModelSerializeMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
-from posts.serializers import (
-    EmotableSerializerMixin,
-    EmotableAggregateSerializerMixin,
-)
+from posts.serializers import EmotableAggregateSerializerMixin
 from authentication.models import Profile
 
 from file_store.models import (
@@ -94,6 +92,11 @@ class BookSerializer(
         many=False,
         view_name='image-detail',
         queryset=Image.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    author = AuthorSerializer(
+        many=False,
         required=False,
         allow_null=True,
     )
