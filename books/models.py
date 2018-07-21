@@ -232,6 +232,7 @@ class ReadingList(
     class Meta:
         verbose_name = 'Reading List'
         verbose_name_plural = 'Reading Lists'
+        unique_together = ('title', 'profile', )
 
     @property
     def count_books(self):

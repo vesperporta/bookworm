@@ -269,6 +269,7 @@ class ReadingListSerializer(
     )
     books = SmallBookSerializer(
         many=True,
+        read_only=True,
     )
     profile = serializers.HyperlinkedRelatedField(
         many=False,
