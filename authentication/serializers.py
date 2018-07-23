@@ -115,6 +115,10 @@ class AuthorSerializer(
         required=False,
         allow_null=True,
     )
+    name_display = serializers.CharField(
+        required=True,
+        allow_null=False,
+    )
 
     class Meta:
         model = Author
@@ -130,7 +134,7 @@ class AuthorSerializer(
             'name_first',
             'name_family',
             'name_middle',
-            'display_name',
+            'name_display',
             'birth_date',
             'death_date',
             'contacts',

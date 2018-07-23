@@ -295,6 +295,30 @@ class ReadingListSerializer(
         exclude = []
 
 
+class SmallReadingListSerializer(serializers.HyperlinkedModelSerializer):
+    """Small ReadingList serializer."""
+
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='readinglist-detail',
+    )
+    books = SmallBookSerializer(
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+        model = ReadingList
+        read_only_fields = (
+            'id',
+            'books',
+            'title',
+        )
+        fields = read_only_fields
+        exclude = []
+
+
 class BookReviewSerializer(
         EmotableAggregateSerializerMixin,
         MetaInfoAvailabledSerializerMixin,

@@ -64,7 +64,9 @@ class ProfileViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter, )
     search_fields = (
         'name_first',
-        'name_last',
+        'name_family',
+        'name_middle',
+        'name_display',
         'contacts__detail',
     )
 
@@ -131,7 +133,9 @@ class AuthorViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter, )
     search_fields = (
         'name_first',
-        'name_last',
+        'name_family',
+        'name_middle',
+        'name_display',
         'contacts__detail',
     )
 

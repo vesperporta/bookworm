@@ -57,7 +57,11 @@ class BookViewSet(
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('title', 'description', )
+    search_fields = (
+        'title',
+        'description',
+        'author__name_display',
+    )
     permission_classes = (AnyReadOrElevatedPermission, )
 
     def perform_create(self, serializer):
