@@ -12,7 +12,7 @@ from books.exceptions import (
     AnswerAlreadyAcceptedValidation,
     CannotAcceptOwnAnswerValidation,
 )
-from books.tasks import answer_accepted_create_read
+from books.tasks import answer_accepted_create_read_task
 from bookworm.mixins import (
     ProfileReferredMixin,
     PreserveModelMixin,
@@ -153,7 +153,7 @@ class ConfirmReadAnswer(
         self.accepted_at = now()
         self.accepted_by = accepted_from
         self.save()
-        answer_accepted_create_read(self)
+        answer_accepted_create_read_task.delay(self)
 
 
 class Read(Emotable, PreserveModelMixin, ProfileReferredMixin):

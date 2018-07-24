@@ -10,6 +10,7 @@ from bookworm.mixins import (
     ProfileReferredMixin,
     PreserveModelMixin,
 )
+from file_store.tasks import image_auto_crop_task
 from meta_info.models import MetaInfo
 
 
@@ -104,8 +105,8 @@ class Imagable(models.Model):
     def image_append(self, image, as_primary=False):
         """Append an image to the images list.
 
-        @param image: Image object.
-        @param as_primary: Bool, default = False, assign as cover_image.
+        @:param image: Image object.
+        @:param as_primary: bool, default = False, assign as cover_image.
         """
         if image.original:
             image = image.original
@@ -113,9 +114,8 @@ class Imagable(models.Model):
             as_primary = True
         if as_primary:
             self.cover_image = image
-        if not image.original:
-            # TODO: Task to manage size cropping # noqa T000
-            pass
+        if not image.original and image.sizes.count() == 0:
+            image_auto_crop_task.delay(image)
         self.images.add(image)
 
     def image_pop(self, image):

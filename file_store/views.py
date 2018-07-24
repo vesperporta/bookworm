@@ -44,7 +44,7 @@ class ImagableViewSet:
         """Add an Image to image list."""
         target = self.get_object()
         try:
-            image = Image.objects.filter(id=request.POST.get('image')).first()
+            image = Image.objects.get(id=request.POST.get('image'))
         except Image.DoesNotExist as error:
             self._image_error_handle(error)
         target.image_append(image, request.POST.get('as_primary', False))
@@ -62,7 +62,7 @@ class ImagableViewSet:
         """Remove an image from object."""
         target = self.get_object()
         try:
-            image = Image.objects.filter(id=request.POST.get('image')).first()
+            image = Image.objects.get(id=request.POST.get('image'))
         except Image.DoesNotExist as error:
             self._image_error_handle(error)
         target.image_pop(image)
