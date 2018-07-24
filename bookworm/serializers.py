@@ -5,12 +5,33 @@ from rest_framework.relations import PKOnlyObject
 
 from collections import OrderedDict
 
+from authentication.models import Profile
+
 
 class PreservedModelSerializeMixin:
     """Prevent deletion serializer mixin."""
     created_at = serializers.ReadOnlyField()
     modified_at = serializers.ReadOnlyField()
     deleted_at = serializers.ReadOnlyField()
+
+
+class ProfileSerializeMixin:
+    """Upon creation of objects assign profile from request object."""
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
+    )
+
+    def create(self, validated_data):
+        """Assign the current user to the validated_data object for creation.
+
+        @:param validated_data: dict validated from request data.
+        """
+        validated_data.update({
+            'profile': self.context['request'].user.profile,
+        })
+        return super().create(validated_data)
 
 
 class ForeignFieldRepresentationSerializerMixin:

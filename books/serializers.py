@@ -5,7 +5,7 @@ from django.db import transaction
 
 from authentication.serializers import AuthorSerializer, SmallAuthorSerializer
 from bookworm.serializers import PreservedModelSerializeMixin, \
-    ForeignFieldRepresentationSerializerMixin
+    ForeignFieldRepresentationSerializerMixin, ProfileSerializeMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 from posts.models import Post
 from posts.serializers import EmotableAggregateSerializerMixin
@@ -57,8 +57,9 @@ class BookReviewShortSerializer(
 
 class BookSerializer(
         EmotableAggregateSerializerMixin,
-        PreservedModelSerializeMixin,
+        ProfileSerializeMixin,
         MetaInfoAvailabledSerializerMixin,
+        PreservedModelSerializeMixin,
         serializers.HyperlinkedModelSerializer,
 ):
     """Book model serializer."""
@@ -71,11 +72,6 @@ class BookSerializer(
     reviews = BookReviewShortSerializer(
         many=True,
         read_only=True,
-    )
-    profile = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
     )
     documents = serializers.HyperlinkedRelatedField(
         many=True,
@@ -169,7 +165,10 @@ class SmallBookSerializer(
         exclude = []
 
 
-class BookProgressSerializer(serializers.HyperlinkedModelSerializer):
+class BookProgressSerializer(
+    ProfileSerializeMixin,
+    serializers.HyperlinkedModelSerializer,
+):
     """BookProgress model serializer."""
 
     id = serializers.HyperlinkedRelatedField(
@@ -188,11 +187,6 @@ class BookProgressSerializer(serializers.HyperlinkedModelSerializer):
         queryset=Document.objects.all(),
         required=False,
         allow_null=True,
-    )
-    profile = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -291,6 +285,7 @@ class BookChapterSerializer(
 
 class ReadingListSerializer(
         EmotableAggregateSerializerMixin,
+        ProfileSerializeMixin,
         MetaInfoAvailabledSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
@@ -304,11 +299,6 @@ class ReadingListSerializer(
     books = SmallBookSerializer(
         many=True,
         read_only=True,
-    )
-    profile = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -355,9 +345,10 @@ class SmallReadingListSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BookReviewSerializer(
-        EmotableAggregateSerializerMixin,
-        ForeignFieldRepresentationSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
+    EmotableAggregateSerializerMixin,
+    ProfileSerializeMixin,
+    ForeignFieldRepresentationSerializerMixin,
+    serializers.HyperlinkedModelSerializer,
 ):
     """BookReview serializer."""
 
@@ -377,11 +368,6 @@ class BookReviewSerializer(
         queryset=BookProgress.objects.all(),
         required=False,
         allow_null=True,
-    )
-    profile = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
     )
     post = serializers.HyperlinkedRelatedField(
         many=False,
@@ -423,7 +409,6 @@ class BookReviewSerializer(
         @:returns BookReview
         """
         with transaction.atomic():
-            # Signals pre and post are contained within transaction.atomic.
             created_post = Post.objects.create(
                 copy=validated_data.get('copy'),
                 profile=self.context['request'].user.profile,
@@ -436,8 +421,9 @@ class BookReviewSerializer(
 
 
 class ConfirmReadQuestionSerializer(
-        EmotableAggregateSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
+    ProfileSerializeMixin,
+    EmotableAggregateSerializerMixin,
+    serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmReadQuestion model serializer."""
 
@@ -458,10 +444,12 @@ class ConfirmReadQuestionSerializer(
         required=False,
         allow_null=True,
     )
-    profile = serializers.HyperlinkedRelatedField(
+    multi_choice_answer = serializers.HyperlinkedRelatedField(
         many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
+        view_name='confirmreadquestion-detail',
+        queryset=ConfirmReadQuestion.objects.all(),
+        required=False,
+        allow_null=True,
     )
 
     class Meta:
@@ -479,12 +467,14 @@ class ConfirmReadQuestionSerializer(
             'book',
             'chapter',
             'copy',
+            'multi_choice_answer',
         )
         exclude = []
 
 
 class ConfirmReadAnswerSerializer(
-        serializers.HyperlinkedModelSerializer,
+    ProfileSerializeMixin,
+    serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmReadAnswer model serializer."""
 
@@ -496,17 +486,12 @@ class ConfirmReadAnswerSerializer(
     accepted_by = serializers.HyperlinkedRelatedField(
         many=False,
         view_name='profile-detail',
-        queryset=Profile.objects.all(),
+        read_only=True,
     )
     question = serializers.HyperlinkedRelatedField(
         many=False,
         view_name='confirmreadquestion-detail',
         queryset=ConfirmReadQuestion.objects.all(),
-    )
-    profile = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -522,15 +507,15 @@ class ConfirmReadAnswerSerializer(
         fields = read_only_fields + (
             'question',
             'is_true',
-            'is_answer',
             'copy',
         )
         exclude = []
 
 
 class ReadSerializer(
-        EmotableAggregateSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
+    ProfileSerializeMixin,
+    EmotableAggregateSerializerMixin,
+    serializers.HyperlinkedModelSerializer,
 ):
     """ConfirmRead model serializer."""
 
@@ -551,11 +536,6 @@ class ReadSerializer(
         many=False,
         view_name='confirmreadanswer-detail',
         queryset=ConfirmReadAnswer.objects.all(),
-    )
-    profile = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
     )
 
     class Meta:

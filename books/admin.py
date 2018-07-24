@@ -161,11 +161,9 @@ class ConfirmReadAnswerAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'question',
-        'is_answer',
         'copy',
     )
     search_fields = (
-        'is_answer',
         'copy__icontains',
         'profile__user__username__icontains',
     )

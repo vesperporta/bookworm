@@ -8,10 +8,15 @@ from django.utils.timezone import now
 from model_utils import Choices
 from hashid_field import HashidAutoField
 
-from books.exceptions import AnswerAlreadyAcceptedValidation, \
-    CannotAcceptOwnAnswerValidation
+from books.exceptions import (
+    AnswerAlreadyAcceptedValidation,
+    CannotAcceptOwnAnswerValidation,
+)
 from books.tasks import answer_accepted_create_read
-from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
+from bookworm.mixins import (
+    ProfileReferredMixin,
+    PreserveModelMixin,
+)
 from posts.models import Emotable, Post
 
 
@@ -57,6 +62,14 @@ class ConfirmReadQuestion(
         verbose_name=_('Question'),
         max_length=400,
     )
+    multi_choice_answer = models.ForeignKey(
+        'books.ConfirmReadQuestion',
+        related_name='multi_choice',
+        verbose_name=_('Answer'),
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         verbose_name = 'Confirm Read Question'
@@ -79,13 +92,6 @@ class ConfirmReadAnswer(
     Pre-determined groups: gloable, or noone.
     """
 
-    TYPES = Choices(
-        (0, 'choice', _('Multiple choice answer to select from.')),
-        (1, 'written', _('Written answer.')),
-        (2, 'boolean', _('True or False.')),
-    )
-    TYPES_CHOICE = [TYPES.choice, TYPES.boolean, ]
-
     id = HashidAutoField(
         primary_key=True,
         salt=settings.SALT_BOOKS_CONFIRMREADANSWER,
@@ -100,14 +106,11 @@ class ConfirmReadAnswer(
         verbose_name=_('Answer copy'),
         max_length=400,
     )
-    is_true = models.BooleanField(
+    is_true = models.NullBooleanField(
         verbose_name=_('Boolean Answer'),
-        blank=True,
         default=None,
-    )
-    is_answer = models.BooleanField(
-        verbose_name=_('Is Answer for Multiple Choice'),
-        default=False,
+        blank=True,
+        null=True,
     )
     accepted_at = models.DateTimeField(
         verbose_name=_('Accepted When'),
@@ -146,7 +149,7 @@ class ConfirmReadAnswer(
             raise AnswerAlreadyAcceptedValidation(self.accepted_by)
         if accepted_from.id == self.profile.id:
             raise CannotAcceptOwnAnswerValidation()
-        self.accepted_at = now(USE_TZ=True)
+        self.accepted_at = now()
         self.accepted_by = accepted_from
         self.save()
         answer_accepted_create_read(self)

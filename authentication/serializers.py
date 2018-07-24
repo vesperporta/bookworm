@@ -82,8 +82,6 @@ class ProfileSerializer(
         email = validated_data.get('email')
         username = Token.objects.generate_sha256(email)
         with transaction.atomic():
-            # Signals pre and post are contained within transaction.atomic.
-            # User objects username field character limit is 150.
             created_user = User.objects.create_user(
                 username=username[:150],
                 email=email,

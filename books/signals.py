@@ -62,20 +62,6 @@ def pre_save_book_meta_info(sender, instance, *args, **kwargs):
         instance.meta_info.json = default_json
 
 
-@receiver(pre_save, sender=ConfirmReadAnswer)
-def pre_save_confirm_read_one_answer(sender, instance, *args, **kwargs):
-    """Ensure only one true answer for a question for multi-choice."""
-    type_choice = instance.type in ConfirmReadAnswer.TYPES_CHOICE
-    if not instance.is_answer or type_choice:
-        return
-    answer_list = list(instance.question.answers.filter(is_answer=True))
-    for answer in answer_list:
-        if answer.id == instance.id:
-            continue
-        answer.is_answer = False
-        answer.save()
-
-
 @receiver(pre_save, sender=Read)
 def pre_save_read_comments(sender, instance, *args, **kwargs):
     """Update the Read object with a post thread for comments."""

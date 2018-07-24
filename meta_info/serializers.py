@@ -97,9 +97,12 @@ class MetaInfoAvailabledSerializerMixin:
         allow_null=True,
     )
 
-    def validate(self, data):
-        """Validate for meta_info to validated_data"""
-        if 'meta_info' in data and not type(data['meta_info']) is str:
-            meta_info = MetaInfo.objects.create(**data['meta_info'])
-            data['meta_info'] = meta_info.id
-        return super().validate(data)
+    def create(self, validated_data):
+        """Create for meta_info to validated_data"""
+        if 'meta_info' in validated_data and \
+                not type(validated_data['meta_info']) is str:
+            meta_info = MetaInfo.objects.create(**validated_data['meta_info'])
+            validated_data.update({
+                'meta_info': meta_info,
+            })
+        return super().create(validated_data)
