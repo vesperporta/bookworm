@@ -2,7 +2,8 @@
 
 from rest_framework import serializers
 
-from bookworm.serializers import PreservedModelSerializeMixin
+from bookworm.serializers import PreservedModelSerializeMixin, \
+    ProfileSerializeMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 
 from authentication.models import Profile
@@ -14,8 +15,9 @@ from posts.models import (
 
 
 class EmoteSerializer(
-        PreservedModelSerializeMixin,
-        serializers.HyperlinkedModelSerializer,
+    ProfileSerializeMixin,
+    PreservedModelSerializeMixin,
+    serializers.HyperlinkedModelSerializer,
 ):
     """Generic Emote serializer."""
 
@@ -23,11 +25,6 @@ class EmoteSerializer(
         many=False,
         read_only=True,
         view_name='emote-detail',
-    )
-    profile = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
     )
 
     class Meta:
@@ -70,7 +67,7 @@ class EmotableSerializerMixin:
     emotes = serializers.HyperlinkedRelatedField(
         many=True,
         view_name='emote-detail',
-        queryset=Emote.objects.all(),
+        read_only=True,
     )
     emote_aggregate = serializers.ListField(
         child=serializers.IntegerField(
@@ -120,10 +117,11 @@ class ThinPostSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class PostSerializer(
-        EmotableSerializerMixin,
-        PreservedModelSerializeMixin,
-        MetaInfoAvailabledSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
+    EmotableAggregateSerializerMixin,
+    ProfileSerializeMixin,
+    PreservedModelSerializeMixin,
+    MetaInfoAvailabledSerializerMixin,
+    serializers.HyperlinkedModelSerializer,
 ):
     """Post model serializer."""
 
@@ -138,11 +136,6 @@ class PostSerializer(
         queryset=Post.objects.all(),
         required=False,
         allow_null=True,
-    )
-    profile = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
     )
     images = serializers.HyperlinkedRelatedField(
         many=True,
@@ -175,7 +168,6 @@ class PostSerializer(
             'modified_at',
             'deleted_at',
             'meta_info',
-            'emotes',
             'emote_aggregate',
             'children',
             'children_count',
@@ -198,31 +190,3 @@ class PostSerializer(
             serializer = ThinPostSerializer(child, context=self.context)
             data.append(serializer.data)
         return data
-
-
-class WritePostSerializer(
-        PreservedModelSerializeMixin,
-        MetaInfoAvailabledSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
-):
-    """Writing a Post serializer sub another serializer."""
-
-    id = serializers.HyperlinkedRelatedField(
-        many=False,
-        read_only=True,
-        view_name='post-detail',
-    )
-
-    class Meta:
-        model = Post
-        read_only_fields = (
-            'id',
-            'created_at',
-            'modified_at',
-            'deleted_at',
-            'meta_info',
-        )
-        fields = read_only_fields + (
-            'copy',
-        )
-        exclude = ()

@@ -8,7 +8,7 @@ from bookworm.serializers import PreservedModelSerializeMixin, \
     ForeignFieldRepresentationSerializerMixin, ProfileSerializeMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
 from posts.models import Post
-from posts.serializers import EmotableAggregateSerializerMixin
+from posts.serializers import EmotableAggregateSerializerMixin, PostSerializer
 from authentication.models import Profile
 
 from file_store.models import (
@@ -528,9 +528,8 @@ class ReadSerializer(
         view_name='confirmreadanswer-detail',
         queryset=ConfirmReadAnswer.objects.all(),
     )
-    post = serializers.HyperlinkedRelatedField(
+    post = PostSerializer(
         many=False,
-        view_name='post-detail',
         read_only=True,
     )
 
