@@ -132,6 +132,7 @@ class ConfirmReadAnswer(
     class Meta:
         verbose_name = 'Confirm Read Answer'
         verbose_name_plural = 'Confirm Read Answers'
+        unique_together = ('profile', 'copy', )
 
     @property
     def correct(self):

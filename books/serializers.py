@@ -523,13 +523,15 @@ class ReadSerializer(
         view_name='book-detail',
         queryset=Book.objects.all(),
     )
-    answered_correctly = serializers.BooleanField(
-        read_only=True,
-    )
     answer = serializers.HyperlinkedRelatedField(
         many=False,
         view_name='confirmreadanswer-detail',
         queryset=ConfirmReadAnswer.objects.all(),
+    )
+    post = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='post-detail',
+        read_only=True,
     )
 
     class Meta:
@@ -542,6 +544,7 @@ class ReadSerializer(
             'answered_correctly',
             'emote_aggregate',
             'profile',
+            'post',
         )
         fields = read_only_fields + (
             'book',
