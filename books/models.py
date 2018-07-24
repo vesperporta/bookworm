@@ -14,7 +14,7 @@ from bookworm.mixins import (
 )
 from meta_info.models import MetaInfo
 from meta_info.models_localisation import Localisable
-from posts.models import Emotable
+from posts.models import Emotable, Post
 from file_store.models import (Imagable, Documentable, DocumentRefferedMixin)
 
 
@@ -215,6 +215,10 @@ class ReadingList(
         max_length=200,
         db_index=True,
     )
+    description = models.TextField(
+        blank=True,
+        null=True,
+    )
     books = models.ManyToManyField(
         Book,
         related_name='reading_lists',
@@ -289,13 +293,9 @@ class BookReview(
         default=TYPES.review,
         blank=True,
     )
-    copy = models.TextField(
-        db_index=True,
-    )
     rating = models.IntegerField(
         choices=RATINGS,
         default=RATINGS.unrated,
-        blank=True,
     )
     book = models.ForeignKey(
         Book,
@@ -303,27 +303,20 @@ class BookReview(
         verbose_name=_('Book'),
         on_delete=models.PROTECT,
     )
-    inferred_progress = models.ForeignKey(
-        BookProgress,
-        related_name='inferred_reviewed_at+',
-        verbose_name=_('Inferred Progress'),
-        on_delete=models.DO_NOTHING,
-        blank=True,
-    )
     progress = models.ForeignKey(
         BookProgress,
         related_name='reviewed_at',
         verbose_name=_('Progress'),
         on_delete=models.DO_NOTHING,
         blank=True,
+        null=True,
     )
-    meta_info = models.ForeignKey(
-        MetaInfo,
-        related_name='book_reviews+',
-        verbose_name=_('Meta data'),
+    post = models.ForeignKey(
+        Post,
+        related_name='book_review+',
+        verbose_name=_('Post'),
         on_delete=models.DO_NOTHING,
         blank=True,
-        null=True,
     )
 
     class Meta:

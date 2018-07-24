@@ -1,10 +1,13 @@
 """Books app serializers."""
 
 from rest_framework import serializers
+from django.db import transaction
 
 from authentication.serializers import AuthorSerializer, SmallAuthorSerializer
-from bookworm.serializers import PreservedModelSerializeMixin
+from bookworm.serializers import PreservedModelSerializeMixin, \
+    ForeignFieldRepresentationSerializerMixin
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
+from posts.models import Post
 from posts.serializers import EmotableAggregateSerializerMixin
 from authentication.models import Profile
 
@@ -166,9 +169,7 @@ class SmallBookSerializer(
         exclude = []
 
 
-class BookProgressSerializer(
-        serializers.HyperlinkedModelSerializer,
-):
+class BookProgressSerializer(serializers.HyperlinkedModelSerializer):
     """BookProgress model serializer."""
 
     id = serializers.HyperlinkedRelatedField(
@@ -211,6 +212,39 @@ class BookProgressSerializer(
             'end',
             'book',
             'document',
+        )
+
+
+class SmallBookProgressSerializer(serializers.HyperlinkedModelSerializer):
+    """Small BookProgress model serializer."""
+
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='bookprogress-detail',
+    )
+    book = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='book-detail',
+        queryset=Book.objects.all(),
+    )
+
+    class Meta:
+        model = BookProgress
+        exclude = []
+        read_only_fields = (
+            'id',
+            'created_at',
+            'modified_at',
+            'deleted_at',
+            'profile',
+        )
+        fields = read_only_fields + (
+            'percent',
+            'page',
+            'start',
+            'end',
+            'book',
         )
 
 
@@ -291,6 +325,7 @@ class ReadingListSerializer(
         )
         fields = read_only_fields + (
             'title',
+            'description',
         )
         exclude = []
 
@@ -321,7 +356,7 @@ class SmallReadingListSerializer(serializers.HyperlinkedModelSerializer):
 
 class BookReviewSerializer(
         EmotableAggregateSerializerMixin,
-        MetaInfoAvailabledSerializerMixin,
+        ForeignFieldRepresentationSerializerMixin,
         serializers.HyperlinkedModelSerializer,
 ):
     """BookReview serializer."""
@@ -338,11 +373,24 @@ class BookReviewSerializer(
     )
     progress = serializers.HyperlinkedRelatedField(
         many=False,
-        view_name='bookprogress-detail',
+        view_name='progress-detail',
         queryset=BookProgress.objects.all(),
         required=False,
         allow_null=True,
     )
+    profile = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='profile-detail',
+        queryset=Profile.objects.all(),
+    )
+    post = serializers.HyperlinkedRelatedField(
+        many=False,
+        view_name='post-detail',
+        queryset=Post.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    copy = serializers.CharField()
 
     class Meta:
         model = BookReview
@@ -351,18 +399,40 @@ class BookReviewSerializer(
             'created_at',
             'modified_at',
             'deleted_at',
-            'meta_info',
             'profile',
             'emote_aggregate',
+            'post',
         )
         fields = read_only_fields + (
             'type',
-            'copy',
             'rating',
+            'copy',
             'book',
             'progress',
         )
-        exclude = []
+        exclude = ()
+        foreign_fields_get = {
+            'copy': 'post',
+        }
+
+    def create(self, validated_data):
+        """Create a BookReview object with a Post object to store copy.
+
+        @:param validated_data: dict validated from request data.
+
+        @:returns BookReview
+        """
+        with transaction.atomic():
+            # Signals pre and post are contained within transaction.atomic.
+            created_post = Post.objects.create(
+                copy=validated_data.get('copy'),
+                profile=self.context['request'].user.profile,
+            )
+            validated_data.pop('copy')
+            validated_data.update({
+                'post': created_post,
+            })
+        return super().create(validated_data)
 
 
 class ConfirmReadQuestionSerializer(

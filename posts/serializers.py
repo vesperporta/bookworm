@@ -198,3 +198,31 @@ class PostSerializer(
             serializer = ThinPostSerializer(child, context=self.context)
             data.append(serializer.data)
         return data
+
+
+class WritePostSerializer(
+        PreservedModelSerializeMixin,
+        MetaInfoAvailabledSerializerMixin,
+        serializers.HyperlinkedModelSerializer,
+):
+    """Writing a Post serializer sub another serializer."""
+
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='post-detail',
+    )
+
+    class Meta:
+        model = Post
+        read_only_fields = (
+            'id',
+            'created_at',
+            'modified_at',
+            'deleted_at',
+            'meta_info',
+        )
+        fields = read_only_fields + (
+            'copy',
+        )
+        exclude = ()

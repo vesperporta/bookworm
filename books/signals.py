@@ -19,28 +19,8 @@ from books.models_read import (
 from posts.models import (Emote, Post)
 
 
-@receiver(pre_save, sender=BookReview)
-def pre_save_book_review(sender, instance, *args, **kwargs):
-    """Ensure there is an infered progress update."""
-    if instance.infered_progress:
-        return
-    progress = BookProgress.objects.filter(
-        book=instance.book
-    ).order_by('-percent', '-page').first()
-    if not progress:
-        progress = BookProgress.objects.create(
-            percent=0.0,
-            page=0,
-            start=0,
-            end=0,
-            book=instance.book,
-        )
-    instance.infered_progress = progress
-
-
 @receiver(pre_save, sender=BookChapter)
 @receiver(pre_save, sender=ReadingList)
-@receiver(pre_save, sender=BookReview)
 def pre_save_book_chapter_meta_info(sender, instance, *args, **kwargs):
     """set meta info for instance."""
     if instance.pk:
