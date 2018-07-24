@@ -483,11 +483,6 @@ class ConfirmReadAnswerSerializer(
         read_only=True,
         view_name='confirmreadanswer-detail',
     )
-    accepted_by = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        read_only=True,
-    )
     question = serializers.HyperlinkedRelatedField(
         many=False,
         view_name='confirmreadquestion-detail',
@@ -501,8 +496,7 @@ class ConfirmReadAnswerSerializer(
             'created_at',
             'modified_at',
             'deleted_at',
-            'accepted_at',
-            'accepted_by',
+            'correct',
         )
         fields = read_only_fields + (
             'question',

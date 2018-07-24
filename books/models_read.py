@@ -136,7 +136,7 @@ class ConfirmReadAnswer(
     @property
     def correct(self):
         """Answer is correct."""
-        return bool(self.is_answer or self.accepted_by)
+        return bool(self.accepted_by)
 
     def __str__(self):
         """Display only as URI valid slug."""
