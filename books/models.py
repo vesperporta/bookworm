@@ -200,10 +200,11 @@ class BookChapter(Localisable, PreserveModelMixin):
 
 
 class ReadingList(
-        Emotable,
-        Localisable,
-        ProfileReferredMixin,
-        PreserveModelMixin,
+    Emotable,
+    Imagable,
+    Localisable,
+    ProfileReferredMixin,
+    PreserveModelMixin,
 ):
     """Reading list model."""
 

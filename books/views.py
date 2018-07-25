@@ -108,9 +108,10 @@ class BookChapterViewSet(
 
 
 class ReadingListViewSet(
-        EmotableViewSet,
-        LocalisableViewSetMixin,
-        viewsets.ModelViewSet,
+    EmotableViewSet,
+    ImagableViewSet,
+    LocalisableViewSetMixin,
+    viewsets.ModelViewSet,
 ):
     queryset = ReadingList.objects.all()
     serializer_class = ReadingListSerializer

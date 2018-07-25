@@ -12,6 +12,7 @@ from hashid_field import HashidAutoField
 
 from bookworm.mixins import (ProfileReferredMixin, PreserveModelMixin)
 from books.models import ReadingList
+from file_store.models import Imagable
 from meta_info.models import MetaInfo, MetaInfoMixin
 from authentication.models import ContactMethod, Profile
 from authentication.models_token import Token
@@ -287,7 +288,11 @@ class CircleManager(models.Manager):
         return circle
 
 
-class Circle(Invitable, PreserveModelMixin):
+class Circle(
+    Invitable,
+    Imagable,
+    PreserveModelMixin,
+):
     """Profile and group relationship model."""
 
     PREFIX = '¶'  # Pilcrow

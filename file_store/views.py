@@ -1,9 +1,10 @@
 """FileStore app views."""
 
 from rest_framework import (status, viewsets, filters)
-from rest_framework.decorators import detail_route
+from rest_framework import decorators
 from rest_framework.response import Response
 
+from books.permissions import OwnerAndAdminPermission
 from file_store.models import (
     Image,
     Document,
@@ -39,7 +40,8 @@ class ImagableViewSet:
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    @detail_route(methods=['post'])
+    @decorators.detail_route(methods=['post'])
+    @decorators.permission_classes((OwnerAndAdminPermission, ))
     def image_append(self, request, pk, **kwargs):
         """Add an Image to image list."""
         target = self.get_object()
@@ -57,7 +59,8 @@ class ImagableViewSet:
             }
         )
 
-    @detail_route(methods=['post'])
+    @decorators.detail_route(methods=['post'])
+    @decorators.permission_classes((OwnerAndAdminPermission, ))
     def image_pop(self, request, pk, **kwargs):
         """Remove an image from object."""
         target = self.get_object()

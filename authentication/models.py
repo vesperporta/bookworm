@@ -10,6 +10,7 @@ from hashid_field import HashidAutoField
 
 from authentication.models_token import Token
 from bookworm.mixins import PreserveModelMixin
+from file_store.models import Imagable
 from meta_info.models import MetaInfo, MetaInfoMixin
 from posts.models import Emotable
 
@@ -156,7 +157,7 @@ class PersonMixin(models.Model):
         return name
 
 
-class Profile(PersonMixin, PreserveModelMixin):
+class Profile(Imagable, PersonMixin, PreserveModelMixin):
     """Profile model."""
 
     TYPES = Choices(
@@ -217,7 +218,7 @@ class Profile(PersonMixin, PreserveModelMixin):
         return f'Profile({self.id} - {self.display_name} "{self.email}")'
 
 
-class Author(Emotable, PersonMixin, PreserveModelMixin):
+class Author(Emotable, Imagable, PersonMixin, PreserveModelMixin):
     """Author model."""
 
     id = HashidAutoField(

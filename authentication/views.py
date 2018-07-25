@@ -25,6 +25,7 @@ from authentication.models_circles import (
     Invitation,
 )
 from authentication.views_invitable import InvitableViewSetMixin
+from file_store.views import ImagableViewSet
 
 
 class ProfilePermission(permissions.IsAuthenticated):
@@ -60,7 +61,7 @@ class ProfilePermission(permissions.IsAuthenticated):
         return authenticated and obj.id == request.user.profile.id
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
+class ProfileViewSet(ImagableViewSet, viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = (ProfilePermission, )
@@ -90,6 +91,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
 
 class ProfileMeViewSet(
+    ImagableViewSet,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
@@ -131,7 +133,7 @@ class AuthorPermission(permissions.IsAuthenticated):
         return authenticated and obj.profile.id == request.user.profile.id
 
 
-class AuthorViewSet(viewsets.ModelViewSet):
+class AuthorViewSet(ImagableViewSet, viewsets.ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
     permission_classes = (AuthorPermission, )
@@ -213,7 +215,11 @@ class CirclePermission(permissions.IsAuthenticated):
         return invite_elevated or is_admin
 
 
-class CircleViewSet(InvitableViewSetMixin, viewsets.ModelViewSet):
+class CircleViewSet(
+    InvitableViewSetMixin,
+    ImagableViewSet,
+    viewsets.ModelViewSet,
+):
     queryset = Circle.objects.all()
     serializer_class = CircleSerializer
     permission_classes = (

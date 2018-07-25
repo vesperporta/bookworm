@@ -10,6 +10,8 @@ services:
     env_file: .env
     volumes:
       - db-data:/var/lib/postgresql/db-data
+    ports:
+        - "5433:5432"
 
   rabbitmq:
     image: rabbitmq:3.6-management
