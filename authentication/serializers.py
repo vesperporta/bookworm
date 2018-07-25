@@ -66,7 +66,7 @@ class ProfileSerializer(
             'pen_names',
             'contacts',
         )
-        exclude = []
+        exclude = ()
 
     def create(self, validated_data):
         """Create a Profile object to allow a user to login.
@@ -97,10 +97,7 @@ class ProfileSerializer(
         return created_user.profile
 
 
-class AuthorSerializer(
-        MetaInfoAvailabledSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
-):
+class AuthorSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.HyperlinkedRelatedField(
         many=False,
         read_only=True,
@@ -124,8 +121,6 @@ class AuthorSerializer(
             'id',
             'created_at',
             'modified_at',
-            'deleted_at',
-            'meta_info',
         )
         fields = read_only_fields + (
             'name_title',
@@ -137,7 +132,7 @@ class AuthorSerializer(
             'death_date',
             'contacts',
         )
-        exclude = []
+        exclude = ()
 
 
 class SmallAuthorSerializer(serializers.HyperlinkedModelSerializer):
@@ -157,7 +152,7 @@ class SmallAuthorSerializer(serializers.HyperlinkedModelSerializer):
             'birth_date',
             'death_date',
         )
-        exclude = []
+        exclude = ()
 
 
 class ContactMethodSerializer(
@@ -183,7 +178,7 @@ class ContactMethodSerializer(
             'detail',
             'email',
         )
-        exclude = []
+        exclude = ()
 
 
 class InvitationSerializer(
@@ -219,7 +214,7 @@ class InvitationSerializer(
             'profile_to',
         )
         fields = read_only_fields
-        exclude = []
+        exclude = ()
 
     def validate(self, data):
         """Validate for profile assignment to validated_data"""
@@ -265,7 +260,7 @@ class CircleSerializer(
             'reading_list',
             'invites',
         )
-        exclude = []
+        exclude = ()
 
     def create(self, validated_data):
         """Create a Circle object to group users.
@@ -321,4 +316,30 @@ class ProfileMeSerializer(
             'pen_names',
             'contacts',
         )
-        exclude = []
+        exclude = ()
+
+
+class PublicProfileSerializer(
+    MetaInfoAvailabledSerializerMixin,
+    serializers.HyperlinkedModelSerializer,
+):
+    id = serializers.HyperlinkedRelatedField(
+        many=False,
+        read_only=True,
+        view_name='profile-detail',
+    )
+    pen_names = SmallAuthorSerializer(
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+        model = Profile
+        read_only_fields = (
+            'id',
+            'type',
+            'name_display',
+            'pen_names',
+        )
+        fields = read_only_fields
+        exclude = ()

@@ -18,6 +18,7 @@ from authentication.serializers import (
     CircleSerializer,
     InvitationSerializer,
     ProfileMeSerializer,
+    PublicProfileSerializer,
 )
 from authentication.models_circles import (
     Circle,
@@ -42,6 +43,8 @@ class ProfilePermission(permissions.IsAuthenticated):
         if view.action in ['create']:
             if authenticated:
                 return False
+            return True
+        if view.action in ['list', 'retrieve', ]:
             return True
         return authenticated
 
@@ -70,18 +73,20 @@ class ProfileViewSet(viewsets.ModelViewSet):
         'contacts__detail',
     )
 
-    def get_queryset(self):
-        """User may only see their own Profile object.
+    def get_serializer_class(self):
+        """Represent this Profile determined by authenticated Profile.
 
-        Admins can view all Profiles.
+        All users can see a public serialized version of a profile
         """
-        queryset = super().get_queryset()
-        if (
-                self.action in ['list']
-                and self.request.user.profile.type < Profile.TYPES.admin
-        ):
-            return queryset.filter(id=self.request.user.profile.id)
-        return queryset
+        if self.action in ['retrieve', ] and \
+                self.get_object().id != self.request.user.profile.id:
+            serializer = PublicProfileSerializer
+        elif self.action in ['list', ] and \
+                self.request.user.profile.type < Profile.TYPES.admin:
+            serializer = PublicProfileSerializer
+        if not serializer:
+            serializer = super().get_serializer_class()
+        return serializer
 
 
 class ProfileMeViewSet(
