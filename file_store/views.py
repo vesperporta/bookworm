@@ -70,13 +70,38 @@ class ImagableViewSet:
     @decorators.detail_route(methods=['post'])
     @decorators.permission_classes((OwnerAndAdminPermission, ))
     def image_append(self, request, pk, **kwargs):
-        """Add an Image to image list."""
+        """Add an Image to image list.
+
+        Request param of `images` is acceptable for a list of images to be
+        added to the target object at one time otherwise the request param of
+        `image` is always attempted when the former is not defined.
+
+        Request param `as_primary` is used as either a string identifier for
+        the image being added from a list or is a boolean when a single image
+        is being added to the target.
+        """
         target = self.get_object()
-        try:
-            image = Image.objects.get(id=request.POST.get('image'))
-        except Image.DoesNotExist as error:
-            self._image_error_handle(error)
-        target.image_append(image, request.POST.get('as_primary', False))
+        images_list = request.POST.get('images')
+        as_primary = request.POST.get('as_primary', False)
+        if images_list:
+            images = Image.objects.filter(id__in=images_list)
+            for image in images:
+                target.image_append(
+                    image,
+                    True if (
+                        type(as_primary) is str and
+                        as_primary == image.id
+                    ) else False
+                )
+        else:
+            try:
+                image = Image.objects.get(id=request.POST.get('image'))
+                target.image_append(
+                    image,
+                    bool(as_primary),
+                )
+            except Image.DoesNotExist as error:
+                self._image_error_handle(error)
         return Response(
             {
                 'status': 'appended',
@@ -89,13 +114,28 @@ class ImagableViewSet:
     @decorators.detail_route(methods=['post'])
     @decorators.permission_classes((OwnerAndAdminPermission, ))
     def image_pop(self, request, pk, **kwargs):
-        """Remove an image from object."""
+        """Remove an image from object.
+
+        Request params of `images` is operated on as an array of image ids
+        where all known images are removed from the target, otherwise a single
+        `image` parameter is used to remove a single image.
+
+        When a cover_image is removed from the list of images that image is
+        removed from the cover image and replaced with the first available
+        image in the available list or None.
+        """
         target = self.get_object()
-        try:
-            image = Image.objects.get(id=request.POST.get('image'))
-        except Image.DoesNotExist as error:
-            self._image_error_handle(error)
-        target.image_pop(image)
+        images_list = request.POST.get('images')
+        if images_list:
+            images = Image.objects.filter(id__in=images_list)
+            for image in images:
+                target.image_pop(image)
+        else:
+            try:
+                image = Image.objects.get(id=request.POST.get('image'))
+                target.image_pop(image)
+            except Image.DoesNotExist as error:
+                self._image_error_handle(error)
         return Response(
             {
                 'status': 'popped',

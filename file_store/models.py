@@ -116,13 +116,11 @@ class Imagable(models.Model):
     def image_pop(self, image):
         """Remove an image from the images list.
 
-        If the image beign removed is cover_image then:
-        - The first image other than the removed is used as cover_image.
+        If the image being removed is cover_image then the first image not
+        the removed image is used as cover_image or None.
 
         @param image: Image object.
         """
-        if self.cover_image == image and self.images.count() > 1:
-            self.cover_image = self.images.exclude(id=image.id).first()
         if image.original:
             size_ids = [image.original.id]
             size_ids += image.original.sizes.values_list('id')
@@ -131,6 +129,9 @@ class Imagable(models.Model):
                 self.images.remove(remove)
         else:
             self.images.remove(image)
+        if self.cover_image == image and self.images.count() > 1:
+            self.cover_image = self.images.first()
+            self.save()
 
 
 class Document(FileMixin, ProfileReferredMixin, PreserveModelMixin):
