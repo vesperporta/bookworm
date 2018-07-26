@@ -2,9 +2,11 @@
 
 from rest_framework import serializers
 
-from bookworm.serializers import PreservedModelSerializeMixin
+from bookworm.serializers import (
+    PreservedModelSerializeMixin,
+    ProfileSerializeMixin,
+)
 from meta_info.serializers import MetaInfoAvailabledSerializerMixin
-from authentication.models import Profile
 
 from file_store.models import (
     Image,
@@ -13,9 +15,10 @@ from file_store.models import (
 
 
 class ImageSerializer(
-        PreservedModelSerializeMixin,
-        MetaInfoAvailabledSerializerMixin,
-        serializers.HyperlinkedModelSerializer,
+    ProfileSerializeMixin,
+    PreservedModelSerializeMixin,
+    MetaInfoAvailabledSerializerMixin,
+    serializers.HyperlinkedModelSerializer,
 ):
     """Image serializer."""
 
@@ -23,11 +26,6 @@ class ImageSerializer(
         many=False,
         read_only=True,
         view_name='image-detail',
-    )
-    profile = serializers.HyperlinkedRelatedField(
-        many=False,
-        view_name='profile-detail',
-        queryset=Profile.objects.all(),
     )
     original = serializers.HyperlinkedRelatedField(
         many=False,
@@ -44,12 +42,13 @@ class ImageSerializer(
             'created_at',
             'modified_at',
             'deleted_at',
+            'profile',
+            'original',
             'meta_info',
         )
         fields = read_only_fields + (
             'title',
             'description',
-            'extension',
             'mime',
             'source_url',
         )

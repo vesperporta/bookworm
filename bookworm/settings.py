@@ -409,6 +409,22 @@ DEFAULT_LOCALISATION = f'{DEFAULT_LANGUAGE}-{DEFAULT_LOCATION}'
 PROFILE_TYPE_ELEVATED__MIN = 1
 PROFILE_TYPE_ADMIN__MIN = 2
 
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default='')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default='')
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default='bookworm')
+AWS_QUERYSTRING_AUTH = False
+AWS_HEADERS = {'Cache-Control': 'max-age=86400', }
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage' \
+    if AWS_ACCESS_KEY_ID else \
+    'django.core.files.storage.FileSystemStorage'
+STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage' \
+    if AWS_ACCESS_KEY_ID else \
+    'django.contrib.staticfiles.storage.StaticFilesStorage'
+# these next two aren't used, but staticfiles will complain without them
+STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/' \
+    if AWS_ACCESS_KEY_ID else '/static/'
+STATIC_ROOT = '' if AWS_ACCESS_KEY_ID else None
+
 # Load local environment specific settings
 try:
     from local_settings import *

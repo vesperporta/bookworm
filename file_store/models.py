@@ -28,11 +28,6 @@ class FileMixin(models.Model):
     description = models.TextField(
         blank=True,
     )
-    extension = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-    )
     mime = models.CharField(
         max_length=50,
         blank=True,

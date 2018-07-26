@@ -1,9 +1,10 @@
 """FileStore app views."""
 
-from rest_framework import (status, viewsets, filters)
-from rest_framework import decorators
+from rest_framework import (status, viewsets, filters, )
+from rest_framework import (decorators, permissions, )
 from rest_framework.response import Response
 
+from authentication.models import Profile
 from books.permissions import OwnerAndAdminPermission
 from file_store.models import (
     Image,
@@ -15,11 +16,37 @@ from file_store.serializers import (
 )
 
 
+class FilePermission(permissions.IsAuthenticated):
+
+    def has_permission(self, request, view):
+        """Permissions to allow specific status Profiles.
+
+        Authenticated and elevated and above status Profiles.
+        """
+        authenticated = super().has_permission(request, view)
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return authenticated
+
+    def has_object_permission(self, request, view, obj):
+        """Users may not accept their own answer.
+
+        Admins are allowed to accept their own answers.
+        """
+        if request.method not in permissions.SAFE_METHODS:
+            return (
+                obj.profile.id == request.user.profile.id or
+                request.user.profile.type >= Profile.TYPES.admin
+            )
+        return request.method in permissions.SAFE_METHODS
+
+
 class ImageViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('title', 'description', )
+    permission_classes = (FilePermission, )
 
 
 class ImagableViewSet:
@@ -84,3 +111,4 @@ class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('title', 'description', )
+    permission_classes = (FilePermission, )
