@@ -5,8 +5,9 @@
 A simple books archiving application with reading list and notifications feature.
 Includes book reading progress tracking, multi user support and SMS Alerts notifications reminding you to pick up where you've left off.
 
-#### Contributors: Silvian Dragan and Laurence Green
-##### Published under GNU General Public Licence v3 - please read the LICENSE included.
+#### Contributors: Laurence Green
+#### Forked from: Silvian Dragan
+#### Published under GNU General Public Licence v3 - please read the LICENSE included.
 
 
 

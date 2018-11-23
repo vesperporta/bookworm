@@ -1,0 +1,1883 @@
+{
+	"info": {
+		"_postman_id": "f95dafb8-47e0-492b-bfc1-ed23ae2f4771",
+		"name": "Bookworm",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"_postman_id": "48b5d9e6-37d2-44e6-ba24-b58926e293be",
+			"name": "JWT Token",
+			"item": [
+				{
+					"_postman_id": "3f568b53-7648-4942-b3b9-e8c8dda95efd",
+					"name": "authentication/token-auth/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "{{user_email}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "root@admin.com",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "iamsosecret",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/authentication/token-auth/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"token-auth",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "d2d3c414-ce61-4d98-9be0-ce0b255273e2",
+					"name": "authentication/token-refresh/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "token",
+									"value": "{{Authorization}}",
+									"type": "text"
+								},
+								{
+									"key": "orig_iat",
+									"value": "{{Authorization}}",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/authentication/token-refresh/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"token-refresh",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "288be735-351e-4b0a-86b5-60efaa172f2e",
+					"name": "authentication/token-verify/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "token",
+									"value": "{{Authorization}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/authentication/token-verify/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"token-verify",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"_postman_id": "a72d2f99-7126-4a63-99d3-9678ca35d9f8",
+			"name": "Profiles",
+			"item": [
+				{
+					"_postman_id": "b861e726-567d-4982-85f3-1f48da250398",
+					"name": "/authentication/me/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/authentication/me/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"me",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "ecd7ad7f-926e-4f2f-871f-c4a8953fb767",
+					"name": "/authentication/me/",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name_first",
+									"value": "Vesper",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "name_family",
+									"value": "Porta",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "name_display",
+									"value": "vesper.porta",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/authentication/me/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"me",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "e0f2dfc9-b9be-4860-aa86-b8f72567f00a",
+					"name": "/authentication/profile/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/authentication/profile/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"profile",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "63197128-6fe1-4071-8642-68fc71c37512",
+					"name": "/authentication/profile/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "vesper.porta+test1@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "iamsosecret",
+									"type": "text"
+								},
+								{
+									"key": "name_title",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "name_first",
+									"value": "Vesper",
+									"type": "text"
+								},
+								{
+									"key": "name_family",
+									"value": "Porta",
+									"type": "text"
+								},
+								{
+									"key": "name_display",
+									"value": "Vesper Porta",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/authentication/profile/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"profile",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "8834a837-75c3-4b9c-97b0-c1826075bf77",
+					"name": "/authentication/profile/{other}/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/authentication/profile/JBgE38N/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"profile",
+								"JBgE38N",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "b834db60-77a8-46a0-b2ab-211258f6ac08",
+					"name": "/authentication/profile/{id}/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/authentication/profile/{{profile_id}}/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"profile",
+								"{{profile_id}}",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "e1f16d95-95c5-454c-ad3e-d1fa4eb61361",
+					"name": "/authentication/profile/{id}/",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "vesper.porta@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "name_title",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "name_first",
+									"value": "Vesper",
+									"type": "text"
+								},
+								{
+									"key": "name_family",
+									"value": "Porta",
+									"type": "text"
+								},
+								{
+									"key": "name_display",
+									"value": "Vesper Porta",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/authentication/profile/{{profile_id}}/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"profile",
+								"{{profile_id}}",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"_postman_id": "d35a172b-9333-4b3f-965f-e527d213bb4f",
+			"name": "Authors",
+			"item": [
+				{
+					"_postman_id": "e6b283cb-2f56-4c7a-9bb1-65be36fe95ff",
+					"name": "/authentication/author/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/authentication/author/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"author",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "41c83a89-aba9-4181-b14e-3a7093bc864b",
+					"name": "/authentication/author/?search=",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/authentication/author/?search=",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"author",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": ""
+								}
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "685209e7-0e62-4d2f-bf37-2397f2c6c464",
+					"name": "/authentication/author/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name_display",
+									"value": "Nora Ikstena",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/authentication/author/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"author",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"_postman_id": "18b2b6d1-eb47-4a2a-a408-c9915a7fc0b5",
+			"name": "Circles",
+			"item": [
+				{
+					"_postman_id": "1fd0053f-de3c-46ac-855a-1db316064d1b",
+					"name": "/authentication/circle/{id}/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/authentication/circle/{{circle_id}}/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"circle",
+								"{{circle_id}}",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "658b7c13-ac3c-4999-9de9-807642d04708",
+					"name": "/authentication/circle/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/authentication/circle/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"circle",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "bdad6f92-4481-4d91-9218-7176a9652864",
+					"name": "/authentication/circle/?search=",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/authentication/circle/?search=read",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"circle",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "read"
+								}
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "47bd5353-ce1c-4562-968f-61c6a843b307",
+					"name": "/authentication/circle/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Reading Circle",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/authentication/circle/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"circle",
+								""
+							]
+						},
+						"description": "Creation of User and Profile objects."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"_postman_id": "273d33a3-d737-46a0-b2ab-d0f01068ff5a",
+			"name": "Invitations",
+			"item": [
+				{
+					"_postman_id": "add84281-fb78-4cfc-8fcb-9aaa2bdd9946",
+					"name": "/authentication/invitation/{id}/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/authentication/invitation/QNWgzdy/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"authentication",
+								"invitation",
+								"QNWgzdy",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"_postman_id": "ece3e810-a969-4af5-a9b6-213c5decff79",
+			"name": "Reading Lists",
+			"item": [
+				{
+					"_postman_id": "dfc3996b-b5c4-4641-8e34-0a442cfd668f",
+					"name": "/books/reading_list/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/books/reading_list/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"reading_list",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "f351ba04-9679-4d3e-b788-2bbfdbee7666",
+					"name": "/books/reading_list/?search=",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/books/reading_list/?search=read",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"reading_list",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "read"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "d2526c9b-f02b-4b4a-982c-c069e8249fea",
+					"name": "/books/reading_list/{id}/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/books/reading_list/{{reading_list_id}}/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"reading_list",
+								"{{reading_list_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "79c4e3db-9555-4cd7-a2bb-213d2b9a750d",
+					"name": "/books/reading_list/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Great Fireplace Tomes",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/reading_list/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"reading_list",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "24c8cf49-ece8-447f-a011-b9dba47e63d0",
+					"name": "/books/reading_list/{id}/add_book/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "book",
+									"value": "{{book_id}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/reading_list/{{reading_list_id}}/add_book/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"reading_list",
+								"{{reading_list_id}}",
+								"add_book",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "9f24a588-8535-41db-9598-e14d7e04fa36",
+					"name": "/books/reading_list/{id}/remove_book/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "book",
+									"value": "LjP1Zd3",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/reading_list/{{reading_list_id}}/remove_book/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"reading_list",
+								"{{reading_list_id}}",
+								"remove_book",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "6ef44ada-3e63-4983-8dba-5ae4cb84e9c7",
+					"name": "/books/reading_list/{id}/emoted/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "emote_type",
+									"value": "0",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/reading_list/{{reading_list_id}}/emoted/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"reading_list",
+								"{{reading_list_id}}",
+								"emoted",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "20ab196b-0006-42dd-b47f-6229711838a5",
+					"name": "/books/reading_list/{id}/un_emote/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/books/reading_list/{{reading_list_id}}/un_emote/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"reading_list",
+								"{{reading_list_id}}",
+								"un_emote",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"_postman_id": "57c06e8b-935d-4166-adba-52413375f752",
+			"name": "Books",
+			"item": [
+				{
+					"_postman_id": "5198dd0c-33a9-4699-b2b2-d0ec5ee9cd3d",
+					"name": "/books/book/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/books/book/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"book",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "2ec189d5-58fa-48bb-88c7-2629f8c0628d",
+					"name": "/books/book/?search=",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}",
+								"disabled": true
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/books/book/?search=Ham",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"book",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Ham"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "7304097b-600d-4ffb-99b4-bd19b8a1c333",
+					"name": "/books/book/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "1984",
+									"type": "text"
+								},
+								{
+									"key": "author",
+									"value": "George Orwell",
+									"type": "text"
+								},
+								{
+									"key": "cover_image",
+									"value": "",
+									"type": "file"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/book/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"book",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"_postman_id": "b827e9c6-099f-49b4-b5b1-93dca5b44b9f",
+			"name": "BookReviews",
+			"item": [
+				{
+					"_postman_id": "fbe2c6db-c23c-45a4-8dc3-619e7ff1546f",
+					"name": "/books/review/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "book",
+									"value": "http://localhost:8000/books/book/jbdJnd9/",
+									"type": "text"
+								},
+								{
+									"key": "post[copy]",
+									"value": "Review copy here 🤯.",
+									"type": "text"
+								},
+								{
+									"key": "profile",
+									"value": "http://{{domain}}/authentication/profile/{{profile_id}}/",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "0",
+									"type": "text"
+								},
+								{
+									"key": "rating",
+									"value": "4",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/review/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"review",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "2de9701e-8874-44b9-b4a8-284e54456966",
+					"name": "/books/review/{id}/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/books/review/{{book_review_id}}/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"review",
+								"{{book_review_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "1e758ed4-bde7-4a21-82c1-32c5ba5a5ac4",
+					"name": "/books/review/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "book",
+									"value": "http://localhost:8000/books/book/jbdJnd9/",
+									"type": "text"
+								},
+								{
+									"key": "copy",
+									"value": "Review copy here 🤯.",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "0",
+									"type": "text"
+								},
+								{
+									"key": "rating",
+									"value": "4",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/review/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"review",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"_postman_id": "33bcbddc-19f3-49e3-af49-c89910823930",
+			"name": "Read",
+			"item": [
+				{
+					"_postman_id": "2a58c58e-ebbe-4c2b-94a3-768f7eafdc4b",
+					"name": "/books/read_question/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "book",
+									"value": "http://localhost:8000/books/book/jbdJnd9/",
+									"type": "text"
+								},
+								{
+									"key": "post[copy]",
+									"value": "Review copy here 🤯.",
+									"type": "text"
+								},
+								{
+									"key": "profile",
+									"value": "http://{{domain}}/authentication/profile/{{profile_id}}/",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "0",
+									"type": "text"
+								},
+								{
+									"key": "rating",
+									"value": "4",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/read_question/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"read_question",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "323658b9-df70-4500-840b-45962ddd124b",
+					"name": "/books/read_question/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "book",
+									"value": "http://{{domain}}/books/book/{{book_id}}/",
+									"type": "text"
+								},
+								{
+									"key": "chapter",
+									"value": "http://{{domain}}/books/chapter/{{book_chapter_id}}/",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "difficulty",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "copy",
+									"value": "How many people were drunk?",
+									"type": "text"
+								},
+								{
+									"key": "multi_choice_answer",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/read_question/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"read_question",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "93cfe063-1daf-40f1-adbd-8c8e97c6d890",
+					"name": "/books/read_answer/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "book",
+									"value": "http://localhost:8000/books/book/jbdJnd9/",
+									"type": "text"
+								},
+								{
+									"key": "post[copy]",
+									"value": "Review copy here 🤯.",
+									"type": "text"
+								},
+								{
+									"key": "profile",
+									"value": "http://{{domain}}/authentication/profile/{{profile_id}}/",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "0",
+									"type": "text"
+								},
+								{
+									"key": "rating",
+									"value": "4",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/read_answer/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"read_answer",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "4691699f-c7dc-4344-b56f-646a910d8d50",
+					"name": "/books/read_answer/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "question",
+									"value": "http://{{domain}}/books/read_question/{{read_question_id}}/",
+									"type": "text"
+								},
+								{
+									"key": "copy",
+									"value": "42",
+									"type": "text"
+								},
+								{
+									"key": "is_true",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "is_answer",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/read_answer/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"read_answer",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "af279677-dd77-4f72-a597-8c3fc4fbf345",
+					"name": "/books/read_answer/{id}/accept/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization_admin}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/books/read_answer/{{read_answer_id}}/accept/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"read_answer",
+								"{{read_answer_id}}",
+								"accept",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "694a8545-d7b2-4d3e-85ad-11057edefe86",
+					"name": "/books/read/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "book",
+									"value": "http://localhost:8000/books/book/jbdJnd9/",
+									"type": "text"
+								},
+								{
+									"key": "post[copy]",
+									"value": "Review copy here 🤯.",
+									"type": "text"
+								},
+								{
+									"key": "profile",
+									"value": "http://{{domain}}/authentication/profile/{{profile_id}}/",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "0",
+									"type": "text"
+								},
+								{
+									"key": "rating",
+									"value": "4",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/read/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"read",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "449b8d9e-c1d8-437c-a61d-826ca66cb3e3",
+					"name": "/books/read/{id}/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "book",
+									"value": "http://localhost:8000/books/book/jbdJnd9/",
+									"type": "text"
+								},
+								{
+									"key": "post[copy]",
+									"value": "Review copy here 🤯.",
+									"type": "text"
+								},
+								{
+									"key": "profile",
+									"value": "http://{{domain}}/authentication/profile/{{profile_id}}/",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "0",
+									"type": "text"
+								},
+								{
+									"key": "rating",
+									"value": "4",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/books/read/{{read_id}}/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"books",
+								"read",
+								"{{read_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"_postman_id": "7e601f6c-21c6-4099-852b-6636d938c502",
+			"name": "Posts",
+			"item": [
+				{
+					"_postman_id": "eceda531-c9ea-4675-a9ec-b5e35ba36c2d",
+					"name": "/posts/post/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/posts/post/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"posts",
+								"post",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "23c8a6fc-47ae-4e39-be6a-35c642b0db1f",
+					"name": "/posts/post/{id}/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/posts/post/{{post_id}}/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"posts",
+								"post",
+								"{{post_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "fe37b69f-cb9f-45ca-a985-fdd06b381247",
+					"name": "/posts/post/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "copy",
+									"value": "Read all the books in the world, this is my seat to start, will likely finish in the bed 😎.",
+									"type": "text"
+								},
+								{
+									"key": "cover_image",
+									"value": "http://{{domain}}/file_store/image/{{image_id}}/",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/posts/post/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"posts",
+								"post",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "bfab7791-6e7f-4274-a317-4b5793bd1491",
+					"name": "/posts/post/{id}/emoted/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "emote_type",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/posts/post/{{post_id}}/emoted/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"posts",
+								"post",
+								"{{post_id}}",
+								"emoted",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "6dbdfb37-4393-425f-8e98-083807681e23",
+					"name": "/posts/post/{id}/un_emote/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/posts/post/{{post_id}}/un_emote/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"posts",
+								"post",
+								"{{post_id}}",
+								"un_emote",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"_postman_id": "5fd89a1d-b75d-4bce-8060-7568b933549a",
+			"name": "File Store",
+			"item": [
+				{
+					"_postman_id": "7e92b008-208a-43b4-9a9b-29d16dc5fbb7",
+					"name": "/file_store/image/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/file_store/image/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"file_store",
+								"image",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "c112c9d2-71fe-48be-b79f-9fdb3c3ef5fb",
+					"name": "/file_store/image/{id}/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://{{domain}}/file_store/image/{{image_id}}/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"file_store",
+								"image",
+								"{{image_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"_postman_id": "d4ab058b-0049-4af4-a53e-652f04f8627d",
+					"name": "/file_store/image/",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{Authorization}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "All the cool cats have plants 🌴!",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{domain}}/file_store/image/",
+							"protocol": "http",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"file_store",
+								"image",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer"
+	},
+	"variable": [
+		{
+			"id": "6c0620c1-a5e9-4710-bd21-16f82e6e15c8",
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "4525334f-cb39-4637-a220-d983f17f26aa",
+			"key": "domain",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

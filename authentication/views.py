@@ -79,6 +79,7 @@ class ProfileViewSet(ImagableViewSet, viewsets.ModelViewSet):
 
         All users can see a public serialized version of a profile
         """
+        serializer = None
         if self.action in ['retrieve', ] and \
                 self.get_object().id != self.request.user.profile.id:
             serializer = PublicProfileSerializer
