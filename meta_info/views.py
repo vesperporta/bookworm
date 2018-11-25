@@ -31,6 +31,7 @@ class TagViewSet(viewsets.ModelViewSet):
 class MetaViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet,):
     queryset = MetaInfo.objects.all()
     serializer_class = MetaInfoSerializer
+    permission_classes = (ElevatedForDeletePermission, )
 
 
 class LocalisableViewSetMixin:

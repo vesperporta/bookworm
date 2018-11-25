@@ -29,10 +29,7 @@ class FilePermission(permissions.IsAuthenticated):
         return authenticated
 
     def has_object_permission(self, request, view, obj):
-        """Users may not accept their own answer.
-
-        Admins are allowed to accept their own answers.
-        """
+        """Documents may only be changed by an administrator otherwise read."""
         if request.method not in permissions.SAFE_METHODS:
             return (
                 obj.profile.id == request.user.profile.id or

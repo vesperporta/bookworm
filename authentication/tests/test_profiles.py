@@ -1,3 +1,5 @@
+"""Authentication End to End tests."""
+
 from faker import Faker
 
 from authentication.tests import UserFactory

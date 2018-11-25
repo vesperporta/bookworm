@@ -7,13 +7,11 @@ from django.dispatch import receiver
 from meta_info.models import MetaInfo
 from books.models import (
     Book,
-    BookProgress,
     BookChapter,
     ReadingList,
     BookReview,
 )
 from books.models_read import (
-    ConfirmReadAnswer,
     Read,
 )
 from posts.models import (Emote, Post)

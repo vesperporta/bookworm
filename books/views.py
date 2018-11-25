@@ -78,6 +78,7 @@ class BookViewSet(
             book.author = new_author
             book.save()
 
+
 class BookProgressViewSet(viewsets.ModelViewSet):
     queryset = BookProgress.objects.all()
     serializer_class = BookProgressSerializer
