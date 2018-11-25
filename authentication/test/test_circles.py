@@ -2,7 +2,7 @@
 
 from faker import Faker
 
-from authentication.tests import UserFactory
+from authentication.test import UserFactory
 
 fake = Faker()
 

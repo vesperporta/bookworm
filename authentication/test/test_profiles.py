@@ -2,7 +2,7 @@
 
 from faker import Faker
 
-from authentication.tests import UserFactory
+from authentication.test import UserFactory
 
 fake = Faker()
 expected_no_permission = 'You do not have permission to perform this action.'

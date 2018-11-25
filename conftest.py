@@ -5,7 +5,7 @@ import pytest
 from django.utils.translation import activate
 from rest_framework.test import APIClient
 
-from authentication.tests import UserFactory
+from authentication.test import UserFactory
 
 
 @pytest.fixture(autouse=True)
