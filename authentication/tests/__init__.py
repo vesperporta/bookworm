@@ -13,6 +13,7 @@ from django.db.models.signals import (
 
 from django_common.auth_backends import User
 from factory.fuzzy import FuzzyChoice
+from faker.utils.text import slugify
 
 from authentication.models import Profile, PersonMixin, ContactMethod
 from meta_info.models import MetaInfo, HashedTag, Tag
@@ -24,11 +25,17 @@ _start_date = datetime.datetime(2018, 1, 1, tzinfo=pytz.UTC)
 class TagFactory(DjangoModelFactory):
     """Factory for tag."""
 
-    slug = factory.fuzzy.FuzzyText(length=8)
     copy = factory.fuzzy.FuzzyText(length=8)
 
     @factory.post_generation
+    def slug(self, create, extracted, **kwargs):
+        """Slugs are derived from the copy supplied."""
+        if create and extracted:
+            self.slug = slugify(self.copy)
+
+    @factory.post_generation
     def tags(self, create, extracted, **kwargs):
+        """By default there are no Tags supplied."""
         if not create:
             return
         if extracted:
@@ -48,6 +55,7 @@ class HashedTagFactory(DjangoModelFactory):
 
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
+        """By default there are no Tags supplied."""
         if not create:
             return
         if extracted:
@@ -63,11 +71,12 @@ class MetaInfoFactory(DjangoModelFactory):
     """Factory for meta_info."""
 
     copy = '{}'
-    json = '{}'
-    uri = factory.fuzzy.FuzzyText(length=12, prefix='https://localhost/')
+    json = {}
+    uri = ''
 
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
+        """By default there are no Tags supplied."""
         if not create:
             return
         if extracted:
@@ -76,6 +85,7 @@ class MetaInfoFactory(DjangoModelFactory):
 
     @factory.post_generation
     def chain(self, create, extracted, **kwargs):
+        """By default there is no chain supplied."""
         if not create:
             return
         if extracted:
@@ -97,7 +107,9 @@ class ContactMethodFactory(DjangoModelFactory):
 
     @factory.post_generation
     def meta_info(self, create, extracted, **kwargs):
-        self.meta_info = {}
+        """MetaInfo object creation for model."""
+        if create and extracted:
+            self.meta_info = MetaInfoFactory()
 
     class Meta:
         model = ContactMethod
@@ -118,10 +130,13 @@ class ProfileFactory(DjangoModelFactory):
 
     @factory.post_generation
     def meta_info(self, create, extracted, **kwargs):
-        self.meta_info = MetaInfoFactory()
+        """MetaInfo object creation for model."""
+        if create and extracted:
+            self.meta_info = MetaInfoFactory()
 
     @factory.post_generation
     def contacts(self, create, extracted, **kwargs):
+        """Create ContactMethods when they are requested."""
         if not create:
             return
         if extracted:
